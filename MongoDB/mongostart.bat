@@ -1,0 +1,1 @@
+mongod.exe --config="C:\Users\arturo\Documents\R2RO\VenYa\MongoDB\mongod.cfg"
