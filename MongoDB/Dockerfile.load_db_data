@@ -1,0 +1,16 @@
+FROM mongo
+
+RUN mkdir -p /venya/mongo/data/db /venya/mongo/log && chown -R mongodb:mongodb /venya/mongo
+#RUN mkdir -p /venya/mongo/data/db/diagnostics.dat /venya/mongo/log && chown -R mongodb:mongodb /venya/mongo
+#RUN mkdir -p /venya/mongo /venya/mongo/log && chown -R mongodb:mongodb /venya/mongo
+COPY ./mongod.cfg /venya/mongo/
+COPY ./data/ /venya/mongo/
+#COPY . /venya/mongo
+#VOLUME ["/data/db"]
+VOLUME ["/venya/mongo/data/db"]
+WORKDIR /venya/mongo
+
+EXPOSE 27017
+
+#CMD ["mongod"]
+CMD ["mongod", "--config", "./mongod.cfg"]

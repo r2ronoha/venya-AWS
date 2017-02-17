@@ -23,17 +23,16 @@
 	<link href="/static/css/arturo.css" rel="stylesheet">
 	
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
-</head>
-<!-- <script src="C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist.js"></script> -->
-<script type="text/javascript" src="/static/common/parsing.js"></script>
-<script type="text/javascript">
+	<!-- <script src="C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist.js"></script> -->
+	<script type="text/javascript" src="/static/common/parsing.js"></script>
+	<script type="text/javascript">
 	function register(){
 	//var attList = ['_id','type','name','email','phone','username','password'];
 		var credList = ['username','password'];
 		var form = document.querySelector("form");
 		var id = form.elements.id.value;
 		var username = form.elements.inputUsername.value;
-		var usernameFormat = new RegExp("^\w{8,}$","g");
+		//var usernameFormat = new RegExp("^\w{8,}$","g");
 		var surname = form.elements.inputName.value;
 		var email = form.elements.inputEmail.value;
 		var confirmEmail = form.elements.confirmEmail.value;
@@ -44,7 +43,7 @@
 		if ( id == "" ) { error["id"] = "id is required"; }
 		else if ( ! objectidFormat.test(id) ) error["id"] = "id format is not valid";
 
-		if ( ! usernameFormat.test(username) ) error["username"] = "Username must have at least 8 characters and only contain alphanumeric characters";
+		if ( ! usernameFormat.test(username) ) error["username"] = "Username " + username + " must have at least 8 characters and only contain alphanumeric characters";
 		if ( surname == "" ) { error["surname"] = "surname is required"; }
 
 		if ( email == "" ) { error["email"] = "email is required"; }
@@ -103,6 +102,7 @@
 		}
 	}
 </script>
+</head>
 
 <body>
 	<script>
@@ -154,7 +154,13 @@
 			</div>
 			<button class="btn btn-lg btn-primary btn-block" type="button" onclick="register()">SUBMIT</button>
 		</form>
-		
+		<script>
+			if ( urlParams["action"] == "webcreation" ) {
+				document.getElementById("id").defaultValue = customerId;
+				document.getElementById("id").autofocus = false;
+				document.getElementById("id").disabled = true;
+			}
+		</script>
 	</div> <!-- /container -->
 	<div class="links">
 		Already have an account? <a href="./signin.html">Log in</a>

@@ -63,29 +63,7 @@ function goTo(page,params) {
 	}
 	location.href = target.replace(/[?&]$/,'');
 }
-/*
-function createDataTable(){
-	var table = document.createElement("table");
-	for (var field in urlParams) {
-		if (field != "action") {
-			var row = document.createElement("tr");
-			
-			var fieldCell = document.createElement("td");
-			fieldCell.appendChild(document.createTextNode(field));
-			fieldCell.className = "field";
-			row.appendChild(fieldCell);
-			
-			var valueCell = document.createElement("td");
-			valueCell.appendChild(document.createTextNode(unescape(urlParams[field])));
-			valueCell.className = "value";
-			row.appendChild(valueCell);
-			
-			table.appendChild(row);
-		}
-	}
-	document.body.appendChild(table);
-}
-*/
+
 function createDataTable(tableData){
 	if ( tableData == null ) tableData = urlParams;
 	var table = document.createElement("table");
@@ -152,7 +130,8 @@ function getCustomerDetails(action,id,callback) {
 
 function getCustomerFullDetails(action,id,callback) {
 	venya_server_ip = document.location.hostname;
-	var myUrl = "http://" + venya_server_ip + ":" + venya_server_port + "/getCustomer?action=" + action + "&id=" + id;
+	var myUrl = "http://" + venya_server_ip + ":" + venya_server_port + "/getFullCustomerData?action=" + action + "&id=" + id;
+	console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -161,13 +140,14 @@ function getCustomerFullDetails(action,id,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log(xhr.responseText);
+				console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
 						customerDetails[field] = response[field];
+						console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
 					}
 				}
 				callback();

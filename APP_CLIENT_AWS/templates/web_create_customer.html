@@ -90,9 +90,10 @@ if (xhr.readyState == 4) {
 if (xhr.status == 200) {
 console.log(xhr.responseText);
 var response = JSON.parse(xhr.responseText);
-var successUrl = "./signin.html?action=registration&";
+//var successUrl = "./signin.html?action=registration&";
+var successUrl = "./register.html?action=webcreation&";
 for (var field in response) {
-if ( field != "status" ) {
+if ( field != "status" && field != "action" ) {
 var value = response[field];
 if ( value == undefined ) value = "N/A";
 successUrl += field.replace(/_/,'') + "=" + value + "&";
@@ -116,10 +117,6 @@ location.href=errorUrl;
 
 <div class="container">
 
-<!-- <form class="form-signin">
-<h2 class="form-signin-heading">Please enter your details</h2> 
--->
-
 <form class="form">
 <h2 class="form-heading">Please enter your details</h2>
 
@@ -131,14 +128,12 @@ location.href=errorUrl;
 
 <label for="inputEmail" class="sr-only">Email address</label>
 <input type="email" id="inputEmail" class="form-control" placeholder="Email address" >
-<!--
-<label for="inputAddress" class="sr-only">Address</label>
-<input type="text" id="inputAddress" class="form-control" placeholder="Address" >
--->
+
 <label for="inputPhone" class="sr-only">Phone number</label>
 <input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
 <button class="btn btn-lg btn-primary btn-block" type="button" onclick="create_customer()">SUBMIT</button>
 </form>
+</div>
 
 
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
