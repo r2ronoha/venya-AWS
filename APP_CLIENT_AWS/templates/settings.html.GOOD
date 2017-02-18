@@ -23,15 +23,11 @@
 	
 	var venya_node_server = document.location.hostname;
 	var venya_node_port = 8888;
-	var sessionid;
-
 	function init() {
 		parseUrl();
 		
 		var action = urlParams["action"];
-		sessionid = urlParams["sessionid"];
-		customerId = sessionid.substring(0,sessionid.length - 2);
-		getCustomerFullDetails( action, customerId, function () {
+		getCustomerFullDetails( action, urlParams["id"], function () {
 			customerId = customerDetails["_id"];
 			//updated to make it work on AWS task
 			//customerId = customerDetails["id"];
@@ -71,16 +67,13 @@
 					var response = JSON.parse(xhr.responseText);
 					var successUrl = "./settings.html?updatefield=" + response["updatefield"];
 					console.log(response);
-					
-					successUrl += "&sessionid=" + sessionid;
-
-					/*for (var field in response) {
+					for (var field in response) {
 						if ( field != "status" ) {
 							var value = response[field];
 							if ( value == undefined ) value = "N/A";
 							successUrl += "&" + field.replace(/_/,'') + "=" + value;
 						}
-					}*/
+					}
 					location.href=successUrl;
 					//location.href=successUrl.replace(/&$/,'');
 				} else {
@@ -139,8 +132,7 @@
 				option = optionList["string"];
 				var gotoParams = {};
 				gotoParams["action"] = "update";
-				gotoParams["sessionid"] = sessionid;
-				//gotoParams["id"] = customerId;
+				gotoParams["id"] = customerId;
 				gotoParams["setting"] = field;
 				var gotoPage = pages.settingsPages[field];
 				buttonTarget = "javascript:goTo(\"" + gotoPage + "\"," + JSON.stringify(gotoParams) + ")";

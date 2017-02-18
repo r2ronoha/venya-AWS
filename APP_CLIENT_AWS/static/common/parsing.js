@@ -168,3 +168,10 @@ function getCustomerFullDetails(action,id,callback) {
 		}
 	}
 }
+
+function randomSessionID(id,min,max) {
+	var sufix = Math.floor( Math.random()*(max - min + 1) + min );
+	var sessionId = id + sufix.toString().replace(/^([0-9])$/,"0$1");
+	console.log("[parsing.randomSessionID] Session ID = " + sessionId );
+	return sessionId;
+}
