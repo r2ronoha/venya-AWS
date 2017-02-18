@@ -82,10 +82,16 @@ function createDataTable(tableData){
 			var valueCell = document.createElement("td");
 			
 			var value = tableData[field];
+			if ( field == "firstname" || field == "surname" ) {
+				value = value[0].toUpperCase() + value.substring(1);
+			}
 			if ( field == "address" ) {
 				var myAddress = "";
 				for ( var elt in value ) {
-					myAddress += value[elt] + ", ";
+					if ( value[elt] != "N/A" ) {
+						console.log("[parsing.creatDataTable] Adding value[elt] " + value[elt] + " to user address");
+						myAddress += value[elt] + ", ";
+					}
 				}
 				value = myAddress.replace(/, $/,'');				
 			}

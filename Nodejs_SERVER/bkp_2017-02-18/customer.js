@@ -46,8 +46,8 @@ function getAttDefault(callback) {
 
 function doInsert (cnx, db, query, callback) {
 	var exists = 0;
-	var firstname = query["firstname"].value.toLowerCase();
-	var surname = query["surname"].value.toLowerCase();
+	var firstname = query["firstname"].value;
+	var surname = query["surname"].value;
 	var checkQuery = { "firstname.value": firstname, "surname.value": surname };
 	var insertQuery = query;
 	

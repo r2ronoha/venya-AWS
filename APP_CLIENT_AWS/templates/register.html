@@ -42,7 +42,7 @@
 		
 		var error = {};
 		if ( id == "" ) { error["id"] = "id is required"; }
-		else if ( ! objectidFormat.test(id) ) error["id"] = "id format is not valid";
+		else if ( ! objectidFormat.test(id) ) error["uid"] = "id format is not valid";
 
 		if ( ! usernameFormat.test(username) ) error["username"] = "Username " + username + " must have at least 8 characters and only contain alphanumeric characters";
 		if ( surname == "" ) { error["surname"] = "surname is required"; }

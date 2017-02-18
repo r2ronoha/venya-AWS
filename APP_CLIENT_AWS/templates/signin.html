@@ -42,6 +42,15 @@
 			var username = form.elements.inputUsername.value;
 			var password = form.elements.inputPassword.value;
 			var objectConstructor = {}.constructor;
+			var defaultUsername = "changeme";
+
+			if ( username == defaultUsername ) {
+				var loginStatus = "error";
+				var errormessage = "username invalid. Please register to the service with the id provided by your provider";
+				var errorUrl = "./signin.html?status=" + loginstatus + "&errormessage=" + errormessage;
+				location.href=errorUrl;
+				return;
+			}
 			
 			console.log("Calling checkCredentials");
 			

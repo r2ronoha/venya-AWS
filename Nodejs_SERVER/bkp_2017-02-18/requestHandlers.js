@@ -182,9 +182,9 @@ function createCustomer(response, request, dbcnx, db) {
 	for ( var field in url.parse(request.url, true).query ) {
 		if ( url.parse(request.url, true).query[field] != "" ) {
 			//var fieldQuery = { "fix": attributesFix[field], "value": url.parse(request.url, true).query[field] };
-			var fieldQuery = { "fix": attributesDefault[field].fix, "value": url.parse(request.url, true).query[field].toLowerCase() };
+			var fieldQuery = { "fix": attributesDefault[field].fix, "value": url.parse(request.url, true).query[field] };
 			insertQuery[field] = fieldQuery;
-			console.log("[requestHandler.createCustomer()] added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
+			console.log("[requestHandler.createCustomer()] inserted " + field + " : " + JSON.stringify(insertQuery[field]));
 		}
 	}
 	
