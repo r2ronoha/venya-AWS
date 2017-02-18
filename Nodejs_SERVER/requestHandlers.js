@@ -256,16 +256,17 @@ function register(response, request, dbcnx, db) {
 			response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 			var body = {};
 			body["status"] = "ERROR";
-			body["errormessage"] = "userid is not in the system. Please contact service provider.";
+			body["errormessage"] = "UserID is not in the system. Please contact service provider.";
 			body["action"] = action;
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else {
-			if ( attList["surname"] != surname ){
+			if ( attList["surname"].toLowerCase() != surname.toLowerCase() ){
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "userid and surname do not match (" + attList["surname"] + " vs " + surname + ")";
+				//body["errormessage"] = "UserID (surname for ID: " + attList["surname"].toLowerCase() + ") and Surname " + surname.toLowerCase() + " do not match";
+				body["errormessage"] = "UserID and Surname do not match";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );				
@@ -295,7 +296,7 @@ function register(response, request, dbcnx, db) {
 									//var username = urlParams["username"];
 									//var email = urlParams["email"];
 									//var password = urlParams["password"];
-									console.log("[requestHandlers : register] username: " + username + ", password: " + password + ",  email: " + email);
+									console.log("[requestHandlers.register] username: " + username + ", password: " + password + ",  email: " + email);
 									
 									if ( attList != null && attList["username"] == username && attList["email"] == email && attList["password"] == password ) {
 										response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});

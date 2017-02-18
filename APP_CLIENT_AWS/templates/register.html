@@ -38,6 +38,7 @@
 		var confirmEmail = form.elements.confirmEmail.value;
 		var password = form.elements.inputPassword.value;
 		var confirmPassword = form.elements.confirmPassword.value;
+		var objectConstructor = {}.constructor;
 		
 		var error = {};
 		if ( id == "" ) { error["id"] = "id is required"; }
@@ -47,18 +48,21 @@
 		if ( surname == "" ) { error["surname"] = "surname is required"; }
 
 		if ( email == "" ) { error["email"] = "email is required"; }
-		else { if ( email != confirmEmail ) error["email"] = "email addresses do not match"; }
+		else { if ( email.toLowerCase() != confirmEmail.toLowerCase() ) error["email"] = "email addresses do not match"; }
 
 		if ( password == "" ) { error["password"] = "password is required"; }
 		else {
-			if ( password != confirmPassword ) error["password"] = "passwords do not match: " + password + " vs " + confirmPassword;
+			if ( password != confirmPassword ) error["password"] = "passwords do not match: ";
 			else {
 				if ( ! passwordFormat.test(password) ) error["password"] = "password must be at least 6 characters long and contain at least 1 upper case, 1 lower cased and 1 number";
 			}
 		}
-		
+
 		if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input";
+			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input&id=" + id ;
+			if ( urlParams["action"] == "webcreation" ) {
+				errorUrl += "&" + "action=" + urlParams["action"];
+			}
 			for ( var field in error ) {
 				errorUrl += "&" + field + "=" + escape(error[field]);
 			}
@@ -87,7 +91,8 @@
 						for (var field in response) {
 							if ( field != "status" ) {
 								var value = response[field];
-								if ( value == undefined ) value = "N/A";
+								if ( value == undefined || value === null ) value = "N/A";
+								if ( value.constructor === objectConstructor ) { value = JSON.stringify(value); }
 								successUrl += field.replace(/_/,'') + "=" + value + "&";
 							}
 						}
@@ -113,7 +118,7 @@
 			if (urlParams["errormessage"] == "input") {
 			setHeader("h2","Please double check the following fields:");
 			for (var field in urlParams) {
-				if ( field != "status" && field != "errormessage" ) {
+				if ( field != "status" && field != "errormessage" && field != "id" && field != "action" ) {
 					setHeader("h5",field + ": " + urlParams[field]);
 				}
 				}
@@ -121,6 +126,7 @@
 				setHeader("h3",unescape(urlParams["errormessage"]));
 			}
 		}
+		var action = urlParams["action"];
 	</script>
 	
 	<div class="container">

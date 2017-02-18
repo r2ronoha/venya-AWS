@@ -19,6 +19,8 @@ var pages = {
 	"register": "register.html",
 	"settings": "settings.html",
 	"changeSettings": "changeSettings.html",
+	"appointments": "appointments.html",
+	"notifications": "notifications.html",
 	"settingsPages": {
 		"email": "changeEmail.html",
 		"password": "changePassword.html",
@@ -52,7 +54,8 @@ function parseUrl(callback){
 
 function setHeader(headType,message){
 	var header = document.createElement(headType);
-	header.appendChild(document.createTextNode(unescape(message.toUpperCase())));
+	header.appendChild(document.createTextNode(unescape(message)));
+	//header.appendChild(document.createTextNode(unescape(message.toUpperCase())));
 	document.body.appendChild(header);
 }
 

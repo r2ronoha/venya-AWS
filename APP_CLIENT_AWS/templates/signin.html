@@ -41,6 +41,7 @@
 			var form = document.querySelector("form");
 			var username = form.elements.inputUsername.value;
 			var password = form.elements.inputPassword.value;
+			var objectConstructor = {}.constructor;
 			
 			console.log("Calling checkCredentials");
 			
@@ -61,7 +62,8 @@
 						for (var field in response) {
 							if ( field != "status" ) {
 								var value = response[field];
-								if ( value == undefined ) value = "N/A";
+								if ( value == undefined || value === null ) value = "N/A";
+								if ( value.constructor === objectConstructor ) { value = JSON.stringify(value) }
 								successUrl += field.replace(/_/,'') + "=" + value + "&";
 							}
 						}
