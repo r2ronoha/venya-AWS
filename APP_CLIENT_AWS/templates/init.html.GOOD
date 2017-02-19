@@ -48,26 +48,19 @@
 			setHeader("h2",urlParams["errormessage"]);
 		}
 	</script>
-	<div class="pageContainer">
-	<!-- <div class="container"> -->
+	<div class="container">
 	
-		<h2 style="text-align:center">WELCOME TO VENYA<br/>BIENVENIDO A VENYA</h2>
-		<div class="tableCenter">
-			<table class="bottonTable">
-			<tr>
-			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.signin)">I am a CUSTOMER</button></td>
-			<td/>
-			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.webcreatecustomer)">I am a PROVIDER</button></td>
-			<!-- <td style="text-align:center, border:0"><button class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:goTo(pages.webcreatecustomer)">I am a PROVIDER</button></td>-->
-			</tr>
-			</table>
+		<h2 text-align="center">WELCOME TO VENYA - BIENVENIDO A VENYA</h2>
+		<div class="links">
+			<!-- <button class="btn btn-lg btn-primary btn-block" type="button" onclick="goToWeb("./signin.html")">I am a CUSTOMER</button>
+			<button class="btn btn-lg btn-primary btn-block" type="button" onclick="signin_check()">I am a PROVIDER</button> -->
 			<!-- <a href="javascript:goTo(pages.signin,{'serverip' : urlParams.serverip,'serverport' : urlParams.serverport})">I am a CUSTOMER</a></br>
 			<a href="javascript:goTo(pages.webcreatecustomer,{'serverip' : urlParams.serverip,'serverport' : urlParams.serverport})">I am a PROVIDER</a></br> -->
-			<!-- <a href="javascript:goTo(pages.signin,{'serverip' : serverip,'serverport' : serverport})">I am a CUSTOMER</a><br/>
-			<a href="javascript:goTo(pages.webcreatecustomer,{'serverip' : serverip,'serverport' : serverport})">I am a PROVIDER</a><br/> -->
+			<a href="javascript:goTo(pages.signin,{'serverip' : serverip,'serverport' : serverport})">I am a CUSTOMER</a><br/>
+			<a href="javascript:goTo(pages.webcreatecustomer,{'serverip' : serverip,'serverport' : serverport})">I am a PROVIDER</a><br/>
 		</div>
 	
-	<!-- </div> -->
+	</div>
 	<div class="instructions">
 		<p>Welcome to VenYA.es. We are developing the service. We currently have limited functionality (signup, login, manage settings).<br/>
 		Usage:<br/></p>
@@ -104,7 +97,6 @@
 		<br/><br/>
 	<div class="instructions">
 		<p>contacto: arturo_noha@hotmail.com.</p>
-	</div>
 	</div>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>

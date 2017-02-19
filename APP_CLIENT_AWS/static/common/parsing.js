@@ -70,6 +70,7 @@ function goTo(page,params) {
 function createDataTable(tableData){
 	if ( tableData == null ) tableData = urlParams;
 	var table = document.createElement("table");
+	table.className = "settings";
 	for (var field in tableData) {
 		if (field != "action") {
 			var row = document.createElement("tr");
@@ -94,6 +95,7 @@ function createDataTable(tableData){
 					}
 				}
 				value = myAddress.replace(/, $/,'');				
+				if ( value == "" ) { value = "N/A"; }
 			}
 			
 			//valueCell.appendChild(document.createTextNode(unescape(tableData[field])));

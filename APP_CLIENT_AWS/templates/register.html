@@ -26,6 +26,7 @@
 	<!-- <script src="C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist.js"></script> -->
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
+	var sessionid;
 	function register(){
 	//var attList = ['_id','type','name','email','phone','username','password'];
 		var credList = ['username','password'];
@@ -88,14 +89,16 @@
 						//console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
 						var successUrl = "./home.html?action=registration&";
-						for (var field in response) {
+						sessionid = randomSessionID(response["id"],1,10);
+						successUrl += "sessionid=" + sessionid;
+						/*for (var field in response) {
 							if ( field != "status" ) {
 								var value = response[field];
 								if ( value == undefined || value === null ) value = "N/A";
 								if ( value.constructor === objectConstructor ) { value = JSON.stringify(value); }
 								successUrl += field.replace(/_/,'') + "=" + value + "&";
 							}
-						}
+						}*/
 						location.href=successUrl.replace(/&$/,'');
 					} else {
 						var response = JSON.parse(xhr.responseText);

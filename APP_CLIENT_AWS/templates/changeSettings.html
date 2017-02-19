@@ -29,7 +29,7 @@
 <script type="text/javascript">
 var changeField;
 function init() {
-var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "id": "id" };
+var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid" };
 parseUrl();
 changeField = urlParams["field"];
 if (urlParams["status"] == "ERROR") {
@@ -53,7 +53,7 @@ setHeader("h4",unescape(urlParams["errormessage"]));
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script>')</script>
+<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="/static/js/ie10-viewport-bug-workaround.js"></script>></script>

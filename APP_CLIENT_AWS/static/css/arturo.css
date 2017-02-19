@@ -63,30 +63,93 @@ h1 {
   margin: 0 auto;
   text-align: center;
 }
-table, th, td {
+
+.tableCenter {
+	text-align: center;
+	padding-left: 10px;
+	padding-right: 10px;
+	max-width: 400px;
+	margin: 0 auto;
+}
+
+.settings table, th, td {
 	border: 1px solid black;
 	border-collapse: collapse;
 }
 
-th {
+.settings th {
 	font-weight: bold;
 	font-size: 1.5em;
 	background-color: #c5c5c5;
+	border: 1px solid black;
 }
 
-tr {
+.settings tr {
 	height: 30px;
+	border: 1px solid black
 }
 
-td.value {
+.settings td {
+	height: 30px;
+	border: 1px solid black
+}
+
+.settings td.value {
 	text-align: center;
 	padding-left: 15px;
 	padding-right: 15px;
 }
 
-td.field {
+.settings td.field {
 	width: 100px;
 	text-align: center;
 	background-color: #dbdbdb;
 	font-weight: bold;
+}
+
+.pageContiner {
+	width: 100%;
+}
+
+.instructions h3 {
+	text-align: center;
+}
+
+.instructions p {
+	color: #404040;
+	font-family: verdana;
+	font-size: 75%;
+	text-align: left;
+	padding-left: 50px;
+	width: 95%;
+}
+
+.list {
+	width: 90%;
+	font-family: verdana;
+	color: #404040;
+	font-size: 75%;
+	text-align: left;
+	padding-left: 80px;
+}
+
+.list2 {
+	width: 90%;
+	font-family: verdana;
+	font-size: 75%;
+	color: #404040;
+	text-align: left;
+	padding-left: 110px;
+}
+
+.bottonTable table {
+	border: 0;
+	border-collapse: separate;
+	border-spacing: 5px;
+}
+
+.bottonTable tr, th, td {
+	text-align: center;
+	border: 0;
+	padding: 10px;
 }
