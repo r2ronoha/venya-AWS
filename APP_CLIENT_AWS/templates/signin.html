@@ -77,7 +77,7 @@
 								successUrl += field.replace(/_/,'') + "=" + value + "&";
 							}
 						}*/
-						sessionID = randomSessionID(response["id"],1,10);
+						sessionID = randomSessionID(response["id"],1,99);
 						console.log("[signin.html] sessionID = " + sessionID);
 						successUrl += "action=" + response["action"];
 						successUrl += "&sessionid=" + sessionID;
