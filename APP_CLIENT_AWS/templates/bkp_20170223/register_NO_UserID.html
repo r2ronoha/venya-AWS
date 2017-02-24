@@ -8,9 +8,9 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<link rel="icon" href="/static/favicon.ico">
+<!-- <link rel="icon" href="/static/favicon.ico"> -->
 
-<title>VenYa Lost Password</title>
+<title>VenYa Registration</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -23,24 +23,53 @@
 <link href="/static/css/arturo.css" rel="stylesheet">
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
-
-<script type="text/javascript" src="/static/common/parsing.js"></script>
+<!-- <script src="C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist.js"></script> -->
 <script type="text/javascript">
-function getPassword(){
-var attList = ['id','type','name','address','phone','username','password'];
+var urlParams = {};
+function parseUrl(){
+var params = document.location.search.replace(/^?/,'').split('&');
+for (var i=0; i < params.length; i++) {
+var field = params[i].split('=')[0];
+var value = params[i].split('=')[1];
+urlParams[field] = value;
+}
+}
+
+function setHeader(headType,message){
+var header = document.createElement(headType);
+header.appendChild(document.createTextNode(unescape(message.toUpperCase())));
+document.body.appendChild(header);
+}
+
+<!-- var specialist = require('C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist'); -->
+var mycnx = 'mongodb://127.0.0.1:27017/';
+var mydb = 'venya';
+var success;
+function register(){
+//var attList = ['_id','type','name','email','phone','username','password'];
 var credList = ['username','password'];
 var form = document.querySelector("form");
 var username = form.elements.inputUsername.value;
 var usernameFormat = new RegExp("^\w{8,}$","g");
+var name = form.elements.inputName.value;
 var email = form.elements.inputEmail.value;
 var confirmEmail = form.elements.confirmEmail.value;
+var password = form.elements.inputPassword.value;
+var confirmPassword = form.elements.confirmPassword.value;
 
 var error = {};
 if ( ! usernameFormat.test(username) ) error["username"] = "Username must have at least 8 characters and only contain alphanumeric characters";
+if ( name == "" ) { error["name"] = "name is required"; }
 if ( email == "" ) { error["email"] = "email is required"; }
 else { if ( email != confirmEmail ) error["email"] = "email addresses do not match"; }
+if ( password == "" ) { error["password"] = "password is required"; }
+else {
+if ( password != confirmPassword ) error["password"] = "passwords do not match: " + password + " vs " + confirmPassword;
+else {
+if ( ! passwordFormat.test(password) ) error["password"] = "password must be at least 6 characters long and contain at least 1 upper case, 1 lower cased and 1 number";
+}
+}
 
 if ( Object.keys(error).length > 0 ) {
 var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input";
@@ -48,14 +77,14 @@ for ( var field in error ) {
 errorUrl += "&" + field + "=" + escape(error[field]);
 }
 //var errorUrl = location.href.hostname + location.href.path;
-//console.log("errorUrl = " + errorUrl);
+console.log("errorUrl = " + errorUrl);
 location.href = errorUrl;
 } else {
 var xhr = new XMLHttpRequest();
-//var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getLostPassword?" +
-var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getLostCredentials?" +
+var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/register?type=customer&name=" + name +
+"&email=" + email +
 "&username=" + username +
-"&email=" + email;
+"&password=" + password;
 xhr.open('GET',myUrl,true);
 //xhr.setRequestHeader('Access-Control-Allow-Origin','*');
 xhr.send();
@@ -66,12 +95,18 @@ if (xhr.readyState == 4) {
 if (xhr.status == 200) {
 //console.log(xhr.responseText);
 var response = JSON.parse(xhr.responseText);
-var successUrl = "./show_lost_info.html?password=" + response["password"] + "&message=" + escape(response["errormessage"]);
-location.href=successUrl;
-//document.body.appendChild(document.createTextNode("email sent to " + email));
+var successUrl = "./home.html?action=registration&";
+for (var field in response) {
+if ( field != "status" ) {
+var value = response[field];
+if ( value == undefined ) value = "N/A";
+successUrl += field.replace(/_/,'') + "=" + value + "&";
+}
+}
+location.href=successUrl.replace(/&$/,'');
 } else {
 var response = JSON.parse(xhr.responseText);
-var errorUrl = "./lostPassword.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+var errorUrl = "./register.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
 location.href=errorUrl;
 }
 }
@@ -94,7 +129,7 @@ setHeader("h5",field + ": " + urlParams[field]);
 }
 }
 } else {
-setHeader("h4",unescape(urlParams["errormessage"]));
+setHeader("h3",unescape(urlParams["errormessage"]));
 }
 }
 </script>
@@ -104,16 +139,33 @@ setHeader("h4",unescape(urlParams["errormessage"]));
 <form class="form-signin">
 <h2 class="form-signin-heading">Please enter your details</h2>
 
+<label for="userID" class="sr-only">User ID</label>
+<input type="text" id="userID" class="form-control" placeholder="userID" required autofocus>
+
 <label for="inputUsername" class="sr-only">Username</label>
 <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
 
+<label for="inputName" class="sr-only">Name</label>
+<input type="text" id="inputName" class="form-control" placeholder="Name" required autofocus>
+
 <label for="inputEmail" class="sr-only">Email address</label>
-<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+<input type="text" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
 
 <label for="confirmEmail" class="sr-only">Confirm Email address</label>
 <input type="email" id="confirmEmail" class="form-control" placeholder="Confirm Email address" required autofocus>
 
-<button class="btn btn-lg btn-primary btn-block" type="button" onclick="getPassword()">SUBMIT</button>
+<label for="inputPassword" class="sr-only">Password</label>
+<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+<label for="confirmPassword" class="sr-only">Confirm Password</label>
+<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+
+<div class="checkbox">
+<label>
+<input type="checkbox" value="remember-me"> Remember me
+</label>
+</div>
+<button class="btn btn-lg btn-primary btn-block" type="button" onclick="register()">SUBMIT</button>
 </form>
 
 </div> <!-- /container -->

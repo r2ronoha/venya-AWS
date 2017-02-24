@@ -116,17 +116,6 @@
 
 <body>
 	<script>init();</script>
-
-	<!-- LANGUAGE SELECTION DROPDOWN MENU -->
-	<div class="dropdown">
-	<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LANG<span class="caret"></span></button>
-	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                <li><a id="signinEsp" href="javascript:goTo(pages.signin,{'lang' : "esp"})"><script>javascript:displayMenu("signinEsp","ESP")</script></a></li>
-                <li><a id="signinEng" href="javascript:goTo(pages.signin,{'lang' : "eng"})"><script>javascript:displayMenu("signinEng","ENG")</script></a></li>
-	</ul>
-	</div>
-
-	<!-- SIGN IN FORM -->
 	<div class="container">
 		<form class="form-signin">
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["signin"]["title"])</script></h2>
@@ -138,7 +127,7 @@
 			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["customer"]["password"])</script></label>
 
 			<div class="checkbox">
-				<label id="remember"><input type="checkbox" value="remember-me"> <script>javascript:this.value=myLangTexts["signin"]["rememberme"])</script></label>
+				<label id="remember"><input type="checkbox" value="remember-me"> <script>javascript:displayMenu("remember",myLangTexts["signin"]["rememberme"])</script></label>
 			</div>
 			<!-- <input type="submit" value="submit" onclick="signin_check()"/> -->
 			<button id="signinButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="signin_check()"><script>javascript:displayForm("signinButton",myLangTexts["signin"]["button"])</script></button>

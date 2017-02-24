@@ -17,15 +17,22 @@
 
 	<script src="/static/js/ie-emulation-modes-warning.js"></script>
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
+	<script type="text/javascript" src="/static/common/languages.js"></script>
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 		var sessionid;
+		var lang;
+		var myLangTexts;
+
 		function init() {
 			parseUrl();
 			sessionid = urlParams["sessionid"];
+			lang = urlParams["lang"];
+			var action = urlParams["action"];
+			myLangTexts = languages_text[lang];
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
-			setHeader("h2","*** UNDER CONSTRUCTION ***");
+			setHeader("h2",formatMessage([myLangTexts["action"][action],myLangTexts["form"]["page"],myLangTexts["underconstruction"]]));
 			/*getCustomerDetails( "home", urlParams["id"], function () {
 				customerId = customerDetails["id"];
 				
@@ -43,18 +50,18 @@
 <header>
 </header>
 <body>
+	<script>init();</script>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-			<li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid})">Home</a></li>
-			<li><a href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid})">Appointments</a></li>
-                        <li><a href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid})">Notifications</a></li>
-			<li><a href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid})">Settings</a></li>
-			<li role="separator" class="divider"></li>
-			<li><a href="./signin.html">Logout</a></li>
+                <li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
+                <li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
+                <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
+                <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
+                <li role="separator" class="divider"></li>
+                <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
-	<script>init();</script>
 	
 	<!-- Bootstrap core JavaScript
 	================================================== -->

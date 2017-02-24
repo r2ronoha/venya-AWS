@@ -24,15 +24,11 @@
 	var venya_node_server = document.location.hostname;
 	var venya_node_port = 8888;
 	var sessionid;
-	var myLangTexts;
-	var lang;
 
 	function init() {
 		parseUrl();
 		
 		var action = urlParams["action"];
-		lang = urlParams["lang"];
-		myLangTexts = languages_text[lang];
 		sessionid = urlParams["sessionid"];
 		customerId = sessionid.substring(0,sessionid.length - 2);
 		getCustomerFullDetails( action, customerId, function () {
@@ -45,11 +41,11 @@
 				var updateField = urlParams["updatefield"];
 				setHeader("h2",updateField + " successfully updated");
 			}
-			var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + customerDetails["surname"].value.toUpperCase() + ", " + customerDetails["firstname"].value.toUpperCase();
+			var headerText = "SETTINGS for " + customerDetails["surname"].value.toUpperCase() + ", " + customerDetails["firstname"].value.toUpperCase();
 			//updated to make it work on AWS task
 			//var headerText = "SETTINGS for " + customerDetails["surname"].toUpperCase() + ", " + customerDetails["firstname"].toUpperCase();
 			setHeader("h2",headerText);
-			setHeader("h4",myLangTexts["settings"]["yoursettings"][0].toUpperCase() + myLangTexts["settings"]["yoursettings"].substring(1) + ":");
+			setHeader("h4","These are your settings:");
 			settings(displaySettings);
 		});
 	}
@@ -77,10 +73,6 @@
 					console.log(response);
 					
 					successUrl += "&sessionid=" + sessionid;
-					if ( languages.indexOf(newvalue) > -1 ) {
-						lang = newvalue;
-					}
-					successUrl += "&lang=" + lang;
 
 					/*for (var field in response) {
 						if ( field != "status" ) {
@@ -110,10 +102,10 @@
 		var table = document.createElement("table");
 		table.className = "settings";
 		var header = document.createElement("tr");
-		var headerTags = { "settingCell": "setting", "valueCell": "value", "optionCell": "option" };
+		var headerTags = { "settingCell": "SETTING", "valueCell": "VALUE", "optionCell": "OPTION" };
 		for ( var type in headerTags ) {
 			var headCell = document.createElement("th");
-			headCell.appendChild(document.createTextNode( myLangTexts["settings"][headerTags[type]].toUpperCase() ));
+			headCell.appendChild(document.createTextNode(headerTags[type]));
 			headCell.setAttribute("style",cellsFormat[type]);
 			header.appendChild(headCell);
 		}
@@ -139,37 +131,27 @@
 			var row = document.createElement("tr");
 			if ( settings[field] in booleanField ) {
 				//console.log(field + " is BOOLEAN / NUMBER");
-				option = myLangTexts["settings"]["booleanoption"];
-				//option = optionList["boolean"];
+				option = optionList["boolean"];
 				if ( value == 0 || value == "0" ) { value = "OFF"; newvalue = 1 }
 				else { value = "ON"; newvalue = 0 }
 				buttonTarget = "javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newvalue + "'})";
 			} else {
 			//console.log(field + " is STRING");
-				//option = optionList["string"];
-				option = myLangTexts["settings"]["stringoption"];
+				option = optionList["string"];
 				var gotoParams = {};
 				gotoParams["action"] = "update";
 				gotoParams["sessionid"] = sessionid;
 				//gotoParams["id"] = customerId;
 				gotoParams["setting"] = field;
-				gotoParams["lang"] = lang;
 				var gotoPage = pages.settingsPages[field];
 				buttonTarget = "javascript:goTo(\"" + gotoPage + "\"," + JSON.stringify(gotoParams) + ")";
 			}
 	
 			var cells = { "settingCell": field, "valueCell": value };
 			for ( cell in cells ) {
-				//console.log("[settings.displaySettings] adding " + cell + " : \"" + cells[cell] + "\"");
 				var myCell = document.createElement("td");
 				myCell.setAttribute("style",cellsFormat[cell]);
-				if ( cell == "settingCell" ) {
-					//console.log("[parsing.displaySettings] Append \"" + myLangTexts["customer"][cells[cell]] + "\"");
-					var settingText = myLangTexts["customer"][cells[cell]][0].toUpperCase() + myLangTexts["customer"][cells[cell]].substring(1);
-					myCell.appendChild(document.createTextNode(settingText));
-				} else {
-					myCell.appendChild(document.createTextNode(cells[cell]));
-				}
+				myCell.appendChild(document.createTextNode(cells[cell]));
 				row.appendChild(myCell);
 			}
 	
@@ -179,8 +161,7 @@
 				var optionButton = document.createElement("BUTTON");
 				optionButton.setAttribute("id",field);
 	
-				//option = optionList["list"];
-				option = myLangTexts["settings"]["listoption"];
+				option = optionList["list"];
 				optionButton.setAttribute("class","dropdown-toggle");
 				optionButton.setAttribute("data-toggle","dropdown");
 				optionButton.setAttribute("aria-haspopup","true");
@@ -191,16 +172,16 @@
 				ul.setAttribute("aria-labelledby",field);
 		
 				for ( var i in languages ) {
-					var newLang = languages[i];
+					var lang = languages[i];
 					var li = document.createElement("li");
 					var link = document.createElement("a");
-					link.setAttribute("href","javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newLang + "'})");
-					link.appendChild(document.createTextNode(newLang));
+					link.setAttribute("href","javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + lang + "'})");
+					link.appendChild(document.createTextNode(lang));
 					li.appendChild(link);
 					ul.appendChild(li);
 				}
 				optionCell.appendChild(ul);
-				optionButton.appendChild(document.createTextNode(option.toUpperCase()));
+				optionButton.appendChild(document.createTextNode(option));
 				optionCell.appendChild(optionButton);
 			} else {
 				var optionCell = document.createElement("td");
@@ -214,7 +195,7 @@
 				optionButton.setAttribute("id","option");
 				optionButton.setAttribute("type","submit");
 				optionButton.setAttribute("name",field);
-				optionButton.setAttribute("value",option.toUpperCase());
+				optionButton.setAttribute("value",option);
 				optionForm.appendChild(optionButton);
 				optionCell.appendChild(optionForm);
 			}
@@ -229,7 +210,7 @@
 		for ( field in customerDetails ) {
 			if ( customerDetails[field].fix == 0 ) {
 				mySettings[field] = customerDetails[field].value;
-				//console.log("Adding " + field + " to settings");
+				console.log("Adding " + field + " to settings");
 			}
 		}
 		if ( callback != null ) { callback(mySettings) }
@@ -240,33 +221,25 @@
 	
 	}
 	</script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
-	<!-- <script>
-	function displayMenu(targetId,text) {
-		document.getElementById(targetId).innerHTML = text;
-	}
-	</script> --> 
 </head>
 
 <header>
 </header>
 <body>
-	<script>init();</script>
-
 	<div class="dropdown">
 	<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
 		<!-- <li><a href="./home.html?action=home&name=Arturo">Home</a></li> -->
-		<!-- <li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})">Home</a></li> -->
-		<li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
-		<li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
-		<li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
-		<li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
+		<li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid})">Home</a></li>
+		<li><a href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid})">Appointments</a></li>
+		<li><a href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid})">Notifications</a></li>
+		<li><a href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid})">Settings</a></li>
 		<li role="separator" class="divider"></li>
-		<li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+		<li><a href="./signin.html">Logout</a></li>
 	</ul>
 	</div>
 	
+	<script>init();</script>
 	
 	<!-- Bootstrap core JavaScript -->
 	<!-- Placed at the end of the document so the pages load faster -->

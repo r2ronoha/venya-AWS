@@ -20,48 +20,43 @@
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 		var sessionid;
-		var lang;
-		var myLangTexts;
 		function init() {
 			parseUrl();
 			
 			sessionid = urlParams["sessionid"];
-			lang = urlParams["lang"].toLowerCase();
-			myLangTexts = languages_text[lang];
 			//customerId = sessionid.replace(/..$/,'');
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			//console.log("[home.init] sessionid = " + sessionid + "customerid = " + customerId);
 			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
 			getCustomerDetails( "home", customerId, function () {
 				customerId = customerDetails["id"];
-				myLangTexts;
+				
 				var action = urlParams["action"];
-				var headerText = myLangTexts["action"][action].toUpperCase();
-				if ( action != "home" ) headerText = action.toUpperCase() + "\n" + myLangTexts["home"]["welcome"];
+				var headerText = "HOME ";
+				if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.\nWELCOME ";
 				headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
 				setHeader("h2",headerText);
-				setHeader("h4",myLangTexts["home"]["yourdata"]);
-				createDataTable(customerDetails, lang, action);
+				setHeader("h4","This is your data");
+				createDataTable(customerDetails);
 			});
 		}
 	</script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 <header>
 </header>
 <body>
-	<script>init();</script>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                <li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
-                <li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
-                <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
-                <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
-                <li role="separator" class="divider"></li>
-                <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+			<li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid})">Home</a></li>
+			<li><a href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid})">Appointments</a></li>
+			<li><a href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid})">Notifications</a></li>
+			<li><a href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid})">Settings</a></li>
+			<li role="separator" class="divider"></li>
+			<li><a href="./signin.html">Logout</a></li>
 		</ul>
 	</div>
+	<script>init();</script>
 	
 	<!-- Bootstrap core JavaScript
 	================================================== -->
@@ -69,6 +64,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
 </body>

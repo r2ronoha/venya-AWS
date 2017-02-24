@@ -23,14 +23,13 @@
 <link href="/static/css/arturo.css" rel="stylesheet">
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 
 <script type="text/javascript" src="./parsing.js"></script>
 <script type="text/javascript">
 var changeField;
 function init() {
-var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid", "lang": "lang" };
+var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid" };
 parseUrl();
 changeField = urlParams["field"];
 if (urlParams["status"] == "ERROR") {

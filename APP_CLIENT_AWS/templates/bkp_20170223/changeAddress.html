@@ -30,27 +30,19 @@
 		var venya_node_server = document.location.hostname;
 		var venya_node_port = 8888;
 		var sessionid;
-		var myLangTexts;
-		var lang;
-
 		function init() {
-			var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid", "lang": "lang" };
+			var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid" };
 			parseUrl();
 			sessionid = urlParams["sessionid"];
-			lang = urlParams["lang"];
-			myLangTexts = languages_text[lang];
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			console.log("[changeAddress.init] sessionid = " + sessionid + " : customerId = " + customerId);
 			changeField = urlParams["field"];
 			if (urlParams["status"] == "ERROR") {
 				if (urlParams["errormessage"] == "input") {
-					var headerText = myLangTexts["errors"]["badfields"];
-					headerText = headerText[0].toUpperCase() + headerText.substring(1);
-					setHeader("h2",headerText + " : ");
+					setHeader("h2","Please double check the following fields:");
 					for (var field in urlParams) {
 						if ( !(field in notErrorFields) ) {
-							var fieldText = myLangTexts["address"][field];
-							setHeader("h5",fieldText + ": " + urlParams[field]);
+							setHeader("h5",field + ": " + urlParams[field]);
 						}
 					}
 				} else {
@@ -68,13 +60,11 @@
 		var country = form.elements.country.value;
 		
 		var error = {};
-		if ( postcode == "" ) error["postcode"] = formatMessage([myLangTexts["address"]["postcode"],myLangTexts["errors"]["required"]]);
-		else if (! postcodeFormat.test(postcode) ) error["postcode"] = formatMessage([myLangTexts["errors"]["badformat"],myLangTexts["address"]["postcode"]]);
-		//if ( postcode == "" ) { error["postcode"] = myLangTexts["address"]["postcode"] + " " + myLangTexts["errors"]["required"]; }
-		//else if (! postcodeFormat.test(postcode) ) error["postcode"] = myLangTexts["errors"]["badformat"] + "postcode";
+		if ( postcode == "" ) { error["postcode"] = "post code is required"; }
+		else if (! postcodeFormat.test(postcode) ) error["postcode"] = "bad post code format";
 		
 		if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?action=update&sessionid=" + sessionid + "&lang=" + lang + "&status=ERROR&errormessage=input";
+			var errorUrl = location.href.split('?')[0] + "?action=update&sessionid=" + sessionid + "&status=ERROR&errormessage=input";
 			for ( var field in error ) {
 				errorUrl += "&" + field + "=" + escape(error[field]);
 			}
@@ -118,7 +108,6 @@
 					var gotoParams = {};
 					gotoParams["sessionid"] = sessionid;
 					gotoParams["action"] = response["action"];
-					gotoParams["lang"] = lang;
 					/*for (var field in response) {
 						if ( field != "status" ) gotoParams[field] = response[field];
 					}*/
@@ -131,55 +120,47 @@
 						gotoParams["setting"] = field;
 						gotoParams["status"] = response["status"];
 						gotoParams["errormessage"] = response["errormessage"];
-						gotoParams["lang"] = lang;
 						goTo(pages.settingsPages.Address,gotoParams);
 				}
 			}
 		}
 	}
 	</script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 
 <body>
-	<script>init();</script>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
 		<!-- <li><a href="./home.html?action=home&name=Arturo">Home</a></li> -->
-                <li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuHome",myLangTexts["menu"]["home"])</script></a></li>
-                <li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
-                <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
-                <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
-                <li role="separator" class="divider"></li>
-                <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayForm("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+			<li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid})">Home</a></li>
+			<li><a href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid})">Appointments</a></li>
+			<li><a href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid})">Notifications</a></li>
+			<li><a href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid})">Settings</a></li>
+			<li role="separator" class="divider"></li>
+			<li><a href="./signin.html">Logout</a></li>
 		</ul>
 	</div>
-<script>
-function setPlaceholder(field,text) {
-	field.value = text;
-}
-</script>
+	<script>init();</script>
+	
 	<div class="container">
 	
 		<form class="form-signin">
-		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
+		<h2 class="form-signin-heading">Please enter your details</h2>
 		
-		<!-- <label for="street" class="sr-only">Street and number</label> -->
+		<label for="street" class="sr-only">Street and number</label>
 		<input type="text" id="street" class="form-control" placeholder="Street and number" autofocus>
-		<label for="street" class="sr-only"><script>javascript:displayForm("street",myLangTexts["address"]["street"] + ", " + myLangTexts["address"]["number"])</script></label>
-		<!-- <input type="text" id="street" class="form-control" value="Street and number" onfocus="setPlaceholder(this,myLangTexts["address"]["street"] + " and " + myLangTexts["address"]["number"])" onblur="setPlaceHolder(this,"")" autofocus> -->
 		
-		<input type="text" id="postcode" class="form-control" placeholder="Post Code" >
-		<label for="postcode" class="sr-only"><script>javascript:displayForm("postcode",myLangTexts["address"]["postcode"])</script></label>
+		<label for="postcode" class="sr-only">Post Code *</label>
+		<input type="text" id="postcode" class="form-control" placeholder="Post Code" required >
 		
+		<label for="city" class="sr-only">City</label>
 		<input type="text" id="city" class="form-control" placeholder="City" >
-		<label for="city" class="sr-only"><script>javascript:displayForm("city",myLangTexts["address"]["city"])</script></label>
 		
+		<label for="city" class="sr-only">Country</label>
 		<input type="text" id="country" class="form-control" placeholder="Country" >
-		<label for="country" class="sr-only"><script>javascript:displayForm("country",myLangTexts["address"]["country"])</script></label>
 		
-		<button id="formButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()"><script>javascript:displayMenu("formButton",myLangTexts["form"]["submit"].toUpperCase())</script></button>
+		<button class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()">SUBMIT</button>
 		</form>
 	
 	</div>
@@ -191,7 +172,7 @@ function setPlaceholder(field,text) {
 	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-	<script src="/static/js/ie10-viewport-bug-workaround.js"></script></script>
+	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>></script>
 
 </body>
 </html>
