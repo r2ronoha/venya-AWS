@@ -27,39 +27,64 @@
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 	var sessionid;
+	var lang = default_lang;
+	var myLangTexts;
+	var venya_node_server = document.location.hostname;
+	var venya_node_port = 8888;
+
+	function init() {
+		parseUrl();
+		if ( urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"]) ) {
+			lang = urlParams["lang"];
+		}
+		myLangTexts = languages_text[lang];
+
+		setFormErrorHeader(urlParams,myLangTexts);
+		var action = urlParams["action"];
+	}
+
 	function register(){
 	//var attList = ['_id','type','name','email','phone','username','password'];
 		var credList = ['username','password'];
 		var form = document.querySelector("form");
 		var id = form.elements.id.value;
 		var username = form.elements.inputUsername.value;
-		var surname = form.elements.inputName.value;
-		var email = form.elements.inputEmail.value;
-		var confirmEmail = form.elements.confirmEmail.value;
+		var surname = form.elements.inputName.value.toLowerCase();
+		var email = form.elements.inputEmail.value.toLowerCase();
+		var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
+		var phone = form.elements.inputPhone.value;
 		var password = form.elements.inputPassword.value;
 		var confirmPassword = form.elements.confirmPassword.value;
 		var objectConstructor = {}.constructor;
 		
 		var error = {};
-		if ( id == "" ) { error["id"] = "id is required"; }
-		else if ( ! objectidFormat.test(id) ) error["uid"] = "id format is not valid";
+		if ( id == "" ) { error["id"] = formatMessage([myLangTexts["customer"]["id"],myLangTexts["errors"]["required"]]); }
+		else if ( ! objectidFormat.test(id) ) error["uid"] = formatMessage(myLangTexts["errors"]["badformat"],[myLangTexts["customer"]["id"]]);
 
-		if ( ! usernameFormat.test(username) ) error["username"] = "Username " + username + " must have at least 8 characters and only contain alphanumeric characters";
-		if ( surname == "" ) { error["surname"] = "surname is required"; }
+		if ( ! usernameFormat.test(username) ) error["username"] = myLangTexts["errors"]["usernameformat"];
+		if ( surname == "" ) { error["surname"] = formatMessage([myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]); }
 
-		if ( email == "" ) { error["email"] = "email is required"; }
-		else { if ( email.toLowerCase() != confirmEmail.toLowerCase() ) error["email"] = "email addresses do not match"; }
-
-		if ( password == "" ) { error["password"] = "password is required"; }
-		else {
-			if ( password != confirmPassword ) error["password"] = "passwords do not match: ";
+		if ( email == "" ) { error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]); }
+		else { 
+			if ( email != confirmEmail ) error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]); 
 			else {
-				if ( ! passwordFormat.test(password) ) error["password"] = "password must be at least 6 characters long and contain at least 1 upper case, 1 lower cased and 1 number";
+				if ( ! emailFormat.test(email) ) error["email"] = myLangTexts["errors"]["emailformat"];
+			}
+		}
+			
+		if ( phone != "" && ! phoneFormat.test(phone) ) error["phone"] = myLangTexts["errors"]["phoneformat"];
+		phone = phone.replace(/\+/,'%2B');
+
+		if ( password == "" ) { error["password"] = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); }
+		else {
+			if ( password != confirmPassword ) error["password"] = formatMessage([myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]).replace(/ s/,'s');
+			else {
+				if ( ! passwordFormat.test(password) ) error["password"] = myLangTexts["errors"]["passwordformat"];
 			}
 		}
 
 		if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input&id=" + id ;
+			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input&id=" + id + "&lang=" + lang;
 			if ( urlParams["action"] == "webcreation" ) {
 				errorUrl += "&" + "action=" + urlParams["action"];
 			}
@@ -75,6 +100,7 @@
 				"&id=" + id +
 				"&surname=" + surname +
 				"&email=" + email +
+				"&phone=" + phone +
 				"&username=" + username +
 				"&password=" + password;
 			xhr.open('GET',myUrl,true);
@@ -90,6 +116,7 @@
 						var successUrl = "./home.html?action=registration&";
 						sessionid = randomSessionID(response["id"],1,10);
 						successUrl += "sessionid=" + sessionid;
+						successUrl += "&lang=" + lang;
 						/*for (var field in response) {
 							if ( field != "status" ) {
 								var value = response[field];
@@ -101,7 +128,7 @@
 						location.href=successUrl.replace(/&$/,'');
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = "./register.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+						var errorUrl = "./register.html?lang= " + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
 						location.href=errorUrl;
 					}
 				}
@@ -113,55 +140,41 @@
 </head>
 
 <body>
-	<script>
-		var venya_node_server = document.location.hostname;
-		var venya_node_port = 8888;
-		parseUrl();
-		if (urlParams["status"] == "ERROR") {
-			if (urlParams["errormessage"] == "input") {
-			setHeader("h2","Please double check the following fields:");
-			for (var field in urlParams) {
-				if ( field != "status" && field != "errormessage" && field != "id" && field != "action" ) {
-					setHeader("h5",field + ": " + urlParams[field]);
-				}
-				}
-			} else {
-				setHeader("h3",unescape(urlParams["errormessage"]));
-			}
-		}
-		var action = urlParams["action"];
-	</script>
+	<script>init();</script>
 	
 	<div class="container">
 	
 		<form class="form-signin">
-			<h2 class="form-signin-heading">Please enter your details</h2>
+			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 			
-			<label for="id" class="sr-only">User ID</label>
 			<input type="text" id="id" class="form-control" placeholder="id" required autofocus>
+			<label for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
 			
-			<label for="inputUsername" class="sr-only">Username</label>
 			<input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["customer"]["username"]]))</script></label>
 			
-			<label for="inputName" class="sr-only">Surname</label>
 			<input type="text" id="inputName" class="form-control" placeholder="Surname" required autofocus>
+			<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
 			
-			<label for="inputEmail" class="sr-only">Email address</label>
-			<input type="text" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+			<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 			
-			<label for="confirmEmail" class="sr-only">Confirm Email address</label>
 			<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm Email address" required autofocus>
+			<label for="confirmEmail" class="sr-only"><script>displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["email"]]))</script></label>
+
+			<input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
+			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
 			
-			<label for="inputPassword" class="sr-only">Password</label>
 			<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
 			
-			<label for="confirmPassword" class="sr-only">Confirm Password</label>
 			<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
 			
 			<div class="checkbox">
-				<label><input type="checkbox" value="remember-me"> Remember me</label>
+				<label><input id="remember" type="checkbox" value="remember-me"> <script>javascript:displayForm("remember",formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
 			</div>
-			<button class="btn btn-lg btn-primary btn-block" type="button" onclick="register()">SUBMIT</button>
+			<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="register()"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
 		</form>
 		<script>
 			if ( urlParams["action"] == "webcreation" ) {
@@ -171,8 +184,9 @@
 			}
 		</script>
 	</div> <!-- /container -->
-	<div class="links">
-		Already have an account? <a href="./signin.html">Log in</a>
+	<div class="links" id="links">
+		<p id="already"><script>document.getElementById("links").append(myLangTexts["signin"]["already"])</script></p>
+		<a id="signin" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("signin",formatMessage([myLangTexts["signin"]["button"]]))</script></a>
 	</div>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>

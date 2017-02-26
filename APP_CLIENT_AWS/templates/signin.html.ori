@@ -50,10 +50,9 @@
 			if (urlParams["status"] == "ERROR") {
 				setHeader("h2",urlParams["errormessage"]);
 			}
-			if (urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"] > -1 )) {
+			if (urlParams["lang"] != undefined) {
 				lang = urlParams["lang"];
 			}
-			console.log("[signin.init] urlParame[\"lang\"] = " + urlParams["lang"] + " -- lang = " + lang);
 			myLangTexts = languages_text[lang];
 			serverip = urlParams["serverip"];
 			serverport = urlParams["serverport"];
@@ -68,7 +67,7 @@
 			if ( username == defaultUsername ) {
 				var loginstatus = "error";
 				var errormessage = myLangTexts["errors"]["notregistered"];
-				var errorUrl = "./signin.html?lang=" + lang + "&status=" + loginstatus + "&errormessage=" + errormessage;
+				var errorUrl = "./signin.html?status=" + loginstatus + "&errormessage=" + errormessage;
 				location.href=errorUrl;
 				return;
 			}
@@ -106,7 +105,7 @@
 						location.href=successUrl.replace(/&$/,'');
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"][response["errormessage"]]);
+						var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
 						location.href=errorUrl;
 					}
 				}
@@ -139,21 +138,18 @@
 			<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["customer"]["password"])</script></label>
 
-			<div id="checkRemember" class="checkbox">
-				<input id="remember" type="checkbox" value="rememberme">
-				<label for="remember"> <script>javascript:document.getElementById("checkRemember").append(myLangTexts["signin"]["rememberme"])</script></label>
-				<!-- <label for="remember"> <script>javascript:displayForm("remember",myLangTexts["signin"]["rememberme"])</script></label> -->
+			<div class="checkbox">
+				<label id="remember"><input type="checkbox" value="remember-me"> <script>javascript:this.value=myLangTexts["signin"]["rememberme"];</script></label>
 			</div>
 			<!-- <input type="submit" value="submit" onclick="signin_check()"/> -->
 			<button id="signinButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="signin_check()"><script>javascript:displayForm("signinButton",myLangTexts["signin"]["button"])</script></button>
 			<!-- <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button> -->
 		</form>
 	</div> <!-- /container -->
-	<div class="links" id="links">
-		<p><script>javascript:document.getElementById("links").append(myLangTexts["signin"]["signup"]["question"])</script></p>
-		<a id="signup" href="javascript:goTo(pages.register,{'lang' : lang})"> <script>javascript:displayForm("signup",myLangTexts["signin"]["signup"]["link"])</script></a><br/>
-		<a id="lostusername" href="javascript:goTo(pages.lostusername,{'lost' : 'username', 'lang' : lang})"><script>javascript:displayForm("lostusername",myLangTexts["signin"]["lostusername"])</script></a><br/>
-		<a id="lostpassword" href="javascript:goTo(pages.lostpassword,{'lost' : 'password', 'lang' : lang})"><script>javascript:displayForm("lostpassword",myLangTexts["signin"]["lostpassword"])</script></a>
+	<div class="links">
+		<script>javascript:document.body.append(myLangTexts["signin"]["signup"]["question"])</script> <a id="signup" href="./register.html"><script>javascript:displayForm("signup",myLangTexts["signin"]["signup"]["link"])</script></a><br/>
+		<a id="lostusername" href="./lostUsername.html?lost=username"><script>javascript:displayForm("lostusername",myLangTexts["signin"]["lostusername"])</script></a><br/>
+		<a id="lostpassword" href="./lostPassword.html?lost=password"><script>javascript:displayForm("lostpassword",myLangTexts["signin"]["lostpassword"])</script></a>
 	</div>
 	
 	

@@ -119,7 +119,6 @@
 					gotoParams["sessionid"] = sessionid;
 					gotoParams["action"] = response["action"];
 					gotoParams["lang"] = lang;
-					gotoParams["updatefield"] = field;
 					/*for (var field in response) {
 						if ( field != "status" ) gotoParams[field] = response[field];
 					}*/
@@ -156,14 +155,20 @@
                 <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayForm("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
-
+<script>
+function setPlaceholder(field,text) {
+	field.value = text;
+}
+</script>
 	<div class="container">
 	
 		<form class="form-signin">
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 		
+		<!-- <label for="street" class="sr-only">Street and number</label> -->
 		<input type="text" id="street" class="form-control" placeholder="Street and number" autofocus>
 		<label for="street" class="sr-only"><script>javascript:displayForm("street",myLangTexts["address"]["street"] + ", " + myLangTexts["address"]["number"])</script></label>
+		<!-- <input type="text" id="street" class="form-control" value="Street and number" onfocus="setPlaceholder(this,myLangTexts["address"]["street"] + " and " + myLangTexts["address"]["number"])" onblur="setPlaceHolder(this,"")" autofocus> -->
 		
 		<input type="text" id="postcode" class="form-control" placeholder="Post Code" >
 		<label for="postcode" class="sr-only"><script>javascript:displayForm("postcode",myLangTexts["address"]["postcode"])</script></label>
@@ -183,7 +188,7 @@
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js" />')</script></script>
+	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script></script>

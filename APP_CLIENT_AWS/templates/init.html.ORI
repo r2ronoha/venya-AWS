@@ -41,6 +41,9 @@
 
 <body>
 	<script>
+		//serverip = '{{ serverip }}';
+		window.serverip = document.location.hostname;
+		window.serverport = '{{ serverport }}';
 		parseUrl();
 		if (urlParams["status"] == "ERROR") {
 			setHeader("h2",urlParams["errormessage"]);
@@ -50,12 +53,12 @@
 	<!-- <div class="container"> -->
 	
 		<h2 style="text-align:center">WELCOME TO VENYA<br/>BIENVENIDO A VENYA</h2>
-		<div class="tableCenter" style="text-align:center">
+		<div class="tableCenter">
 			<table class="bottonTable">
 			<tr>
-			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.choosesite_esp,{'lang' : 'esp'})">ESPA&#209OL</button></td>
+			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.signin)">I am a CUSTOMER</button></td>
 			<td/>
-			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.choosesite_eng,{'lang' : 'eng'})">ENGLISH</button></td>
+			<td><button class="btn btn-primary btn-block" type="button" onclick="javascript:goTo(pages.webcreatecustomer)">I am a PROVIDER</button></td>
 			<!-- <td style="text-align:center, border:0"><button class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:goTo(pages.webcreatecustomer)">I am a PROVIDER</button></td>-->
 			</tr>
 			</table>
@@ -66,6 +69,44 @@
 		</div>
 	
 	<!-- </div> -->
+	<div class="instructions">
+		<p>Welcome to VenYA.es. We are developing the service. We currently have limited functionality (signup, login, manage settings).<br/>
+		Usage:<br/></p>
+	</div>
+			<div class="list">
+			1. Access the PROVIDER area and create a customer profile for yourself.<br/>
+			2. Create your user account:<br/>
+			</div>
+				<div class="list2">
+				2.a. you'll be directly redirected after step 1. If you don't want to create it straight away, save your id, you'll need it later).<br/>
+				2.b. if you choose not to complete step 2.a, you can create your account at any time by accessing the CUSTOMER area and Signing Up (with the id provided after step 1 completed).<br/>
+				</div>
+			<div class="list">
+			3. You can access your account in the CUSTOMERS area with the credentials you create in step 2.<br/>
+			4. You can manage your settings (MENU - SETTINGS).<br/>
+			</div>
+	<div class="instructions">
+		<p><br/><br/>
+		Bienvenido a VenYA.es. Estamos desarrollando el servicio en este momento. Acutalmente tenemos una funcionalidad limitada (registrarse, connectarse, gestionar par&#225metros).</br>
+		Uso:<br/></p>
+	</div>
+			<div class="list">
+			1. Accede a la secci&#243n de proveedores ("I AM A PROVIDER") y cr&#233ate un perfil.<br/>
+			2. Crea tu cuenta de ususario:<br/>
+			</div>
+				<div class="list2">
+				2.a. tr&#225s el punto 1 ser&#225s redirigido directamente a la p&#225gina para crear la cuenta. Si no deseas hacerlo ahora, guarda el id, lo necetar&#225s m&#225s tarde.</br>
+				2.b. si no haces el paso 2.a, puedes crear tu cuenta en cualquier momento accediendo a la zona de usuarios ("I AM A CUSTOMER") y haciendo click en "Sign Up" (aqu&#237 te piden el id recibido despu&#233 del paso 1).</br>
+				</div>
+			<div class="list">
+			3. Ahora puedes acceder a tu cuenta en cualquier momento desde la zona de usuarios ("I AM A CUSTOMER") con las credenciales creadas en el paso 2.<br/>
+			4. Puedes gestionar tus datos y par&#225metros (MENU - SETTINGS).</br>
+			</div>
+		<br/><br/>
+	<div class="instructions">
+		<p>contacto: arturo_noha@hotmail.com.</p>
+	</div>
+	</div>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
 </body>

@@ -11,7 +11,6 @@ var ObjectId = require('mongodb').ObjectId;
 
 var exec = require("child_process").exec;
 var myUndefined = [ undefined, "undefined" ];
-var notCaseSensitive = [ "name","username","surname","email","address" ];
 /*
 //imports to support aws email
 // load aws sdk
@@ -104,7 +103,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "wrongcredentials";
+				body["errormessage"] = "Wrong credentials";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -120,7 +119,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "notregistered";
+				body["errormessage"] = "User not registered";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -180,7 +179,7 @@ function getCustomer(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "wrongcredentials";
+				body["errormessage"] = "Wrong credentials";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -196,7 +195,7 @@ function getCustomer(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "notregistered";
+				body["errormessage"] = "User not registered";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -250,7 +249,7 @@ function createCustomer(response, request, dbcnx, db) {
 					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 					var body = {};
 					body["status"] = "ERROR";
-					body["errormessage"] = "registrationerror";
+					body["errormessage"] = "Registration error";
 					body["action"] = action;
 					var respBody = JSON.stringify(body);
 					response.write(respBody, function(err) { response.end(); } );
@@ -297,7 +296,7 @@ function register(response, request, dbcnx, db) {
 			response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 			var body = {};
 			body["status"] = "ERROR";
-			body["errormessage"] = "idnotinsystem";
+			body["errormessage"] = "UserID is not in the system. Please contact service provider.";
 			body["action"] = action;
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
@@ -306,14 +305,15 @@ function register(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "idnamenotmatch";
+				//body["errormessage"] = "UserID (surname for ID: " + attList["surname"].toLowerCase() + ") and Surname " + surname.toLowerCase() + " do not match";
+				body["errormessage"] = "UserID and Surname do not match";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );				
 			} else {
 				customer.doGet(dbcnx, db, checkUsernameQuery, function(attList) {
 					if ( attList != null && attList["username"] != attributesDefault["username"].value ) {
-						var errormessage = ( attList["username"] == username ) ? "usernameexists" : "emailregistered";
+						var errormessage = ( attList["username"] == username ) ? "username already used" : "email already registered";
 						response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 						var body = {};
 						body["status"] = "ERROR";
@@ -353,7 +353,7 @@ function register(response, request, dbcnx, db) {
 										response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 										var body = {};
 										body["status"] = "ERROR";
-										body["errormessage"] = "regdatacheckfail";
+										body["errormessage"] = "Registration failure: failed to checked info after update";
 										body["action"] = action;
 										var respBody = JSON.stringify(body);
 										response.write(respBody, function(err) { response.end(); } );
@@ -377,19 +377,15 @@ function getLostCredentials(response, request, dbcnx, db) {
 	var name = url.parse(request.url, true).query.name;
 	var username = url.parse(request.url, true).query.username;
 	var password = url.parse(request.url, true).query.password;
-	var email = url.parse(request.url, true).query.email
+	var email = url.parse(request.url, true).query.email;
 	
 	//var query = { "email": { "fix": attributesFix["email"], "value": email } };
-	var query = { "email.value": email.toLowerCase() };
+	var query = { "email.value": email };
 	for ( var i = 0; i < optFields.length; i++ ) {
 		var field = optFields[i];
 		if ( urlParams[field] != undefined ) {
 			var queryField = field + ".value";
-			var fieldValue = urlParams[field];
-			if ( notCaseSensitive.indexOf(field) > -1 ) {
-				fieldValue = fieldValue.toLowerCase();
-			}
-			query[queryField] = fieldValue;
+			query[queryField] = urlParams[field];
 		}
 	}
 	
@@ -403,6 +399,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = "accountnotfound";
+			body["email"] = 
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else {
@@ -477,14 +474,11 @@ function updateSetting(response, request, dbcnx, db) {
 			var part = address[i].split('=')[0];
 			var value = address[i].split('=')[1];
 			var updateQueryField = "address.value." + part;
-			updateQuery[updateQueryField] = value.toLowerCase();
+			updateQuery[updateQueryField] = value;
 		}
 		console.log("[requestHandlers : updateSettings] Update address query string = " + JSON.stringify(updateQuery));
 	} else {
 		var updateQueryField = field + ".value";
-		if ( notCaseSensitive.indexOf(field) > -1 ) {
-			newvalue = newvalue.toLowerCase();
-		}
 		updateQuery[updateQueryField] = newvalue;
 	}
 	var query = { "_id": ObjectId(id) };
@@ -526,7 +520,7 @@ function updateSetting(response, request, dbcnx, db) {
 						response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 						var body = {};
 						body["status"] = "ERROR";
-						body["errormessage"] = "updatedatacheckfail";
+						body["errormessage"] = "Update failure: failed to checked info after update";
 						body["action"] = action;
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
@@ -538,9 +532,6 @@ function updateSetting(response, request, dbcnx, db) {
 	
 	if ( oldvalue != undefined ) {
 		var checkQuery = { "_id": ObjectId(id) }
-		if ( notCaseSensitive.indexOf(field) > -1 ) {
-			oldvalue = oldvalue.toLowerCase();
-		}
 		checkQuery[updateQueryField] = oldvalue;
 		console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		customer.doGet(dbcnx, db, checkQuery, function(attList) {
@@ -549,7 +540,7 @@ function updateSetting(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "infonotmatch";
+				body["errormessage"] = "The info entered does not match";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -578,14 +569,11 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 			var part = address[i].split('=')[0];
 			var value = address[i].split('=')[1];
 			var updateQueryField = "address.value." + part;
-			updateQuery[updateQueryField] = value.toLowerCase();
+			updateQuery[updateQueryField] = value;
 		}
 		console.log("[requestHandlers : updateSettings] Update address query string = " + JSON.stringify(updateQuery));
 	} else {
 		var updateQueryField = field + ".value";
-		if ( notCaseSensitive.indexOf(field) > -1 ) {
-			newvalue = newvalue.toLowerCase();
-		}
 		updateQuery[updateQueryField] = newvalue;
 	}
 	var query = { "_id": ObjectId(id) };
@@ -625,7 +613,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 						response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 						var body = {};
 						body["status"] = "ERROR";
-						body["errormessage"] = "updatedatacheckfail";
+						body["errormessage"] = "Update failure: failed to checked info after update";
 						body["action"] = action;
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
@@ -637,9 +625,6 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 	
 	if ( oldvalue != undefined ) {
 		var checkQuery = { "_id": ObjectId(id) }
-		if ( notCaseSensitive.indexOf(field) > -1 ) {
-			oldvalue = oldvalue.toLowerCase();
-		}
 		checkQuery[updateQueryField] = oldvalue;
 		console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		customer.doGet(dbcnx, db, checkQuery, function(attList) {
@@ -648,7 +633,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "infonotmatch";
+				body["errormessage"] = "The info entered does not match";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );

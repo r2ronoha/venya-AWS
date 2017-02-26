@@ -28,18 +28,26 @@
 	<script type="text/javascript">
 	var venya_node_server = document.location.hostname;
 	var venya_node_port = 8888;
-	var lang = default_lang;
-	var myLangTexts;
-
-	function init() {	
+	function init() {
+	
 		parseUrl();
 		
-		if ( urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"]) ) {
-			lang = urlParams["lang"];
-		} 
-		myLangTexts = languages_text[lang];
-
-		setFormErrorHeader(urlParams,myLangTexts);
+		if (urlParams["status"] == "ERROR") {
+			if (urlParams["errormessage"] == "input") {
+				setHeader("h2","Please double check the following fields:");
+				for (var field in urlParams) {
+					if ( field != "status" && field != "errormessage" ) {
+						setHeader("h5",field + ": " + urlParams[field]);
+					}
+				}
+			} else {
+				setHeader("h3",unescape(urlParams["errormessage"]));
+			}
+		}
+		//console.log("venya_node_server = " + venya_node_server);
+		console.log("venyaserver = " + venya_node_server + ":" + venya_node_port);
+		//setHeader("h2",venya_node_server);
+		
 	}
 
 	function create_customer(){
@@ -48,14 +56,13 @@
 		var firstname = form.elements.inputFirstname.value;
 		var email = form.elements.inputEmail.value;
 		//var address = form.elements.inputAddress.value;
-		var phone = form.elements.inputPhone.value;
+		var phone = form.elements.inputPhone.value.replace(/\+/,'%2B');
 		
 		var error = {};
-		if ( surname == "" ) { error["surname"] = formatMessage([myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]); }
-		if ( firstname == "" ) { error["firstname"] = formatMessage([myLangTexts["customer"]["firstname"],myLangTexts["errors"]["required"]]); }
-		if ( email != "" && ! emailFormat.test(email) ) error["email"] = myLangTexts["errors"]["emailformat"];
-		if ( phone != "" && ! phoneFormat.test(phone) ) error["phone"] = myLangTexts["errors"]["phoneformat"];
-		phone = phone.replace(/\+/,'%2B');
+		if ( surname == "" ) { error["surname"] = "surname is required"; }
+		if ( firstname == "" ) { error["firstname"] = "firstname is required"; }
+		if ( email != "" && ! emailFormat.test(email) ) error["email"] = "wrong email format";
+		if ( phone != "" && ! phoneFormat.test(phone) ) error["phone"] = "wrong phone format";
 		
 		if ( Object.keys(error).length > 0 ) {
 			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input";
@@ -70,7 +77,7 @@
 			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/createCustomer?type=customer" + 
 			"&firstname=" + firstname.toLowerCase() +
 			"&surname=" + surname.toLowerCase() +
-			"&email=" + email.toLowerCase() +
+			"&email=" + email +
 			//"&address=" + address + 
 			"&phone=" + phone;
 			console.log(myUrl);
@@ -85,7 +92,7 @@
 						console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
 						//var successUrl = "./signin.html?action=registration&";
-						var successUrl = "./register.html?lang=" + lang + "&action=webcreation&";
+						var successUrl = "./register.html?action=webcreation&";
 						for (var field in response) {
 							if ( field != "status" && field != "action" ) {
 								var value = response[field];
@@ -96,7 +103,7 @@
 						location.href=successUrl.replace(/&$/,'');
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = location.href.split('?')[0] + "?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+						var errorUrl = location.href.split('?')[0] + "?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
 						location.href=errorUrl; 
 					}
 				}
@@ -113,21 +120,20 @@
 	<div class="container">
 	
 	<form class="form">
-	<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
+	<h2 class="form-heading">Please enter your details</h2>
 	
+	<label for="inputSurname" class="sr-only">Surname *</label>
 	<input type="text" id="inputSurname" class="form-control" placeholder="Surname" required autofocus>
-	<label for="inputSurname" class="sr-only"><script>displayForm("inputSurname",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
 	
-	<input type="text" id="inputFirstname" class="form-control" placeholder="First Name" required autofocus>
-	<label for="inputFirstname" class="sr-only"><script>displayForm("inputFirstname",formatMessage([myLangTexts["customer"]["firstname"]]))</script></label>
+	<label for="inputFirstname" class="sr-only">First Name *</label>
+	<input type="text" id="inputFirstname" class="form-control" placeholder="First Name" required>
 	
+	<label for="inputEmail" class="sr-only">Email address</label>
 	<input type="email" id="inputEmail" class="form-control" placeholder="Email address" >
-	<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 	
+	<label for="inputPhone" class="sr-only">Phone number</label>
 	<input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
-	<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
-
-	<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="create_customer()"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
+	<button class="btn btn-lg btn-primary btn-block" type="button" onclick="create_customer()">SUBMIT</button>
 	</form>
 	</div>
 	

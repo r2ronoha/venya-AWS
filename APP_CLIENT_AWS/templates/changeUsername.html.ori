@@ -10,7 +10,7 @@
 	
 	<link rel="icon" href="/static/favicon.ico">
 	
-	<title>VenYa Change Password</title>
+	<title>VenYa Change username</title>
 	
 	<!-- Bootstrap core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -24,6 +24,7 @@
 	
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
 	
+	<script type="text/javascript" src="/static/common/languages.js"></script>
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 		var changeField;
@@ -32,7 +33,7 @@
 		var sessionid;
 		var lang;
 		var myLangTexts;
-
+	
 		function init() {
 			var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid", "lang": "lang" };
 			parseUrl();
@@ -47,9 +48,9 @@
 					for (var field in urlParams) {
 						if ( !(field in notErrorFields) ) {
 							var headText = formatMessage([myLangTexts["customer"][field],":",urlParams[field]]);
-							setHeader("h5",headText);
+                                                        setHeader("h5",headText);
 						}
-					}		
+					}
 				} else {
 					setHeader("h4",unescape(urlParams["errormessage"]));
 				}
@@ -58,19 +59,19 @@
 		
 		function readForm() {
 			var form = document.querySelector("form");
-			var oldPassword = form.elements.oldPassword.value;
-			var password = form.elements.inputPassword.value;
-			var confirmPassword = form.elements.confirmPassword.value;
+			var oldUsername = form.elements.oldUsername.value;
+			var username = form.elements.inputUsername.value;
+			var confirmUsername = form.elements.confirmUsername.value;
 			
 			var error = {};
-			if ( oldPassword == "" ) { error["oldpassword"] = formatMessage([myLangTexts["form"]["old"],myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); }
-			if ( password == "" ) { error["password"] = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); }
+			if ( oldUsername == "" ) { error["oldusername"] = formatMessage([myLangTexts["form"]["old"],myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]); }
+			if ( username == "" ) { error["username"] = "username is required"; }
 			else {
-				if ( password != confirmPassword ) { error["password"] = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["notmatch"]]); }
+				if ( username != confirmUsername ) { error["username"] = formatMessage([myLangTexts["form"]["old"],"-",[myLangTexts["form"]["new"],myLangTexts["customer"]["username"],myLangTexts["errors"]["notmatch"]]]); }
 				else {
-					if ( oldPassword == password ) { error["password"] = formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["password"],myLangTexts["errors"]["sameprevious"]]); }
+					if ( oldUsername == username ) { error["username"] = formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["username"],myLangTexts["errors"]["sameprevious"]]); }
 					else {
-						if ( ! passwordFormat.test(password) ) error["password"] = myLangTexts["errors"]["passwordformat"];
+						if ( ! usernameFormat.test(username) ) error["username"] = myLangTexts["errors"]["usrnameformat"];
 					}
 				}
 			}
@@ -84,9 +85,9 @@
 			} else {
 				var values = {};
 				values["id"] = customerId;
-				values["field"] = "password";
-				values["oldvalue"] = oldPassword;
-				values["newvalue"] = password;
+				values["field"] = "username";
+				values["oldvalue"] = oldUsername;
+				values["newvalue"] = username;
 				update(values);
 			}
 		}
@@ -109,12 +110,11 @@
 					if (xhr.status == 200) {
 						console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
-					
+						
 						var gotoParams = {};
 						gotoParams["sessionid"] = sessionid;
 						gotoParams["action"] = response["action"];
 						gotoParams["lang"] = lang;
-						gotoParams["updatefield"] = field;
 						/*for (var field in response) {
 							if ( field != "status" ) gotoParams[field] = response[field];
 						}*/
@@ -128,13 +128,12 @@
 						gotoParams["status"] = response["status"];
 						gotoParams["errormessage"] = response["errormessage"];
 						gotoParams["lang"] = lang;
-						goTo(pages.settingsPages.password,gotoParams);
+						goTo(pages.settingsPages.username,gotoParams);
 					}
 				}
 			}
 		}
 	</script>
-	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 
 <body>
@@ -155,19 +154,19 @@
 	<div class="container">
 	
 		<form class="form-signin">
-		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
+		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
 	
-		<input type="password" id="oldPassword" class="form-control" placeholder="Old password" required autofocus>
-		<label for="oldPassword" class="sr-only"><script>javascript:displayForm("oldPassword",formatMessage([myLangTexts["form"]["old"],myLangTexts["customer"]["password"]]))</script></label>
+		<input type="text" id="oldUsername" class="form-control" placeholder="Username" required autofocus>
+		<label for="oldUsername" class="sr-only"><script>javascript:displayMenu("oldUsername",formatMessage([myLangTexts["form"]["old"],myLangTexts["customer"]["username"]]))</script></label>
 	
-		<input type="password" id="inputPassword" class="form-control" placeholder="New password" required autofocus>
-		<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["password"]]))</script></label>
+		<input type="text" id="inputUsername" class="form-control" placeholder="New Username" required autofocus>
+		<label for="inputUsername" class="sr-only"><script>javascript:displayMenu("inputUsername",formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["username"]]))</script></label>
 	
-		<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password" required autofocus>
-		<label for="confirmPassword" class="sr-only"><script>javascript:displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
+		<input type="text" id="confirmUsername" class="form-control" placeholder="Confirm new Username" required autofocus>
+		<label for="confirmUsername" class="sr-only"><script>javascript:displayMenu("confirmUsername",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["username"]]))</script></label>
 	
-		<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()"><script>javascript:displayForm("submitButton",myLangTexts["form"]["submit"])</script></button>
-		</form>
+		<button class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()">SUBMIT</button>
+	</form>
 	
 	</div>
 	<!--
@@ -181,10 +180,10 @@
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js" />')</script></script>
+	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>></script>
-	
+	<script src="/static/js/ie10-viewport-bug-workaround.js"></script></script>
+
 </body>
 </html>

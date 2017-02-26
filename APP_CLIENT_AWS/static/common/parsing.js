@@ -8,12 +8,14 @@ var venya_server_port = 8888;
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
 var usernameFormat = new RegExp("^\\w{8,}$","g");
 var passwordFormat = new RegExp("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$","g");
-var phoneFormat = new RegExp("^(\\+|00)?[0-9]+$","g");
+var phoneFormat = new RegExp("^(\\+|00)?[0-9]{4,}$","g");
 var objectidFormat = new RegExp("^[0-9a-fA-F]{24}$");
 var postcodeFormat = new RegExp("^\\w+([\\s-]*\\w*)?$");
 //var postcodeFormat = new RegExp("^[0-9]+$");
 
 var pages = {
+	"choosesite_esp" : "choose_site_esp.html",
+	"choosesite_eng" : "choose_site_eng.html",
 	"signin": "signin.html",
 	"home": "home.html",
 	"register": "register.html",
@@ -29,8 +31,11 @@ var pages = {
 		"address": "changeAddress.html",
 		"times": "changeTimes.html"
 	},
+	"lostusername" : "lostUsername.html",
+	"lostpassword" : "lostPassword.html",
 	"webcreatecustomer" : "web_create_customer.html",
-	"webnewappointment" : "web_new_appointment.html"
+	"webnewappointment" : "web_new_appointment.html",
+	"showlostinfo" : "show_lost_info.html"
 }
 
 var booleanField = {0: 0, "0": "0", 1: 1, "1": "1"};
@@ -206,5 +211,57 @@ function formatMessage(messages) {
 	for ( msg in messages ) {
 		formatedMsg += messages[msg] + " ";
 	}
-	return formatedMsg.replace(/ $/,"");
+	return formatedMsg = formatedMsg[0].toUpperCase() + formatedMsg.substring(1).replace(/ $/,"");
+}
+
+function setFormErrorHeader(params,langTexts) {
+	var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid", "lang": "lang" };
+
+	if (params["status"] == "ERROR") {
+		if (params["errormessage"] == "input") {
+			setHeader("h2",formatMessage([langTexts["errors"]["badfields"]]));
+			for (var field in params) {
+				if ( field != "status" && !(field in notErrorFields)) {
+					var headText = formatMessage([langTexts["customer"][field],":",params[field]]);
+					setHeader("h5",headText);
+				}
+			}
+		} else {
+			setHeader("h4",unescape(params["errormessage"]));
+		}
+	}
+}
+
+function getCredentialsProcessRequest(url,credential,lang) {
+	var email;
+	var message;
+	var myCredential;
+	var respStatus;
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET',url,true);
+	//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				console.log(xhr.responseText);
+				var response = JSON.parse(xhr.responseText);
+				myCredential = response[credential];
+				console.log("response[" + credential + "] = " + myCredential);
+				message = response["errormessage"];
+				email = response["email"];
+				respStatus = "SUCCESS";
+			} else {
+				var response = JSON.parse(xhr.responseText);
+				myCredential = response[credential];
+				message = response["errormessage"];
+				email = response["email"];
+				respStatus = response["status"];
+			}
+			goTo(pages.showlostinfo,{ 'lang': lang, 'status': respStatus, 'info': credential, 'credential': myCredential, 'email': email, 'message': message});
+		}
+	}
 }
