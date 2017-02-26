@@ -109,7 +109,8 @@ var languages_text = {
 			"updatedatacheckfail" : "Warning: failed to check info after update. Verify your data or contact your provider",
 			"infonotmatch" : "the info entered does not match",
 			"alreadyregistered" : "user already registered",
-			"sessionopened" : "this user is already connected"
+			"sessionopened" : "this user is already connected",
+			"invalidsessionid" : "your session is expired"
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -226,7 +227,8 @@ var languages_text = {
 			"updatedatacheckfail" : "aviso: no ha sido posible verificar después de los cambios. Comprueba tus datos",
 			"infonotmatch" : "los datos introducidos no corresponden",
 			"alreadyregistered" : "el usuario ya existe",
-			"sessionopened" : "este usuario ya está conectado"
+			"sessionopened" : "este usuario ya está conectado",
+			"invalidsessionid" : "tu sesión ha cadudcado"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",

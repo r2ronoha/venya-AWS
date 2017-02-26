@@ -40,7 +40,9 @@
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			console.log("[changeAddress.init] sessionid = " + sessionid + " : customerId = " + customerId);
 			changeField = urlParams["field"];
-			if (urlParams["status"] == "ERROR") {
+
+			verifySessionId(sessionid, setFormErrorHeader(urlParams,myLangTexts));
+			/*if (urlParams["status"] == "ERROR") {
 				if (urlParams["errormessage"] == "input") {
 					var headerText = myLangTexts["errors"]["badfields"];
 					headerText = headerText[0].toUpperCase() + headerText.substring(1);
@@ -54,7 +56,7 @@
 				} else {
 					setHeader("h4",unescape(urlParams["errormessage"]));
 				}
-			}
+			}*/
 		}
 	
 	function readForm() {

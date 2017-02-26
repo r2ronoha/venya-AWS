@@ -45,16 +45,17 @@
 		
 		function init() {
 			parseUrl();
-			if (urlParams["status"] == "ERROR") {
+			
+			/* if (urlParams["status"] == "ERROR") {
 				setHeader("h2",formatMessage([urlParams["errormessage"]]));
-			}
+			}*/
 			if (urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"] > -1 )) {
 				lang = urlParams["lang"];
 			}
 			console.log("[signin.init] urlParame[\"lang\"] = " + urlParams["lang"] + " -- lang = " + lang);
 			myLangTexts = languages_text[lang];
-			serverip = urlParams["serverip"];
-			serverport = urlParams["serverport"];
+
+			setFormErrorHeader(urlParams,myLangTexts);
 		}
 
 		function setSessionId(values,urlParams) {
@@ -109,10 +110,12 @@
 			var defaultUsername = "changeme";
 
 			if ( username == defaultUsername ) {
-				var loginstatus = "error";
-				var errormessage = myLangTexts["errors"]["notregistered"];
-				var errorUrl = "./signin.html?lang=" + lang + "&status=" + loginstatus + "&errormessage=" + errormessage;
-				location.href=errorUrl;
+				var params = {};
+				params["lang"] = lang;
+				params["status"] = "ERROR";
+				params["errormessage"] = "notregistered";
+				goTo(pages.signin,params);
+
 				return;
 			}
 			
@@ -147,7 +150,7 @@
 							var gotoParams = {};
 							gotoParams["lang"] = lang;
 							gotoParams["status"] = "ERROR";
-							gotoParams["errormessage"] = escape(myLangTexts["errors"]["sessionopened"]);
+							gotoParams["errormessage"] = "sessionopened";
 							goTo(pages.signin,gotoParams);
 							//goTo(pages.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
 						} else {
@@ -175,7 +178,7 @@
 						var gotoParams = {};
 						gotoParams["lang"] = lang;
 						gotoParams["status"] = response["status"];
-						gotoParams["errormessage"] = escape(myLangTexts["errors"][response["errormessage"]]);
+						gotoParams["errormessage"] = response["errormessage"];
 						goTo(pages.signin,gotoParams);
 					}
 				}

@@ -1,8 +1,6 @@
 var urlParams = {};
 var customerDetails = {};
 var customerId;
-var idLength = 24;
-var sessionidLength = idLength + 2;
 var venya_node_server = document.location.hostname;
 var venya_node_port = 8888;
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
@@ -150,12 +148,8 @@ function getCustomerDetails(action,id,callback) {
 				callback();
 			} else {
 				var response = JSON.parse(xhr.responseText);
-				var params = {};
-				params["status"] = response["status"];
-				params["errormessage"] = response["errormessage"];
-				goTo(pages.signin,params);
-				//var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
-				//location.href=errorUrl;
+				var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+				location.href=errorUrl;
 			}
 		}
 	}
@@ -180,18 +174,14 @@ function getCustomerFullDetails(action,id,callback) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
 						customerDetails[field] = response[field];
-						//console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
+						console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
 					}
 				}
 				callback();
 			} else {
 				var response = JSON.parse(xhr.responseText);
-				var params = {};
-				params["status"] = response["status"];
-				params["errormessage"] = response["errormessage"];
-				goTo(pages.signin,params);
-				//var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
-				//location.href=errorUrl;
+				var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+				location.href=errorUrl;
 			}
 		}
 	}
@@ -238,7 +228,7 @@ function setFormErrorHeader(params,langTexts) {
 				}
 			}
 		} else {
-			setHeader("h3",formatMessage([langTexts["errors"][params["errormessage"]]]));
+			setHeader("h4",unescape(params["errormessage"]));
 		}
 	}
 }
@@ -274,33 +264,5 @@ function getCredentialsProcessRequest(url,credential,lang) {
 			}
 			goTo(pages.showlostinfo,{ 'lang': lang, 'status': respStatus, 'info': credential, 'credential': myCredential, 'email': email, 'message': message});
 		}
-	}
-}
-
-function verifySessionId(sessionid,callback) {
-	console.log("[parsing.verifySessionID] checking sessionid");
-	if ( sessionid.length != sessionidLength ) {
-		console.log("[parsing.verifySessionID] session id FAILED. Wrong length." );
-		var urlParams = {};
-		urlParams["lang"] = default_lang;
-		urlParams["status"] = "ERROR";
-		urlParams["errormessage"] = "invalidsessionid";
-		goTo(pages.signin,urlParams);
-	} else {
-		var customerid = sessionid.substring(0,sessionid.length - 2);
-		getCustomerDetails("checksessionid",customerid,function() {
-			var currentSessionid = customerDetails["sessionid"];
-			if ( sessionid != currentSessionid ) {
-				console.log("[parsing.verifySessionID] session id FAILED");
-				var urlParams = {};
-				urlParams["lang"] = customerDetails["language"];
-				urlParams["status"] = "ERROR";
-				urlParams["errormessage"] = "invalidsessionid";
-				goTo(pages.signin,urlParams);
-			} else {
-				console.log("[parsing.verifySessionID] session id verified. Callback");
-				callback();
-			}
-		});
 	}
 }

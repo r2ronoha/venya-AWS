@@ -38,7 +38,7 @@
 		customerId = sessionid.substring(0,sessionid.length - 2);
 
 		changeField = urlParams["field"];
-		setFormErrorHeader(urlParams,myLangTexts);
+		verifySessionId(sessionid, setFormErrorHeader(urlParams,myLangTexts));
 	}
 	
 	function readForm() {
@@ -142,13 +142,13 @@
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
 		
 		<input type="email" id="oldEmail" class="form-control" placeholder="Old Email" required autofocus>
-		<label for="oldEmail" class="sr-only"><script>javascript:displayForm(oldEmail,myLangTexts["form"]["oldemail"])</script></label>
+		<label for="oldEmail" class="sr-only"><script>javascript:displayForm("oldEmail",myLangTexts["form"]["oldemail"])</script></label>
 		
 		<input type="email" id="inputEmail" class="form-control" placeholder="New Email" required autofocus>
-		<label for="inputEmail" class="sr-only"><script>javascript:displayForm(inputEmail,myLangTexts["form"]["newemail"])</script></label>
+		<label for="inputEmail" class="sr-only"><script>javascript:displayForm("inputEmail",myLangTexts["form"]["newemail"])</script></label>
 		
 		<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm email" required autofocus>
-		<label for="confirmEmail" class="sr-only"><script>javascript:displayForm(confirmEmail,formatMessage([myLangTexts["form"]["confirm"],myLangTexts["form"]["newemail"]]))</script></label>
+		<label for="confirmEmail" class="sr-only"><script>javascript:displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["form"]["newemail"]]))</script></label>
 	
 		<button id="formButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()"><script>javascript:displayMenu("formButton",myLangTexts["form"]["submit"].toUpperCase())</script></button>
 	</form>

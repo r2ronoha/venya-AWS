@@ -30,7 +30,7 @@
 			myLangTexts = languages_text[lang];
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
-			setHeader("h2",myLangTexts["form"]["page"],myLangTexts["underconstruction"]);
+			verifySessionId(sessionid,setHeader("h2",formatMessage([myLangTexts["form"]["page"],myLangTexts["underconstruction"]])));
 			/*getCustomerDetails( "home", urlParams["id"], function () {
 				customerId = customerDetails["id"];
 				

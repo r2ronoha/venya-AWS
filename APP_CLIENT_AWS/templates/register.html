@@ -172,8 +172,10 @@
 			<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
 			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
 			
-			<div class="checkbox">
-				<label><input id="remember" type="checkbox" value="remember-me"> <script>javascript:displayForm("remember",formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
+			<div id="remember" class="checkbox">
+				<input type="checkbox" value="remember-me"><label> <script>javascript:document.getElementById("remember").append(formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
+				<!-- <label><input type="checkbox" value="remember-me"> <script>javascript:document.getElementById("remember").append(formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
+				-->
 			</div>
 			<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="register()"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
 		</form>

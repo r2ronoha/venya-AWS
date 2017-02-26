@@ -28,20 +28,30 @@
 			sessionid = urlParams["sessionid"];
 			lang = urlParams["lang"].toLowerCase();
 			myLangTexts = languages_text[lang];
-			//customerId = sessionid.replace(/..$/,'');
-			customerId = sessionid.substring(0,sessionid.length - 2);
-			//console.log("[home.init] sessionid = " + sessionid + "customerid = " + customerId);
-			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
-			getCustomerDetails( "home", customerId, function () {
-				customerId = customerDetails["id"];
-				myLangTexts;
-				var action = urlParams["action"];
-				var headerText = formatMessage([myLangTexts["action"][action]]);
-				if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
-				headerText = formatMessage([headerText,unescape(customerDetails["surname"].toUpperCase()),",",unescape(customerDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
-				setHeader("h2",headerText);
-				setHeader("h4",myLangTexts["home"]["yourdata"]);
-				createDataTable(customerDetails, lang, action);
+			
+			verifySessionId(sessionid, function() {
+				customerId = sessionid.substring(0,sessionid.length - 2);
+				//console.log("[home.init] sessionid = " + sessionid + "customerid = " + customerId);
+				//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
+				getCustomerDetails( "home", customerId, function () {
+					/*if ( customerDetails["sessionid"] != sessionid ) {
+						var params = {};
+						params["lang"] = customerDetails["language"];
+						params["status"] = "ERROR";
+						params["errormessage"] = "invalidsessionid";
+						goTo(pages.signin,params);
+					} else {*/
+						customerId = customerDetails["id"];
+						myLangTexts;
+						var action = urlParams["action"];
+						var headerText = formatMessage([myLangTexts["action"][action]]);
+						if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
+						headerText = formatMessage([headerText,unescape(customerDetails["surname"].toUpperCase()),",",unescape(customerDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
+						setHeader("h2",headerText);
+						setHeader("h4",myLangTexts["home"]["yourdata"]);
+						createDataTable(customerDetails, lang, action);
+					//}
+				});
 			});
 		}
 	</script>

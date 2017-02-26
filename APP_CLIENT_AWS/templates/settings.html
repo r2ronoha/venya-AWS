@@ -31,25 +31,31 @@
 		var action = urlParams["action"];
 		lang = urlParams["lang"];
 		myLangTexts = languages_text[lang];
+
+		setFormErrorHeader(urlParams,myLangTexts);
+
 		sessionid = urlParams["sessionid"];
-		customerId = sessionid.substring(0,sessionid.length - 2);
-		getCustomerFullDetails( action, customerId, function () {
-			customerId = customerDetails["_id"];
-			//updated to make it work on AWS task
-			//customerId = customerDetails["id"];
-			//console.log("[settings.init.getFullDetails] customerId = " + customerId);
-		
-			if ( action == "update" ) {
-				var updateField = myLangTexts["customer"][urlParams["updatefield"]];
-				var headText = formatMessage([updateField,myLangTexts["settings"]["updatesuccess"]]);
-				setHeader("h2",headText);
-			}
-			var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + customerDetails["surname"].value.toUpperCase() + ", " + customerDetails["firstname"].value.toUpperCase();
-			//updated to make it work on AWS task
-			//var headerText = "SETTINGS for " + customerDetails["surname"].toUpperCase() + ", " + customerDetails["firstname"].toUpperCase();
-			setHeader("h2",headerText);
-			setHeader("h4",myLangTexts["settings"]["yoursettings"][0].toUpperCase() + myLangTexts["settings"]["yoursettings"].substring(1) + ":");
-			settings(displaySettings);
+		verifySessionId(sessionid, function() {
+			console.log("[settings.init] session successfully verified. Getting customer details");
+			customerId = sessionid.substring(0,sessionid.length - 2);
+			getCustomerFullDetails( action, customerId, function () {
+				customerId = customerDetails["_id"];
+				//updated to make it work on AWS task
+				//customerId = customerDetails["id"];
+				//console.log("[settings.init.getFullDetails] customerId = " + customerId);
+			
+				if ( action == "update" ) {
+					var updateField = myLangTexts["customer"][urlParams["updatefield"]];
+					var headText = formatMessage([updateField,myLangTexts["settings"]["updatesuccess"]]);
+					setHeader("h2",headText);
+				}
+				var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + customerDetails["surname"].value.toUpperCase() + ", " + customerDetails["firstname"].value.toUpperCase();
+				//updated to make it work on AWS task
+				//var headerText = "SETTINGS for " + customerDetails["surname"].toUpperCase() + ", " + customerDetails["firstname"].toUpperCase();
+				setHeader("h2",headerText);
+				setHeader("h4",myLangTexts["settings"]["yoursettings"][0].toUpperCase() + myLangTexts["settings"]["yoursettings"].substring(1) + ":");
+				settings(displaySettings);
+			});
 		});
 	}
 	
@@ -72,20 +78,29 @@
 				if (xhr.status == 200) {
 					console.log(xhr.responseText);
 					var response = JSON.parse(xhr.responseText);
-					var successUrl = "./settings.html?updatefield=" + response["updatefield"];
+					//var successUrl = "./settings.html?updatefield=" + response["updatefield"];
 					console.log(response);
-					
-					successUrl += "&sessionid=" + sessionid;
+					//successUrl += "&sessionid=" + sessionid;
 					if ( languages.indexOf(newvalue) > -1 ) {
 						lang = newvalue;
 					}
-					successUrl += "&lang=" + lang;
+					//successUrl += "&lang=" + lang;
+					//location.href=successUrl;
 
-					location.href=successUrl;
+					var urlParams = {};
+					urlParams["updatefield"] = response["updatefield"];
+					urlParams["sessionid"] = sessionid;
+					urlParams["lang"] = lang;
+					goTo(pages.settings,urlParams);
 				} else {
 					var response = JSON.parse(xhr.responseText);
-					var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
-					location.href=errorUrl;
+					var urlParams = {};
+					urlParams["sessionid"] = sessionid;
+					urlParams["status"] = response["status"];
+					urlParams["errormessage"] = response["errormessage"];
+					goTo(pages.settings,urlParams);
+					//var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+					//location.href=errorUrl;
 				}
 			}
 		}
@@ -232,15 +247,8 @@
 	}
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
-	<!-- <script>
-	function displayMenu(targetId,text) {
-		document.getElementById(targetId).innerHTML = text;
-	}
-	</script> --> 
 </head>
 
-<header>
-</header>
 <body>
 	<script>init();</script>
 

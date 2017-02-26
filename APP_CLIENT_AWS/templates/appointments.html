@@ -30,20 +30,23 @@
 			lang = urlParams["lang"];
 			var action = urlParams["action"];
 			myLangTexts = languages_text[lang];
-			customerId = sessionid.substring(0,sessionid.length - 2);
-			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
-			setHeader("h2",formatMessage([myLangTexts["action"][action],myLangTexts["form"]["page"],myLangTexts["underconstruction"]]));
-			/*getCustomerDetails( "home", urlParams["id"], function () {
-				customerId = customerDetails["id"];
-				
-				var action = urlParams["action"];
-				var headerText = "HOME ";
-				if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
-				headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
-				setHeader("h2",headerText);
-				setHeader("h4","This is your data");
-				createDataTable();
-			});*/
+
+			verifySessionId(sessionid, function() {
+				customerId = sessionid.substring(0,sessionid.length - 2);
+				//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
+				setHeader("h2",formatMessage([myLangTexts["action"][action],myLangTexts["form"]["page"],myLangTexts["underconstruction"]]));
+				/*getCustomerDetails( "home", urlParams["id"], function () {
+					customerId = customerDetails["id"];
+					
+					var action = urlParams["action"];
+					var headerText = "HOME ";
+					if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
+					headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
+					setHeader("h2",headerText);
+					setHeader("h4","This is your data");
+					createDataTable();
+				});*/
+			});
 		}
 	</script>
 </head>
