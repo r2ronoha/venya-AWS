@@ -14,16 +14,17 @@ var customerAttributes = {
 		"username": { "fix": 0, "value": "changeme" },
 		"password": { "fix": 0, "value": "changeme" },
 		"address": { "fix": 0, "value": { 
-										"street": "N/A",
-										"postcode": "N/A",
-										"city": "N/A",
-										"country": "N/A" 
-										} },
+			"street": "N/A",
+			"postcode": "N/A",
+			"city": "N/A",
+			"country": "N/A" 
+		} },
 		"phone": { "fix": 1, "value": "N/A" },
 		"times": { "fix": 0, "value": "N/A" },
 		"language": { "fix": 0, "value": "ENG" },
 		"notifications": { "fix": 0, "value": 1 },
-		"location": { "fix": 0, "value": 1 }
+		"location": { "fix": 0, "value": 1 },
+		"sessionid" : { "fix": 1, "value": "closed" }
 };
 
 function getAttFix(callback) {
@@ -55,7 +56,7 @@ function doInsert (cnx, db, query, callback) {
 	
 	doGet(cnx, db, checkQuery, function(attList) {
 		if (attList != null) {
-			var message = "user already registered";
+			var message = "alreadyregistered";
 			exists = 1;
 			callback(query,exists,message);
 		} else {
@@ -99,6 +100,7 @@ function doGet (cnx, db, query, callback) {
 				if (field == "_id"){
 					attList["id"] = document[field];
 				} else {
+					//console.log("[customer.doGet] adding " + field + " = " + document[field].value + " to attList");
 					attList[field] = document[field].value;
 				}
 			}

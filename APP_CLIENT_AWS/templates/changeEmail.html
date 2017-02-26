@@ -25,8 +25,6 @@
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 	var changeField;
-	var venya_node_server = document.location.hostname;
-	var venya_node_port = 8888;
 	var sessionid;
 	var myLangTexts;
 	var lang;
@@ -40,19 +38,7 @@
 		customerId = sessionid.substring(0,sessionid.length - 2);
 
 		changeField = urlParams["field"];
-		if (urlParams["status"] == "ERROR") {
-			if (urlParams["errormessage"] == "input") {
-				setHeader("h2",formatMessage([myLangTexts["errors"]["badfields"]]));
-				for (var field in urlParams) {
-					if ( !(field in notErrorFields) ) {
-						setHeader("h5",formatMessage([myLangTexts["customer"][field],":",urlParams[field]]));
-						//setHeader("h5",field + ": " + urlParams[field]);
-					}
-				}
-			} else {
-				setHeader("h4",unescape(urlParams["errormessage"]));
-			}
-		}
+		setFormErrorHeader(urlParams,myLangTexts);
 	}
 	
 	function readForm() {
@@ -112,7 +98,7 @@
 					gotoParams["sessionid"] = sessionid;
 					gotoParams["action"] = response["action"];
 					gotoParams["lang"] = lang;
-					gotoParams["updatefield"] = field;
+					gotoParams["updatefield"] = changeField;
 					/*for (var field in response) {
 						if ( field != "status" ) gotoParams[field] = response[field];
 					}*/
@@ -146,7 +132,7 @@
                 <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
                 <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
                 <li role="separator" class="divider"></li>
-                <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+                <li><a id="menuLogout" href="javascript:goTo(pages.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
 	

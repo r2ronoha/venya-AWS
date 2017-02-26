@@ -1,8 +1,8 @@
 var urlParams = {};
 var customerDetails = {};
 var customerId;
-var venya_server_ip;
-var venya_server_port = 8888;
+var venya_node_server = document.location.hostname;
+var venya_node_port = 8888;
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -35,7 +35,8 @@ var pages = {
 	"lostpassword" : "lostPassword.html",
 	"webcreatecustomer" : "web_create_customer.html",
 	"webnewappointment" : "web_new_appointment.html",
-	"showlostinfo" : "show_lost_info.html"
+	"showlostinfo" : "show_lost_info.html",
+	"logout" : "logout.html"
 }
 
 var booleanField = {0: 0, "0": "0", 1: 1, "1": "1"};
@@ -45,7 +46,7 @@ var languages = ["eng","esp"];
 var default_lang = "eng";
 
 function parseUrl(callback){
-	venya_server_ip = document.location.hostname; 
+	venya_node_server = document.location.hostname; 
 	//console.log("document.location.hostname = " + document.location.hostname);
 	var params = document.location.search.replace(/^\?/,'').split('&');
 	for (var i=0; i < params.length; i++) {
@@ -57,7 +58,7 @@ function parseUrl(callback){
 	if ( callback ) {
 		callback();
 	}
-	//return venya_server_ip;
+	//return venya_node_server;
 }
 
 function setHeader(headType,message){
@@ -125,8 +126,8 @@ function createDataTable(tableData, lang, action){
 }
 
 function getCustomerDetails(action,id,callback) {
-	venya_server_ip = document.location.hostname;
-	var myUrl = "http://" + venya_server_ip + ":" + venya_server_port + "/getCustomer?action=" + action + "&id=" + id;
+	venya_node_server = document.location.hostname;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=" + action + "&id=" + id;
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -155,8 +156,8 @@ function getCustomerDetails(action,id,callback) {
 }
 
 function getCustomerFullDetails(action,id,callback) {
-	venya_server_ip = document.location.hostname;
-	var myUrl = "http://" + venya_server_ip + ":" + venya_server_port + "/getFullCustomerData?action=" + action + "&id=" + id;
+	venya_node_server = document.location.hostname;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&id=" + id;
 	console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);

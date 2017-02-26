@@ -26,8 +26,6 @@
 	
 	<!-- <script src="C:UsersarturoDocumentsR2ROVenYaNode_jsmongodb-testspecialist.js"></script> -->
 	<script type="text/javascript">
-	var venya_node_server = document.location.hostname;
-	var venya_node_port = 8888;
 	var lang = default_lang;
 	var myLangTexts;
 
@@ -96,7 +94,8 @@
 						location.href=successUrl.replace(/&$/,'');
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = location.href.split('?')[0] + "?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+						//console.log("error received from server: " + response["errormessage"] + " ==> " + myLangTexts["errors"][response["errormessage"]]);
+						var errorUrl = location.href.split('?')[0] + "?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"][response["errormessage"]]);
 						location.href=errorUrl; 
 					}
 				}

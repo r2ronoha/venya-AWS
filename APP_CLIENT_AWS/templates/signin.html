@@ -42,13 +42,11 @@
 		var sessionid;
 		var lang = default_lang;
 		var myLangTexts;
-		var venya_node_server = document.location.hostname;
-		var venya_node_port = 8888;
 		
 		function init() {
 			parseUrl();
 			if (urlParams["status"] == "ERROR") {
-				setHeader("h2",urlParams["errormessage"]);
+				setHeader("h2",formatMessage([urlParams["errormessage"]]));
 			}
 			if (urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"] > -1 )) {
 				lang = urlParams["lang"];
@@ -58,6 +56,51 @@
 			serverip = urlParams["serverip"];
 			serverport = urlParams["serverport"];
 		}
+
+		function setSessionId(values,urlParams) {
+		//function update(values) {
+			var id = values["id"];
+			var field = values["field"];
+			var oldvalue = values["oldvalue"];
+			var newvalue = values["newvalue"];
+	
+			var xhr = new XMLHttpRequest();
+			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+			if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
+			xhr.open('GET',myUrl,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+	
+			function processRequest(e) {
+				if (xhr.readyState == 4) {
+					if (xhr.status == 200) {
+						//console.log(xhr.responseText);
+						//var response = JSON.parse(xhr.responseText);
+	
+						//var gotoParams = {};
+						//gotoParams["sessionid"] = sessionid;
+						//gotoParams["action"] = response["action"];
+						//gotoParams["lang"] = lang;
+						//gotoParams["updatefield"] = changeField;
+						/*for (var field in response) {
+							if ( field != "status" ) gotoParams[field] = response[field];
+						}*/
+						goTo(pages.home,urlParams);
+					} else {
+						var response = JSON.parse(xhr.responseText);
+						var gotoParams = {};
+						gotoParams["action"] = urlParams["action"];
+						//gotoParams["sessionid"] = sessionid;
+						//gotoParams["setting"] = field;
+						gotoParams["status"] = response["status"];
+						gotoParams["errormessage"] = response["errormessage"];
+						gotoParams["lang"] = lang;
+						goTo(pages.signin,gotoParams);
+					}
+				}
+			}
+		}
+
 		function signin_check(){
 			var form = document.querySelector("form");
 			var username = form.elements.inputUsername.value;
@@ -87,7 +130,7 @@
 					if (xhr.status == 200) {
 						console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
-						var successUrl = "./home.html?";
+						//var successUrl = "./home.html?";
 						console.log(response);
 						/*for (var field in response) {
 							if ( field != "status" ) {
@@ -97,17 +140,43 @@
 								successUrl += field.replace(/_/,'') + "=" + value + "&";
 							}
 						}*/
-						sessionID = randomSessionID(response["id"],1,99);
-						lang = response["language"];
-						console.log("[signin.html] sessionID = " + sessionID);
-						successUrl += "action=" + response["action"];
-						successUrl += "&sessionid=" + sessionID;
-						successUrl += "&lang=" + lang;
-						location.href=successUrl.replace(/&$/,'');
+
+						if ( response["sessionid"] != "closed" ) {
+							//var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"]["sessionopened"]);
+							//location.href=errorUrl;
+							var gotoParams = {};
+							gotoParams["lang"] = lang;
+							gotoParams["status"] = "ERROR";
+							gotoParams["errormessage"] = escape(myLangTexts["errors"]["sessionopened"]);
+							goTo(pages.signin,gotoParams);
+							//goTo(pages.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
+						} else {
+	
+							customerId = response["id"];
+							sessionID = randomSessionID(customerId,1,99);
+							lang = response["language"];
+
+							var gotoParams = {};
+							gotoParams["lang"] = lang;
+							gotoParams["action"] = response["action"];
+							gotoParams["sessionid"] = sessionID;
+							
+							var updateValues = {};
+							updateValues["id"] = customerId;
+							updateValues["field"] = "sessionid";
+							updateValues["newvalue"] = sessionID;
+							setSessionId(updateValues,gotoParams);
+							//goTo(pages.home,gotoParams);
+						}
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"][response["errormessage"]]);
-						location.href=errorUrl;
+						//var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"][response["errormessage"]]);
+						//location.href=errorUrl;
+						var gotoParams = {};
+						gotoParams["lang"] = lang;
+						gotoParams["status"] = response["status"];
+						gotoParams["errormessage"] = escape(myLangTexts["errors"][response["errormessage"]]);
+						goTo(pages.signin,gotoParams);
 					}
 				}
 			}

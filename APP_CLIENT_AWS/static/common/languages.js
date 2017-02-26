@@ -17,7 +17,9 @@ var languages_text = {
                         "home" : "home",
                         "settings" : "settings for",
 			"appointments" : "appointments",
-			"notifications" : "notifications"
+			"notifications" : "notifications",
+			"registration" : "successfully registered",
+			"logout" : "logout"
                 },
                 "username" : "username",
                 "password" : "password",
@@ -102,9 +104,12 @@ var languages_text = {
 			"idnamenotmatch" : "UserID and Surname do not match",
 			"usernameexists" : "username already in use",
 			"emailregistered" : "email already registered",
-			"regdatacheckfail" : "Registration failure: failed to checke info after registration",
-			"updatedatacheckfail" : "Update failure: failed to check info after update",
-			"infonotmatch" : "the info entered does not match"
+			"createcheckfail" : "warning: failed to check info after registration. You'll need to check your records",
+			"regdatacheckfail" : "warning: failed to check info after registration. Verify with your provider",
+			"updatedatacheckfail" : "Warning: failed to check info after update. Verify your data or contact your provider",
+			"infonotmatch" : "the info entered does not match",
+			"alreadyregistered" : "user already registered",
+			"sessionopened" : "this user is already connected"
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -129,7 +134,9 @@ var languages_text = {
                         "home" : "hola",
                         "settings" : "ajustes de ",
 			"appointments" : "citas",
-			"notifications" : "notificaciones"
+			"notifications" : "notificaciones",
+			"registration" : "Ya estás inscrito.",
+			"logout" : "desconexión"
                 },
                 "username" : "nombre de usuario",
                 "password" : "contraseña",
@@ -214,9 +221,12 @@ var languages_text = {
 			"idnamenotmatch" : "el identificador y el apellido no corresponden",
 			"usernameexists" : "el nombre de usuario ya existe",
 			"emailregistered" : "el email ya esta inscrito",
-			"regdatacheckfail" : "error de inscripción: no ha sido posible verificar los datos después de la inscripción",
-			"updatedatacheckfail" : "error: no ha sido posible verificar los datos después de los cambios",
-			"infonotmatch" : "los datos introducidos no corresponden"
+			"createcheckfail" : "aviso: no ha sido posible verificar los datos después de la creación. Revise su registro",
+			"regdatacheckfail" : "Aviso: no ha sido posible verificar los datos después de la inscripción. Intente conectarse o contacte a su proveedor.",
+			"updatedatacheckfail" : "aviso: no ha sido posible verificar después de los cambios. Comprueba tus datos",
+			"infonotmatch" : "los datos introducidos no corresponden",
+			"alreadyregistered" : "el usuario ya existe",
+			"sessionopened" : "este usuario ya está conectado"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",

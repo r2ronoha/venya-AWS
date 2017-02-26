@@ -39,11 +39,12 @@
 			customerId = customerDetails["_id"];
 			//updated to make it work on AWS task
 			//customerId = customerDetails["id"];
-			console.log("[settings.init.getFullDetails] customerId = " + customerId);
+			//console.log("[settings.init.getFullDetails] customerId = " + customerId);
 		
 			if ( action == "update" ) {
-				var updateField = urlParams["updatefield"];
-				setHeader("h2",updateField + " successfully updated");
+				var updateField = myLangTexts["customer"][urlParams["updatefield"]];
+				var headText = formatMessage([updateField,myLangTexts["settings"]["updatesuccess"]]);
+				setHeader("h2",headText);
 			}
 			var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + customerDetails["surname"].value.toUpperCase() + ", " + customerDetails["firstname"].value.toUpperCase();
 			//updated to make it work on AWS task
@@ -82,15 +83,7 @@
 					}
 					successUrl += "&lang=" + lang;
 
-					/*for (var field in response) {
-						if ( field != "status" ) {
-							var value = response[field];
-							if ( value == undefined ) value = "N/A";
-							successUrl += "&" + field.replace(/_/,'') + "=" + value;
-						}
-					}*/
 					location.href=successUrl;
-					//location.href=successUrl.replace(/&$/,'');
 				} else {
 					var response = JSON.parse(xhr.responseText);
 					var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
@@ -271,7 +264,7 @@
 	<!-- Bootstrap core JavaScript -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"></script></script>
+	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js" />')</script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>

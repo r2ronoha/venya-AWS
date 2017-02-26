@@ -27,8 +27,6 @@
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
 	<script type="text/javascript">
 		var changeField;
-		var venya_node_server = document.location.hostname;
-		var venya_node_port = 8888;
 		var sessionid;
 		var myLangTexts;
 		var lang;
@@ -153,7 +151,7 @@
                 <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
                 <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayForm("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
                 <li role="separator" class="divider"></li>
-                <li><a id="menuLogout" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayForm("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+                <li><a id="menuLogout" href="javascript:goTo(pages.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayForm("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
 

@@ -29,8 +29,6 @@
 	var sessionid;
 	var lang = default_lang;
 	var myLangTexts;
-	var venya_node_server = document.location.hostname;
-	var venya_node_port = 8888;
 
 	function init() {
 		parseUrl();
@@ -113,23 +111,26 @@
 					if (xhr.status == 200) {
 						//console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
-						var successUrl = "./home.html?action=registration&";
-						sessionid = randomSessionID(response["id"],1,10);
-						successUrl += "sessionid=" + sessionid;
-						successUrl += "&lang=" + lang;
-						/*for (var field in response) {
-							if ( field != "status" ) {
-								var value = response[field];
-								if ( value == undefined || value === null ) value = "N/A";
-								if ( value.constructor === objectConstructor ) { value = JSON.stringify(value); }
-								successUrl += field.replace(/_/,'') + "=" + value + "&";
-							}
-						}*/
-						location.href=successUrl.replace(/&$/,'');
+						//var successUrl = "./home.html?action=registration&";
+						sessionid = randomSessionID(response["id"],1,99);
+						//successUrl += "sessionid=" + sessionid;
+						//successUrl += "&lang=" + lang;
+						//location.href=successUrl.replace(/&$/,'');
+
+						var urlParams = {};
+						urlParams["action"] = "registration";
+						urlParams["sessionid"] = sessionid;
+						urlParams["lang"] = lang;
+						goTo(pages.home,urlParams);
 					} else {
 						var response = JSON.parse(xhr.responseText);
-						var errorUrl = "./register.html?lang= " + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
-						location.href=errorUrl;
+						var urlParams = {};
+						urlParams["lang"] = lang;
+						urlParams["status"] = response["status"];
+						urlParams["errormessage"] = escape(myLangTexts["errors"][response["errormessage"]]);
+						goTo(pages.register,urlParams);
+						//var errorUrl = "./register.html?lang= " + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+						//location.href=errorUrl;
 					}
 				}
 			}

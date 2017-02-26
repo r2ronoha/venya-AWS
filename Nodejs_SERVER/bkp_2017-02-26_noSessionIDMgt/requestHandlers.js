@@ -172,7 +172,7 @@ function getCustomer(response, request, dbcnx, db) {
 				//response.write(body);
 				for ( var field in attList ) {
 					body[field] = attList[field];
-					//console.log("[requestHandler.getCustomer.queryandRespond] field: \"" + field + "\" : \"" + JSON.stringify(body[field]) );
+					console.log("[requestHandler.getCustomer.queryandRespond] field: \"" + field + "\" : \"" + JSON.stringify(body[field]) );
 				}
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -250,7 +250,7 @@ function createCustomer(response, request, dbcnx, db) {
 					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 					var body = {};
 					body["status"] = "ERROR";
-					body["errormessage"] = "createcheckfail";
+					body["errormessage"] = "registrationerror";
 					body["action"] = action;
 					var respBody = JSON.stringify(body);
 					response.write(respBody, function(err) { response.end(); } );
@@ -462,7 +462,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 }
 
 function updateSetting(response, request, dbcnx, db) {
-	console.log("[requestHandlers.updasteSetting] request.url = " + request.url);
+	console.log("request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var id = urlParams["id"];
 	var field = urlParams["field"];
@@ -479,7 +479,7 @@ function updateSetting(response, request, dbcnx, db) {
 			var updateQueryField = "address.value." + part;
 			updateQuery[updateQueryField] = value.toLowerCase();
 		}
-		console.log("[requestHandlers.updateSetting] Update address query string = " + JSON.stringify(updateQuery));
+		console.log("[requestHandlers : updateSettings] Update address query string = " + JSON.stringify(updateQuery));
 	} else {
 		var updateQueryField = field + ".value";
 		if ( notCaseSensitive.indexOf(field) > -1 ) {
@@ -490,7 +490,6 @@ function updateSetting(response, request, dbcnx, db) {
 	var query = { "_id": ObjectId(id) };
 	
 	function updateAndRespond(query, updateQuery) {
-		console.log("[requestHandlers.updateSetting] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
 		customer.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
 				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -501,7 +500,6 @@ function updateSetting(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			}else {
-				console.log("[requestHandlers.updateSetting] Update successful. Getting customer details");
 				customer.doGet(dbcnx, db, query, function(attList) {
 					var field = urlParams["field"];
 					/*

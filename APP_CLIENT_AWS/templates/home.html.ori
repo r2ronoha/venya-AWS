@@ -36,9 +36,9 @@
 				customerId = customerDetails["id"];
 				myLangTexts;
 				var action = urlParams["action"];
-				var headerText = myLangTexts["action"][action].toUpperCase();
-				if ( action != "home" ) headerText = action.toUpperCase() + "\n" + myLangTexts["home"]["welcome"];
-				headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
+				var headerText = formatMessage([myLangTexts["action"][action]]);
+				if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
+				headerText = formatMessage([headerText,unescape(customerDetails["surname"].toUpperCase()),",",unescape(customerDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
 				setHeader("h2",headerText);
 				setHeader("h4",myLangTexts["home"]["yourdata"]);
 				createDataTable(customerDetails, lang, action);
@@ -47,8 +47,6 @@
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
-<header>
-</header>
 <body>
 	<script>init();</script>
 	<div class="dropdown">
