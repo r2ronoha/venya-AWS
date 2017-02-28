@@ -173,16 +173,6 @@
 		}
 	</script>
 
-	<script type="text/javascript">
-		function displayIcon(id,lang) {
-			var element = document.getElementById(id);
-			var icon = document.createElement("IMG");
-			var source = "/static/icons/" + lang + ".png";
-			icon.setAttribute("src",source);
-			element.appendChild(icon);
-		}
-	</script>
-
 </head>
 
 <body>
@@ -190,13 +180,10 @@
 
 	<!-- LANGUAGE SELECTION DROPDOWN MENU -->
 	<div class="dropdown">
-	<button class="btn btn-default dropdown-toggle pull-right" type="button" id="langMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		<script>javascript:displayIcon("langMenu",lang)</script>
-	<span class="caret"></span></button>
-	<!-- <button class="btn btn-default dropdown-toggle pull-right" type="button" id="langMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LANG<span class="caret"></span></button> -->
+	<button class="btn btn-default dropdown-toggle pull-right" type="button" id="langMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LANG<span class="caret"></span></button>
 	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="langMenu">
-                <li><a id="signinEsp" href="javascript:goTo(pages.signin,{'lang' : 'esp'})"><script>javascript:displayIcon("signinEsp","esp")</script></a></li>
-                <li><a id="signinEng" href="javascript:goTo(pages.signin,{'lang' : 'eng'})"><script>javascript:displayIcon("signinEng","eng")</script></a></li>
+                <li><a id="signinEsp" href="javascript:goTo(pages.signin,{'lang' : 'esp'})"><script>javascript:displayMenu("signinEsp","ESP")</script></a></li>
+                <li><a id="signinEng" href="javascript:goTo(pages.signin,{'lang' : 'eng'})"><script>javascript:displayMenu("signinEng","ENG")</script></a></li>
 	</ul>
 	</div>
 

@@ -57,13 +57,14 @@ var languages_text = {
                         "username" : "username",
                         "password" : "password",
                         "phone" : "phone",
-                        "times" : "times",
+                        "times" : "preferred times",
                         "language" : "language",
                         "notifications" : "notifications",
                         "location" : "location",
 						"oldpassword" : "old password",
 						"oldusername" : "old username",
-						"oldemail" : "old email"
+						"oldemail" : "old email",
+						"sessionid" : "session id"
                 },
                 "settings" : {
                         "yoursettings" : "these are your settings",
@@ -176,13 +177,14 @@ var languages_text = {
                         "username" : "nombre de usuario",
                         "password" : "contraseña",
                         "phone" : "teléfono",
-                        "times" : "horas",
+                        "times" : "horas preferidas",
                         "language" : "idioma",
                         "notifications" : "notificaciones",
                         "location" : "localización",
 						"oldpassword" : "antigua contraseña",
 						"oldusername" : "antiguo nombre de usuario",
-						"oldemail" : "antiguo email"
+						"oldemail" : "antiguo email",
+						"sessionid" : "ID de la sesión"
                 },
                 "settings" : {
                         "yoursettings" : "estos son tus ajustes",

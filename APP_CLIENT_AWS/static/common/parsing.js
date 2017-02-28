@@ -6,7 +6,11 @@ var sessionidLength = idLength + 2;
 var venya_node_server = document.location.hostname;
 var venya_node_port = 8888;
 var nameFields = ['firstname','surname'];
-var upperCaseFields = ['postcode','language'];
+var upperCaseFields = ['postcode','language','notifications','location'];
+var booleanFields = ['notifications','location'];
+var booleanValues = {'true' : 'on', 'false' : 'off'};
+var privateFields = ['id','sessionid','type','action'];
+var secretFields = ['password'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -33,7 +37,8 @@ var pages = {
 		"times": "changeTimes.html",
 		"username": "changeUsername.html",
 		"address": "changeAddress.html",
-		"times": "changeTimes.html"
+		"times": "changeTimes.html",
+		"phone": "changePhone.html"
 	},
 	"lostusername" : "lostUsername.html",
 	"lostpassword" : "lostPassword.html",
@@ -43,7 +48,6 @@ var pages = {
 	"logout" : "logout.html"
 }
 
-var booleanField = {0: 0, "0": "0", 1: 1, "1": "1"};
 
 //var languages = ["eng","esp","fra","ger"];
 var languages = ["eng","esp"];
@@ -88,6 +92,10 @@ function formatName(value) {
 	return nameparts.join(' ');
 }
 
+function hideValue(value) {
+	return value.replace(/./g,'*');
+}
+
 function createDataTable(tableData, lang, action){
 	if ( tableData == null ) tableData = urlParams;
 	if ( lang == null || languages.indexOf(lang) < 0 ) {
@@ -99,7 +107,7 @@ function createDataTable(tableData, lang, action){
 	var table = document.createElement("table");
 	table.className = "settings";
 	for (var field in tableData) {
-		if (field != "action") {
+		if ( privateFields.indexOf(field) < 0 ) {
 			var row = document.createElement("tr");
 			
 			var fieldCell = document.createElement("td");
@@ -111,11 +119,19 @@ function createDataTable(tableData, lang, action){
 			var valueCell = document.createElement("td");
 			
 			var value = tableData[field];
-			if ( nameFields.indexOf(field) > -1 ) {
+			
+			if ( booleanFields.indexOf(field) > -1 ) {
+				value = booleanValues[value];
+			}
+
+			if ( secretFields.indexOf(field) > -1 ) {
+				value = hideValue(value);
+			} else if ( nameFields.indexOf(field) > -1 ) {
 				value = formatName(value);
 			} else if ( upperCaseFields.indexOf(field) > -1 ) {
 				value = value.toUpperCase();
 			}
+
 			if ( field == "address" ) {
 				var myAddress = "";
 				for ( var elt in value ) {

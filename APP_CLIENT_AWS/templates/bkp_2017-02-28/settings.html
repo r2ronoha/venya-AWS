@@ -137,26 +137,22 @@
 				}
 				value = myAddress.replace(/, $/,'').replace(/^$/,'N/A');
 			}
-
-			if (secretFields.indexOf(field) > -1 ) {
-				value = hideValue(value);
-			} else if ( nameFields.indexOf(field) > -1 ) {
+			if ( nameFields.indexOf(field) > -1 ) {
 				value = formatName(value);
 			} else if ( upperCaseFields.indexOf(field) > -1 ) {
 				value = value.toUpperCase();
 			}
-
 			var newvalue;
 			var optionList = { "boolean": "ON/OFF", "string": "EDIT", "list": "SELECT" } ;
 			var option;
 			var buttonTarget;
 			var row = document.createElement("tr");
-			if ( booleanFields.indexOf(field) > -1 ) {
+			if ( settings[field] in booleanField ) {
 				//console.log(field + " is BOOLEAN / NUMBER");
 				option = myLangTexts["settings"]["booleanoption"];
 				//option = optionList["boolean"];
-				if ( value.toLowerCase() == "true" ) { value = booleanValues["true"].toUpperCase(); newvalue = "false"; }
-				else { value = booleanValues["false"].toUpperCase(); newvalue = "true"; }
+				if ( value == 0 || value == "0" ) { value = "OFF"; newvalue = 1 }
+				else { value = "ON"; newvalue = 0 }
 				buttonTarget = "javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newvalue + "'})";
 			} else {
 			//console.log(field + " is STRING");
