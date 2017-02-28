@@ -38,7 +38,7 @@
 			lang = urlParams["lang"];
 			myLangTexts = languages_text[lang];
 			customerId = sessionid.substring(0,sessionid.length - 2);
-			console.log("[changeAddress.init] sessionid = " + sessionid + " : customerId = " + customerId);
+			//console.log("[changeAddress.init] sessionid = " + sessionid + " : customerId = " + customerId);
 			changeField = urlParams["field"];
 
 			verifySessionId(sessionid, setFormErrorHeader(urlParams,myLangTexts));
@@ -80,7 +80,7 @@
 			}
 			location.href = errorUrl;
 		} else {
-			console.log("[changeAddress.readForm] customerId = " + customerId );
+			//console.log("[changeAddress.readForm] customerId = " + customerId );
 			var values = {};
 			values["id"] = customerId;
 			values["field"] = "address";
@@ -90,7 +90,7 @@
 				newvalue += ( form.elements[elt].value == "" ) ? elt + "=" + addressFields[elt] + ";" : elt + "=" + form.elements[elt].value + ";";
 			}
 			values["newvalue"] = newvalue.replace(/;$/,'');
-			console.log(values["newvalue"]);
+			//console.log(values["newvalue"]);
 			update(values);
 		}
 	}
@@ -100,7 +100,7 @@
 		var field = values["field"];
 		var oldvalue = values["oldvalue"];
 		var newvalue = values["newvalue"];
-		console.log("[changeAddress.update] values = " + JSON.stringify(values) );
+		//console.log("[changeAddress.update] values = " + JSON.stringify(values) );
 		
 		var xhr = new XMLHttpRequest();
 		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
@@ -112,7 +112,7 @@
 		function processRequest(e) {
 			if (xhr.readyState == 4) {
 				if (xhr.status == 200) {
-					console.log(xhr.responseText);
+					//console.log(xhr.responseText);
 					var response = JSON.parse(xhr.responseText);
 					
 					var gotoParams = {};

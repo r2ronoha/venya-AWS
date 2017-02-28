@@ -52,7 +52,7 @@
 			if (urlParams["lang"] != undefined && languages.indexOf(urlParams["lang"] > -1 )) {
 				lang = urlParams["lang"];
 			}
-			console.log("[signin.init] urlParame[\"lang\"] = " + urlParams["lang"] + " -- lang = " + lang);
+			//console.log("[signin.init] urlParame[\"lang\"] = " + urlParams["lang"] + " -- lang = " + lang);
 			myLangTexts = languages_text[lang];
 
 			setFormErrorHeader(urlParams,myLangTexts);
@@ -106,7 +106,7 @@
 				return;
 			}
 			
-			console.log("Calling checkCredentials");
+			//console.log("Calling checkCredentials");
 			
 			var xhr = new XMLHttpRequest();
 			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
@@ -118,10 +118,10 @@
 			function processRequest(e) {
 				if (xhr.readyState == 4) {
 					if (xhr.status == 200) {
-						console.log(xhr.responseText);
+						//console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
 						//var successUrl = "./home.html?";
-						console.log(response);
+						//console.log(response);
 						/*for (var field in response) {
 							if ( field != "status" ) {
 								var value = response[field];

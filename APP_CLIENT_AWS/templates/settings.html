@@ -36,7 +36,7 @@
 
 		sessionid = urlParams["sessionid"];
 		verifySessionId(sessionid, function() {
-			console.log("[settings.init] session successfully verified. Getting customer details");
+			//console.log("[settings.init] session successfully verified. Getting customer details");
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			getCustomerFullDetails( action, customerId, function () {
 				customerId = customerDetails["_id"];
@@ -76,10 +76,10 @@
 		function processRequest(e) {
 			if (xhr.readyState == 4) {
 				if (xhr.status == 200) {
-					console.log(xhr.responseText);
+					//console.log(xhr.responseText);
 					var response = JSON.parse(xhr.responseText);
 					//var successUrl = "./settings.html?updatefield=" + response["updatefield"];
-					console.log(response);
+					//console.log(response);
 					//successUrl += "&sessionid=" + sessionid;
 					if ( languages.indexOf(newvalue) > -1 ) {
 						lang = newvalue;
@@ -138,14 +138,6 @@
 				value = myAddress.replace(/, $/,'').replace(/^$/,'N/A');
 			}
 
-			if (secretFields.indexOf(field) > -1 ) {
-				value = hideValue(value);
-			} else if ( nameFields.indexOf(field) > -1 ) {
-				value = formatName(value);
-			} else if ( upperCaseFields.indexOf(field) > -1 ) {
-				value = value.toUpperCase();
-			}
-
 			var newvalue;
 			var optionList = { "boolean": "ON/OFF", "string": "EDIT", "list": "SELECT" } ;
 			var option;
@@ -155,8 +147,10 @@
 				//console.log(field + " is BOOLEAN / NUMBER");
 				option = myLangTexts["settings"]["booleanoption"];
 				//option = optionList["boolean"];
-				if ( value.toLowerCase() == "true" ) { value = booleanValues["true"].toUpperCase(); newvalue = "false"; }
-				else { value = booleanValues["false"].toUpperCase(); newvalue = "true"; }
+				value = booleanValues[value];
+				newvalue = !(value)
+				//if ( value.toLowerCase() == "true" ) { value = booleanValues["true"].toUpperCase(); newvalue = "false"; }
+				//else { value = booleanValues["false"].toUpperCase(); newvalue = "true"; }
 				buttonTarget = "javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newvalue + "'})";
 			} else {
 			//console.log(field + " is STRING");
@@ -170,6 +164,14 @@
 				gotoParams["lang"] = lang;
 				var gotoPage = pages.settingsPages[field];
 				buttonTarget = "javascript:goTo(\"" + gotoPage + "\"," + JSON.stringify(gotoParams) + ")";
+			}
+
+			if (secretFields.indexOf(field) > -1 ) {
+				value = hideValue(value);
+			} else if ( nameFields.indexOf(field) > -1 ) {
+				value = formatName(value);
+			} else if ( upperCaseFields.indexOf(field) > -1 ) {
+				value = value.toUpperCase();
 			}
 	
 			var cells = { "settingCell": field, "valueCell": value };

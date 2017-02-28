@@ -107,6 +107,7 @@ function createDataTable(tableData, lang, action){
 	var table = document.createElement("table");
 	table.className = "settings";
 	for (var field in tableData) {
+		//console.log("[parsing.createDataTable] field to process : " + field);
 		if ( privateFields.indexOf(field) < 0 ) {
 			var row = document.createElement("tr");
 			
@@ -119,6 +120,7 @@ function createDataTable(tableData, lang, action){
 			var valueCell = document.createElement("td");
 			
 			var value = tableData[field];
+			//console.log("[parsing.createDataTable] value = " + value);
 			
 			if ( booleanFields.indexOf(field) > -1 ) {
 				value = booleanValues[value];
@@ -169,7 +171,7 @@ function getCustomerSessionidDetails(action,sessionid,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log(xhr.responseText);
+				//console.log(xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
@@ -195,7 +197,7 @@ function getCustomerSessionidDetails(action,sessionid,callback) {
 function getCustomerSessionidFullDetails(action,sessionid,callback) {
 	venya_node_server = document.location.hostname;
 	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&sessionid=" + sessionid;
-	console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
+	//console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -204,7 +206,7 @@ function getCustomerSessionidFullDetails(action,sessionid,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
+				//console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
@@ -239,7 +241,7 @@ function getCustomerDetails(action,id,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log(xhr.responseText);
+				//console.log(xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
@@ -265,7 +267,7 @@ function getCustomerDetails(action,id,callback) {
 function getCustomerFullDetails(action,id,callback) {
 	venya_node_server = document.location.hostname;
 	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&id=" + id;
-	console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
+	//console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -274,7 +276,7 @@ function getCustomerFullDetails(action,id,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
+				//console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
@@ -301,7 +303,7 @@ function getCustomerFullDetails(action,id,callback) {
 function randomSessionID(id,min,max) {
 	var sufix = Math.floor( Math.random()*(max - min + 1) + min );
 	var sessionId = id + sufix.toString().replace(/^([0-9])$/,"0$1");
-	console.log("[parsing.randomSessionID] Session ID = " + sessionId );
+	//console.log("[parsing.randomSessionID] Session ID = " + sessionId );
 	return sessionId;
 }
 
@@ -359,10 +361,10 @@ function getCredentialsProcessRequest(url,credential,lang) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log(xhr.responseText);
+				//console.log(xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				myCredential = response[credential];
-				console.log("response[" + credential + "] = " + myCredential);
+				//console.log("response[" + credential + "] = " + myCredential);
 				message = response["errormessage"];
 				email = response["email"];
 				respStatus = "SUCCESS";
@@ -379,7 +381,7 @@ function getCredentialsProcessRequest(url,credential,lang) {
 }
 
 function verifySessionId(sessionid,callback) {
-	console.log("[parsing.verifySessionID] checking sessionid");
+	//console.log("[parsing.verifySessionID] checking sessionid");
 	if ( sessionid.length != sessionidLength ) {
 		console.log("[parsing.verifySessionID] session id FAILED. Wrong length." );
 		var urlParams = {};
@@ -399,7 +401,7 @@ function verifySessionId(sessionid,callback) {
 				urlParams["errormessage"] = "invalidsessionid";
 				goTo(pages.signin,urlParams);
 			} else {
-				console.log("[parsing.verifySessionID] session id verified. Callback");
+				//console.log("[parsing.verifySessionID] session id verified. Callback");
 				callback();
 			}
 		});

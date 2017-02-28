@@ -38,33 +38,9 @@ var attributesDefault = {};
 customer.getAttDefault( function(attDef) {
 	attributesDefault = attDef;
 });	
-/*
-function sendEmailAws(destEmail, emailSubject, message) {
-	ses.sendEmail( 
-		{
-			Source: from,
-			Destination: { ToAddresses: destEmail },
-			Message: {
-				Subject:Source {
-					Data: emailSubject
-				},
-				Body: {
-					Text: {
-						Data: message,
-					}
-				}
-			}
 
-		}, function(err,data) {
-			if(err) throw err
-				console.log('[requestHandler.sendEmailAws] Email sent:');
-				console.log(data)console;
-		}
-	);
-}
-*/
 function getFullCustomerData(response, request, dbcnx, db) {	
-	console.log("request.url = " + request.url);
+	//console.log("[requestHandlres.getFullCustomerData] request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
@@ -98,7 +74,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 					body[field] = document[field];
 				}
 				var respBody = JSON.stringify(body);
-				console.log("[requestHandlers.getFullCustomerData.q&R] respBody = " + respBody);
+				//console.log("[requestHandlers.getFullCustomerData.q&R] respBody = " + respBody);
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -133,14 +109,91 @@ function getFullCustomerData(response, request, dbcnx, db) {
 			}
 		});
 	} else {
-		console.log("query = { \"_id\": ObjectId(" + id + ") }");
+		//console.log("[requestHandlres.getFullCustomerData] query = { \"_id\": ObjectId(" + id + ") }");
 		query = { "_id": ObjectId(id) }
 		queryAndRespond(query)
 	}
 }
 
+function sleep(ms) {
+	//console.log("[sleep] Sleeping");
+	return new Promise((resolve) => setTimeout(resolve,ms));
+}
+
+function sessionTimeoutManagement(dbcnx, db) {
+
+	var timeout = 30*60; //timeout = 30 minutes = 30*60 sec (timestamp of session id is set in seconds)
+
+	function clearSession(query, updateQuery, callback) {
+		//console.log("[requestHandlers.sessionTimeoutMgtupdate.clearSession] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
+		customer.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
+			if ( err ) {
+				console.log("[requestHandlers.sessionTimeoutMgt.clearSession] failed to clear session");
+				callback();
+			}else {
+				console.log("[requestHandlers.sessionTimeoutMgt.clearSession] Session successfully cleared.");
+				callback();
+			}
+		});
+	}
+
+	//function getCustomersToClearSession() {
+		var query = {'sessionid.timestamp':{$gt: 0}};
+		customer.doGetAll(dbcnx, db, query, function(customerList) {
+			if (customerList == null) {
+				console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] NULL list of customers returned by DB");
+				//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+			} else {
+				if ( customerList.length > 0 ) {
+					//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] LIST OF CUSTOMERS with open sessions: " + JSON.stringify(customerList));
+					for ( var i in customerList ) {
+						var mycustomer = customerList[i];
+						var mycustomerID = mycustomer["_id"];
+						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] " + JSON.stringify(mycustomer));
+						var now = Math.round(new Date().getTime() / 1000);
+						var sessionInit = mycustomer.sessionid.timestamp;
+						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session init timestamp = " + sessionInit);
+						var sessionTime = now - sessionInit;
+						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] mycustomer ID = " + mycustomerID + " -- session time = " + sessionTime);
+						if ( sessionInit != 0 && sessionTime > timeout ) {
+							console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session (" + sessionInit + ") EXPIRED for mycustomer id " + mycustomerID);
+							// update sessionid to close + 0 timeout
+							var myquery = { '_id' : ObjectId(mycustomerID) };
+							var updateQuery = { '_id' : ObjectId(mycustomerID) };
+							updateQuery['sessionid.value'] = 'closed';
+							updateQuery['sessionid.timestamp'] = 0;
+							//clearSession(myquery,updateQuery);
+							
+							//console.log("[requestHandlers.sessionTimeoutMgtupdate.clearSession] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
+							customer.doUpdate(dbcnx, db, myquery, updateQuery, function(err,myquery) {
+								if ( err ) {
+									console.log("[requestHandlers.sessionTimeoutMgt.clearSession] failed to clear session for customerID " + mycustomerID);
+									//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+								} else {
+									console.log("[requestHandlers.sessionTimeoutMgt.clearSession] Session successfully cleared for customerID " + mycustomerID);
+									//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+								}
+							});
+	
+	
+							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+						} /* else {
+							//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session (" + sessionInit + ")not expired yet for customer id " + mycustomerID);
+							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+						} */
+					}
+				} /*else {
+					//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] NO CUSTOMERS with open sessions");
+					//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+				}*/
+			}
+			setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+		});
+	//}
+}
+
 function getCustomer(response, request, dbcnx, db) {	
-	console.log("request.url = " + request.url);
+	//console.log("[requestHandlers.getCustomer] request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
@@ -209,14 +262,14 @@ function getCustomer(response, request, dbcnx, db) {
 			}
 		});
 	} else {
-		console.log("query = { \"_id\": ObjectId(" + id + ") }");
+		//console.log("[requestHandlers.getCustomer]query = { \"_id\": ObjectId(" + id + ") }");
 		query = { "_id": ObjectId(id) }
 		queryAndRespond(query)
 	}
 }
 
 function createCustomer(response, request, dbcnx, db) {
-	console.log("[requestHandler.createCustomer()] request.url = " + request.url);
+	//console.log("[requestHandler.createCustomer()] request.url = " + request.url);
 	var action = "createcustomer";
 	
 	var insertQuery = {};
@@ -225,15 +278,15 @@ function createCustomer(response, request, dbcnx, db) {
 			//var fieldQuery = { "fix": attributesFix[field], "value": url.parse(request.url, true).query[field] };
 			var fieldQuery = { "fix": attributesDefault[field].fix, "value": url.parse(request.url, true).query[field].toLowerCase() };
 			insertQuery[field] = fieldQuery;
-			console.log("[requestHandler.createCustomer()] added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
+			//console.log("[requestHandler.createCustomer()] added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
 		}
 	}
 	
-	console.log("[requestHandler.createCustomer()] Calling customer.doInsert\n[requestHandler.createCustomer()] dbcnx = " + dbcnx + " -- db = " + db + " insertQuery = " + JSON.stringify(insertQuery))
+	//console.log("[requestHandler.createCustomer()] Calling customer.doInsert\n[requestHandler.createCustomer()] dbcnx = " + dbcnx + " -- db = " + db + " insertQuery = " + JSON.stringify(insertQuery))
 	
 	customer.doInsert(dbcnx, db, insertQuery, function(query,exists,message){
 		if ( exists == 0 ) {
-			console.log("[requestHandler.createCustomer()] Calling customer.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
+			//console.log("[requestHandler.createCustomer()] Calling customer.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
 			customer.doGet(dbcnx, db, query, function(attList) {
 				if (attList != null) {
 					response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -270,7 +323,7 @@ function createCustomer(response, request, dbcnx, db) {
 }
 
 function register(response, request, dbcnx, db) {
-	console.log("request.url = " + request.url);
+	//console.log("[requestHandlers.register] request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var action = urlParams["action"];
 	var id = urlParams["id"];
@@ -336,7 +389,7 @@ function register(response, request, dbcnx, db) {
 									//var username = urlParams["username"];
 									//var email = urlParams["email"];
 									//var password = urlParams["password"];
-									console.log("[requestHandlers.register] username: " + username + ", password: " + password + ",  email: " + email);
+									//console.log("[requestHandlers.register] username: " + username + ", password: " + password + ",  email: " + email);
 									
 									if ( attList != null && attList["username"] == username && attList["email"] == email && attList["password"] == password ) {
 										response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -370,7 +423,7 @@ function register(response, request, dbcnx, db) {
 }
 
 function getLostCredentials(response, request, dbcnx, db) {
-	console.log("request.url = " + request.url);
+	//console.log("[requestHandlers.getLostCredentials] request.url = " + request.url);
 	var optFields = ["name","password","username"];
 	var urlParams = url.parse(request.url, true).query;
 	
@@ -395,7 +448,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 	
 	var credential = "password";
 	if ( username == undefined ) credential = "username";
-	console.log("LOOKING FOR : " + credential);
+	//console.log("[requestHandlers.getLostCredentials] LOOKING FOR : " + credential);
 	
 	customer.doGet(dbcnx, db, query, function(attList) {
 		if ( attList == null ) {
@@ -446,7 +499,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 					response.write(respBody, function(err) { response.end(); });
 					return console.log(error);
 				}
-				console.log('Message sent: ' + info.response);			
+				console.log("[requestHandlers.getLostCredential] Email sent: " + info.response);			
 				
 				var body = {};
 				body["status"] = "SUCCESS";
@@ -462,7 +515,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 }
 
 function updateSetting(response, request, dbcnx, db) {
-	console.log("[requestHandlers.updasteSetting] request.url = " + request.url);
+	//console.log("[requestHandlers.updasteSetting] request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var id = urlParams["id"];
 	var field = urlParams["field"];
@@ -479,18 +532,22 @@ function updateSetting(response, request, dbcnx, db) {
 			var updateQueryField = "address.value." + part;
 			updateQuery[updateQueryField] = value.toLowerCase();
 		}
-		console.log("[requestHandlers.updateSetting] Update address query string = " + JSON.stringify(updateQuery));
+		//console.log("[requestHandlers.updateSetting] Update address query string = " + JSON.stringify(updateQuery));
 	} else {
 		var updateQueryField = field + ".value";
 		if ( notCaseSensitive.indexOf(field) > -1 ) {
 			newvalue = newvalue.toLowerCase();
 		}
 		updateQuery[updateQueryField] = newvalue;
+		if ( field == "sessionid") {
+			var timestamp = Math.round(new Date().getTime()/1000); // get timestamp in seconds
+			updateQuery['sessionid.timestamp'] = timestamp;
+		}
 	}
 	var query = { "_id": ObjectId(id) };
 	
 	function updateAndRespond(query, updateQuery) {
-		console.log("[requestHandlers.updateSetting] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
+		//console.log("[requestHandlers.updateSetting] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
 		customer.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
 				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -501,16 +558,9 @@ function updateSetting(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			}else {
-				console.log("[requestHandlers.updateSetting] Update successful. Getting customer details");
+				//console.log("[requestHandlers.updateSetting] Update successful. Getting customer details");
 				customer.doGet(dbcnx, db, query, function(attList) {
 					var field = urlParams["field"];
-					/*
-					console.log("field AFTER doGet = " + field);
-					console.log("field in URL AFTER doGet = " + urlParams["field"]);
-					console.log("Checking after update:");
-					console.log("Field: " + field + "\nnewvalue: " + newvalue + "\nattList[field]: " + attList[field]);
-					*/
-					//if ( attList != null && attList[field] == newvalue ) { ==> REMOVED TO HANDLE ADDRESS AS AN OBJECT
 					if ( attList != null ) {
 						response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 						var body = {};
@@ -544,7 +594,7 @@ function updateSetting(response, request, dbcnx, db) {
 			oldvalue = oldvalue.toLowerCase();
 		}
 		checkQuery[updateQueryField] = oldvalue;
-		console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
+		//console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		customer.doGet(dbcnx, db, checkQuery, function(attList) {
 			if ( attList == null ) {
 				noUser = 1;
@@ -565,7 +615,7 @@ function updateSetting(response, request, dbcnx, db) {
 }
 
 function updateSetting_extraManualCheck(response, request, dbcnx, db) {
-	console.log("request.url = " + request.url);
+	//console.log("[requestHandlres.updateSettings] request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var id = urlParams["id"];
 	var field = urlParams["field"];
@@ -582,7 +632,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 			var updateQueryField = "address.value." + part;
 			updateQuery[updateQueryField] = value.toLowerCase();
 		}
-		console.log("[requestHandlers : updateSettings] Update address query string = " + JSON.stringify(updateQuery));
+		//console.log("[requestHandlers : updateSettings] Update address query string = " + JSON.stringify(updateQuery));
 	} else {
 		var updateQueryField = field + ".value";
 		if ( notCaseSensitive.indexOf(field) > -1 ) {
@@ -605,12 +655,6 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 			}else {
 				customer.doGet(dbcnx, db, query, function(attList) {
 					var field = urlParams["field"];
-					/*
-					console.log("field AFTER doGet = " + field);
-					console.log("field in URL AFTER doGet = " + urlParams["field"]);
-					console.log("Checking after update:");
-					console.log("Field: " + field + "\nnewvalue: " + newvalue + "\nattList[field]: " + attList[field]);
-					*/
 					if ( attList != null && attList[field] == newvalue ) {
 						response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 						var body = {};
@@ -643,7 +687,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 			oldvalue = oldvalue.toLowerCase();
 		}
 		checkQuery[updateQueryField] = oldvalue;
-		console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
+		//console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		customer.doGet(dbcnx, db, checkQuery, function(attList) {
 			if ( attList == null ) {
 				noUser = 1;
@@ -670,3 +714,4 @@ exports.register = register;
 exports.getLostCredentials = getLostCredentials;
 exports.updateSetting = updateSetting;
 exports.createCustomer = createCustomer;
+exports.sessionTimeoutManagement = sessionTimeoutManagement;
