@@ -5,6 +5,8 @@ var idLength = 24;
 var sessionidLength = idLength + 2;
 var venya_node_server = document.location.hostname;
 var venya_node_port = 8888;
+var nameFields = ['firstname','surname'];
+var upperCaseFields = ['postcode','language'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -78,6 +80,14 @@ function goTo(page,params) {
 	location.href = target.replace(/[?&]$/,'');
 }
 
+function formatName(value) {
+	var nameparts = value.split(" ");
+	for (var part in nameparts) {
+		nameparts[part] = nameparts[part][0].toUpperCase() + nameparts[part].substring(1);
+	}
+	return nameparts.join(' ');
+}
+
 function createDataTable(tableData, lang, action){
 	if ( tableData == null ) tableData = urlParams;
 	if ( lang == null || languages.indexOf(lang) < 0 ) {
@@ -101,19 +111,24 @@ function createDataTable(tableData, lang, action){
 			var valueCell = document.createElement("td");
 			
 			var value = tableData[field];
-			if ( field == "firstname" || field == "surname" ) {
-				value = value[0].toUpperCase() + value.substring(1);
+			if ( nameFields.indexOf(field) > -1 ) {
+				value = formatName(value);
+			} else if ( upperCaseFields.indexOf(field) > -1 ) {
+				value = value.toUpperCase();
 			}
 			if ( field == "address" ) {
 				var myAddress = "";
 				for ( var elt in value ) {
-					if ( value[elt] != "N/A" ) {
+					if ( value[elt].toLowerCase() != "n/a" ) {
 						//console.log("[parsing.creatDataTable] Adding value[elt] " + value[elt] + " to user address");
-						myAddress += value[elt] + ", ";
+						if ( upperCaseFields.indexOf(elt) > -1 ) { 
+							myAddress += value[elt].toUpperCase() + ", "
+						} else { myAddress += formatName(value[elt]) + ", "; }
 					}
 				}
 				value = myAddress.replace(/, $/,'');				
 				if ( value == "" ) { value = "N/A"; }
+				//else value = formatName(value);
 			}
 			
 			//valueCell.appendChild(document.createTextNode(unescape(tableData[field])));
@@ -125,6 +140,76 @@ function createDataTable(tableData, lang, action){
 		}
 	}
 	document.body.appendChild(table);
+}
+
+function getCustomerSessionidDetails(action,sessionid,callback) {
+	venya_node_server = document.location.hostname;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=" + action + "&sessionid=" + sessionid;
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET',myUrl,true);
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+	
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				console.log(xhr.responseText);
+				var response = JSON.parse(xhr.responseText);
+				for (var field in response) {
+					if ( field != "status" ) {
+						var value = response[field];
+						if ( value == undefined ) value = "N/A";
+						customerDetails[field] = response[field];
+					}
+				}
+				callback();
+			} else {
+				var response = JSON.parse(xhr.responseText);
+				var params = {};
+				params["status"] = response["status"];
+				params["errormessage"] = response["errormessage"];
+				goTo(pages.signin,params);
+				//var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+				//location.href=errorUrl;
+			}
+		}
+	}
+}
+
+function getCustomerSessionidFullDetails(action,sessionid,callback) {
+	venya_node_server = document.location.hostname;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&sessionid=" + sessionid;
+	console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET',myUrl,true);
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+	
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
+				var response = JSON.parse(xhr.responseText);
+				for (var field in response) {
+					if ( field != "status" ) {
+						var value = response[field];
+						if ( value == undefined ) value = "N/A";
+						customerDetails[field] = response[field];
+						//console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
+					}
+				}
+				callback();
+			} else {
+				var response = JSON.parse(xhr.responseText);
+				var params = {};
+				params["status"] = response["status"];
+				params["errormessage"] = response["errormessage"];
+				goTo(pages.signin,params);
+				//var errorUrl = "./signin.html?status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
+				//location.href=errorUrl;
+			}
+		}
+	}
 }
 
 function getCustomerDetails(action,id,callback) {
@@ -302,5 +387,36 @@ function verifySessionId(sessionid,callback) {
 				callback();
 			}
 		});
+	}
+}
+
+function setSessionId(values,urlParams) {
+//function update(values) {
+	var id = values["id"];
+	var field = values["field"];
+	var oldvalue = values["oldvalue"];
+	var newvalue = values["newvalue"];
+
+	var xhr = new XMLHttpRequest();
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+	if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
+	xhr.open('GET',myUrl,true);
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				goTo(pages.home,urlParams);
+			} else {
+				var response = JSON.parse(xhr.responseText);
+				var gotoParams = {};
+				gotoParams["action"] = urlParams["action"];
+				gotoParams["status"] = response["status"];
+				gotoParams["errormessage"] = response["errormessage"];
+				gotoParams["lang"] = urlParams["lang"];
+				goTo(pages.signin,gotoParams);
+			}
+		}
 	}
 }

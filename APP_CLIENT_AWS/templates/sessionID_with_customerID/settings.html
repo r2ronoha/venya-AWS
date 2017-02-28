@@ -107,7 +107,6 @@
 	}
 	
 	function displaySettings(settings) {
-		var nameFields = ['firstname', 'surname'];
 		var cellsFormat = {
 			"valueCell": "text-align: center; padding-left: 15px; padding-right: 15px",
 			"settingCell": "text-align: left; padding-left: 15px; padding-right: 15px",
@@ -130,17 +129,14 @@
 			if ( field == "address" ) {
 				var myAddress = "";
 				for ( var elt in value ) {
-					if ( value[elt].toLowerCase() != "n/a" ) {
-						if ( upperCaseFields.indexOf(elt) > -1 ) { myAddress += value[elt].toUpperCase() + ", "; }
-						else { myAddress += formatName(value[elt]) + ", "; }
+					if ( value[elt] != "N/A" ) {
+						myAddress += value[elt] + ", ";
 					}
 				}
 				value = myAddress.replace(/, $/,'').replace(/^$/,'N/A');
-			}
-			if ( nameFields.indexOf(field) > -1 ) {
-				value = formatName(value);
-			} else if ( upperCaseFields.indexOf(field) > -1 ) {
-				value = value.toUpperCase();
+				/* if ( value == "" ) {
+					value = "N/A";
+				} */
 			}
 			var newvalue;
 			var optionList = { "boolean": "ON/OFF", "string": "EDIT", "list": "SELECT" } ;
@@ -186,25 +182,19 @@
 			if ( field == "language" ) {
 				var optionCell = document.createElement("td");
 				optionCell.setAttribute["optionCell"];
-
-				//var div = document.createElement("div");
-				//div.setAttribute("class","dropdown");
 				var optionButton = document.createElement("BUTTON");
 				optionButton.setAttribute("id",field);
 	
 				//option = optionList["list"];
 				option = myLangTexts["settings"]["listoption"];
 				optionButton.setAttribute("class","dropdown-toggle");
-				optionButton.setAttribute("type","button");
 				optionButton.setAttribute("data-toggle","dropdown");
 				optionButton.setAttribute("aria-haspopup","true");
 				optionButton.setAttribute("aria-expanded","false");
 	
 				var ul = document.createElement("ul");
-				//ul.setAttribute("class","dropdown-menu-cell");
 				ul.setAttribute("class","dropdown-menu");
 				ul.setAttribute("aria-labelledby",field);
-				ul.setAttribute("position","absolute");
 		
 				for ( var i in languages ) {
 					var newLang = languages[i];
@@ -215,12 +205,8 @@
 					li.appendChild(link);
 					ul.appendChild(li);
 				}
-				//div.appendChild(ul);
 				optionCell.appendChild(ul);
 				optionButton.appendChild(document.createTextNode(option.toUpperCase()));
-				//optionButton.appendChild(ul);
-				//div.appendChild(optionButton);
-				//optionCell.appendChild(div);
 				optionCell.appendChild(optionButton);
 			} else {
 				var optionCell = document.createElement("td");

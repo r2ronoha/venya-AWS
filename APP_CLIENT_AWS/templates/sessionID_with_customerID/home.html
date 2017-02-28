@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 	
-	<title>Venya Times Update</title>
+	<title>VenYa Home</title>
 	
 	<!-- Bootstrap core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -22,32 +22,41 @@
 		var sessionid;
 		var lang;
 		var myLangTexts;
-
 		function init() {
 			parseUrl();
+			
 			sessionid = urlParams["sessionid"];
-			lang = urlParams["lang"];
+			lang = urlParams["lang"].toLowerCase();
 			myLangTexts = languages_text[lang];
-			customerId = sessionid.substring(0,sessionid.length - 2);
-			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
-			verifySessionId(sessionid,setHeader("h2",formatMessage([myLangTexts["form"]["page"],myLangTexts["underconstruction"]])));
-			/*getCustomerDetails( "home", urlParams["id"], function () {
-				customerId = customerDetails["id"];
-				
-				var action = urlParams["action"];
-				var headerText = "HOME ";
-				if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
-				headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
-				setHeader("h2",headerText);
-				setHeader("h4","This is your data");
-				createDataTable();
-			});*/
+			
+			verifySessionId(sessionid, function() {
+				customerId = sessionid.substring(0,sessionid.length - 2);
+				//console.log("[home.init] sessionid = " + sessionid + "customerid = " + customerId);
+				//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
+				getCustomerDetails( "home", customerId, function () {
+					/*if ( customerDetails["sessionid"] != sessionid ) {
+						var params = {};
+						params["lang"] = customerDetails["language"];
+						params["status"] = "ERROR";
+						params["errormessage"] = "invalidsessionid";
+						goTo(pages.signin,params);
+					} else {*/
+						customerId = customerDetails["id"];
+						myLangTexts;
+						var action = urlParams["action"];
+						var headerText = formatMessage([myLangTexts["action"][action]]);
+						if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
+						headerText = formatMessage([headerText,unescape(customerDetails["surname"].toUpperCase()),",",unescape(customerDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
+						setHeader("h2",headerText);
+						setHeader("h4",myLangTexts["home"]["yourdata"]);
+						createDataTable(customerDetails, lang, action);
+					//}
+				});
+			});
 		}
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
-<header>
-</header>
 <body>
 	<script>init();</script>
 	<div class="dropdown">
@@ -62,15 +71,12 @@
 		</ul>
 	</div>
 	
-	<div class="container">
-		<a id="cancelButton" href="javascript:goTo(pages.settings,{'sessionid' : sessionid, 'lang' : lang})" style="text-align:center"><script>javascript:displayMenu("cancelButton",myLangTexts["form"]["cancel"].toUpperCase())</script></a>
-	</div>
 	<!-- Bootstrap core JavaScript
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js" />')</script></script>
+	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"/>')</script></script>
 	<script src="/static/js/bootstrap.min.js"></script>
-	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
 </body>

@@ -83,7 +83,8 @@ var languages_text = {
 			"oldemail" : "old email address",
 			"newemail" : "new email address",
 			"enterdetails" : "please enter your details",
-			"submit" : "submit"
+			"submit" : "submit",
+			"cancel" : "cancel"
                 },
                 "underconstruction" : "under construction",
 		"errors" : {
@@ -201,7 +202,8 @@ var languages_text = {
 			"oldemail" : "antigua dirección de email",
 			"newemail" : "nueva dirección de email",
 			"enterdetails" : "Introduce tus datos",
-			"submit" : "enviar"
+			"submit" : "enviar",
+			"cancel" : "anular"
                 },
                 "underconstruction" : "en construcción",
 		"errors" : {

@@ -58,7 +58,7 @@
 			setFormErrorHeader(urlParams,myLangTexts);
 		}
 
-		/*function setSessionId(values,urlParams) {
+		function setSessionId(values,urlParams) {
 		//function update(values) {
 			var id = values["id"];
 			var field = values["field"];
@@ -75,11 +75,24 @@
 			function processRequest(e) {
 				if (xhr.readyState == 4) {
 					if (xhr.status == 200) {
+						//console.log(xhr.responseText);
+						//var response = JSON.parse(xhr.responseText);
+	
+						//var gotoParams = {};
+						//gotoParams["sessionid"] = sessionid;
+						//gotoParams["action"] = response["action"];
+						//gotoParams["lang"] = lang;
+						//gotoParams["updatefield"] = changeField;
+						/*for (var field in response) {
+							if ( field != "status" ) gotoParams[field] = response[field];
+						}*/
 						goTo(pages.home,urlParams);
 					} else {
 						var response = JSON.parse(xhr.responseText);
 						var gotoParams = {};
 						gotoParams["action"] = urlParams["action"];
+						//gotoParams["sessionid"] = sessionid;
+						//gotoParams["setting"] = field;
 						gotoParams["status"] = response["status"];
 						gotoParams["errormessage"] = response["errormessage"];
 						gotoParams["lang"] = lang;
@@ -87,7 +100,7 @@
 					}
 				}
 			}
-		}*/
+		}
 
 		function signin_check(){
 			var form = document.querySelector("form");

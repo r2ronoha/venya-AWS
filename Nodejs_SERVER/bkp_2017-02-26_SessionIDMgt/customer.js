@@ -19,12 +19,12 @@ var customerAttributes = {
 			"city": "N/A",
 			"country": "N/A" 
 		} },
-		"phone": { "fix": 0, "value": "N/A" },
+		"phone": { "fix": 1, "value": "N/A" },
 		"times": { "fix": 0, "value": "N/A" },
 		"language": { "fix": 0, "value": "ENG" },
 		"notifications": { "fix": 0, "value": 1 },
 		"location": { "fix": 0, "value": 1 },
-		"sessionid" : { "fix": 1, "value": "closed", "timestamp": 0 }
+		"sessionid" : { "fix": 1, "value": "closed" }
 };
 
 function getAttFix(callback) {

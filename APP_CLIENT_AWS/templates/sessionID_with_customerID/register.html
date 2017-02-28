@@ -100,8 +100,7 @@
 				"&email=" + email +
 				"&phone=" + phone +
 				"&username=" + username +
-				"&password=" + password +
-				"&language=" + lang;
+				"&password=" + password;
 			xhr.open('GET',myUrl,true);
 			//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
 			xhr.send();
@@ -118,32 +117,17 @@
 						//successUrl += "&lang=" + lang;
 						//location.href=successUrl.replace(/&$/,'');
 
-						//var urlParams = {};
-						//urlParams["action"] = "registration";
-						//urlParams["sessionid"] = sessionid;
-						//urlParams["lang"] = lang;
-						//goTo(pages.home,urlParams);
-
-						customerId = response["id"];
-						//sessionID = randomSessionID(customerId,1,99);
-						lang = response["language"];
-	
-						var gotoParams = {};
-						gotoParams["lang"] = lang;
-						gotoParams["action"] = "registration";
-						gotoParams["sessionid"] = sessionid;
-	
-						var updateValues = {};
-						updateValues["id"] = customerId;
-						updateValues["field"] = "sessionid";
-						updateValues["newvalue"] = sessionid;
-						setSessionId(updateValues,gotoParams);
+						var urlParams = {};
+						urlParams["action"] = "registration";
+						urlParams["sessionid"] = sessionid;
+						urlParams["lang"] = lang;
+						goTo(pages.home,urlParams);
 					} else {
 						var response = JSON.parse(xhr.responseText);
 						var urlParams = {};
 						urlParams["lang"] = lang;
 						urlParams["status"] = response["status"];
-						urlParams["errormessage"] = response["errormessage"];
+						urlParams["errormessage"] = escape(myLangTexts["errors"][response["errormessage"]]);
 						goTo(pages.register,urlParams);
 						//var errorUrl = "./register.html?lang= " + lang + "&status=" + response["status"] + "&errormessage=" + escape(response["errormessage"]);
 						//location.href=errorUrl;
