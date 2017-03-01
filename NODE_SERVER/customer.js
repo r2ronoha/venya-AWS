@@ -92,9 +92,11 @@ function doGet (cnx, db, query, callback) {
 	
 	//console.log("[customer.doGet()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
-	doGetFullData (cnx, db, query, function(document) {
-		if (document === null) {
-			callback(null);
+	doGetFullData (cnx, db, query, function(err, document) {
+		if (err) {
+			callback(err,null);
+		} else if (document === null) {
+			callback(err,null);
 		} else {
 			for ( var field in document ) {
 				if (field == "_id"){
@@ -104,7 +106,7 @@ function doGet (cnx, db, query, callback) {
 					attList[field] = document[field].value;
 				}
 			}
-			callback(attList);
+			callback(err,attList);
 		}
 	});
 }
@@ -118,14 +120,15 @@ function doGetFullData (cnx, db, query, callback) {
 		//assert.equal(null, err);
 		if (err) {
 			console.log("[customer.doGetFullData] Mongo DB connection error: " + err);
-			callback(null);
+			err = "dbcnxerror";
+			callback(err,null);
 		} else {
 			var collection = connection.collection(mycollection);
 			collection.findOne(query, function (err, document) {
 				if (document === null) {
-					callback(null);
+					callback(err,null);
 				} else {
-					callback(document);
+					callback(err,document);
 				}
 			});
 		}
@@ -141,14 +144,14 @@ function doGetAll (cnx, db, query, callback) {
 		//assert.equal(null, err);
 		if (err) {
 			console.log("[customer.doGetAll] Mongo DB connection error: " + err);
-			callback(null);
+			callback(err,null);
 		} else {
 			var collection = connection.collection(mycollection);
 			collection.find(query).toArray( function (err, documents) {
 				if (documents === null) {
-					callback(null);
+					callback(err,null);
 				} else {
-					callback(documents);
+					callback(err,documents);
 				}
 			});
 		}

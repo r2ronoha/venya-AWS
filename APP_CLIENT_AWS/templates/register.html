@@ -146,7 +146,7 @@
 							urlParams["status"] = response["status"];
 							urlParams["errormessage"] = response["errormessage"];
 							//goTo(pages.register,urlParams);
-							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"],response["errormessage"]]);
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
 						} catsh (err) {
 							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 							return false;

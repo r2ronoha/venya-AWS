@@ -102,7 +102,7 @@
 							params["errormessage"] = response["errormessage"];
 							//console.log(params["errormessage"]);
 							//goTo(pages.webcreatecustomer,params);
-							document.getElementById("errors").innerHTML = formatMessage([response["errormessage"]]);
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
 						} catch (err) {
 							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 						}

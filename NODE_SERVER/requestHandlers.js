@@ -63,8 +63,16 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	var queryUsername = {};
 	
 	function queryAndRespond(query) {
-		customer.doGetFullData(dbcnx, db, query, function(document) {
-			if (document != null) {
+		customer.doGetFullData(dbcnx, db, query, function(err,document) {
+			if (err) {
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = err;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if (document != null) {
 				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "SUCCESS";
@@ -90,8 +98,16 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	
 	if ( action == "login" ) {
 		queryUsername["username.value"] = username;
-		customer.doGet(dbcnx, db, queryUsername, function(userAtt) {
-			if ( userAtt == null ) {
+		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
+			if (err) {
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = err;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if ( userAtt == null ) {
 				noUser = 1;
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
@@ -124,73 +140,59 @@ function sessionTimeoutManagement(dbcnx, db) {
 
 	var timeout = 30*60; //timeout = 30 minutes = 30*60 sec (timestamp of session id is set in seconds)
 
-	function clearSession(query, updateQuery, callback) {
-		//console.log("[requestHandlers.sessionTimeoutMgtupdate.clearSession] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
-		customer.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
-			if ( err ) {
-				console.log("[requestHandlers.sessionTimeoutMgt.clearSession] failed to clear session");
-				callback();
-			}else {
-				console.log("[requestHandlers.sessionTimeoutMgt.clearSession] Session successfully cleared.");
-				callback();
-			}
-		});
-	}
+	//console.log("[requestHAndlers.sessionTimeoutMgt] starting session management");
+	var query = {'sessionid.timestamp':{$gt: 0}};
+	customer.doGetAll(dbcnx, db, query, function(err,customerList) {
+		if (err) {
+			console.log("[requestHandler.sessionTimeoutMgt] DB ERROR: " + err);
+		} else if (customerList == null) {
+			console.log("[requestHandler.sessionTimeoutMgt] NULL list of customers returned by DB");
+			//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+		} else {
+			if ( customerList.length > 0 ) {
+				//console.log("[requestHandler.sessionTimeoutMgt] LIST OF CUSTOMERS with open sessions: " + JSON.stringify(customerList));
+				for ( var i in customerList ) {
+					var mycustomer = customerList[i];
+					var mycustomerID = mycustomer["_id"];
+					//console.log("[requestHandler.sessionTimeoutMgt] " + JSON.stringify(mycustomer));
+					var now = Math.round(new Date().getTime() / 1000);
+					var sessionInit = mycustomer.sessionid.timestamp;
+					//console.log("[requestHandler.sessionTimeoutMgt] session init timestamp = " + sessionInit);
+					var sessionTime = now - sessionInit;
+					//console.log("[requestHandler.sessionTimeoutMgt] mycustomer ID = " + mycustomerID + " -- session time = " + sessionTime);
+					if ( sessionInit != 0 && sessionTime > timeout ) {
+						console.log("[requestHandler.sessionTimeoutMgt] session (" + sessionInit + ") EXPIRED for mycustomer id " + mycustomerID);
+						// update sessionid to "closed" + 0 timeout
+						var myquery = { '_id' : ObjectId(mycustomerID) };
+						var updateQuery = { '_id' : ObjectId(mycustomerID) };
+						updateQuery['sessionid.value'] = 'closed';
+						updateQuery['sessionid.timestamp'] = 0;
+						
+						//console.log("[requestHandlers.sessionTimeoutMgtupdate.clearSession] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
+						customer.doUpdate(dbcnx, db, myquery, updateQuery, function(err,myquery) {
+							if ( err ) {
+								console.log("[requestHandler.sessionTimeoutMgt] failed to clear session for customerID " + mycustomerID);
+								//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+							} else {
+								console.log("[requestHandler.sessionTimeoutMgt] Session successfully cleared for customerID " + mycustomerID);
+								//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+							}
+						});
 
-	//function getCustomersToClearSession() {
-		//console.log("[requestHAndlers.sessionTimeoutMgt] starting session management");
-		var query = {'sessionid.timestamp':{$gt: 0}};
-		customer.doGetAll(dbcnx, db, query, function(customerList) {
-			if (customerList == null) {
-				console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] NULL list of customers returned by DB");
+
+						//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+					} /*else {
+						console.log("[requestHandler.sessionTimeoutMgt] session (" + sessionInit + ")not expired yet for customer id " + mycustomerID);
+						//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+					}*/ 
+				}
+			} /*else {
+				console.log("[requestHandler.sessionTimeoutMgt] NO CUSTOMERS with open sessions");
 				//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-			} else {
-				if ( customerList.length > 0 ) {
-					//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] LIST OF CUSTOMERS with open sessions: " + JSON.stringify(customerList));
-					for ( var i in customerList ) {
-						var mycustomer = customerList[i];
-						var mycustomerID = mycustomer["_id"];
-						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] " + JSON.stringify(mycustomer));
-						var now = Math.round(new Date().getTime() / 1000);
-						var sessionInit = mycustomer.sessionid.timestamp;
-						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session init timestamp = " + sessionInit);
-						var sessionTime = now - sessionInit;
-						//console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] mycustomer ID = " + mycustomerID + " -- session time = " + sessionTime);
-						if ( sessionInit != 0 && sessionTime > timeout ) {
-							console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session (" + sessionInit + ") EXPIRED for mycustomer id " + mycustomerID);
-							// update sessionid to close + 0 timeout
-							var myquery = { '_id' : ObjectId(mycustomerID) };
-							var updateQuery = { '_id' : ObjectId(mycustomerID) };
-							updateQuery['sessionid.value'] = 'closed';
-							updateQuery['sessionid.timestamp'] = 0;
-							//clearSession(myquery,updateQuery);
-							
-							//console.log("[requestHandlers.sessionTimeoutMgtupdate.clearSession] calling customer.doUpadte with query: " + JSON.stringify(updateQuery));
-							customer.doUpdate(dbcnx, db, myquery, updateQuery, function(err,myquery) {
-								if ( err ) {
-									console.log("[requestHandlers.sessionTimeoutMgt.clearSession] failed to clear session for customerID " + mycustomerID);
-									//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-								} else {
-									console.log("[requestHandlers.sessionTimeoutMgt.clearSession] Session successfully cleared for customerID " + mycustomerID);
-									//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-								}
-							});
-	
-	
-							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-						} /*else {
-							console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session (" + sessionInit + ")not expired yet for customer id " + mycustomerID);
-							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-						}*/ 
-					}
-				} /*else {
-					console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] NO CUSTOMERS with open sessions");
-					//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-				}*/
-			}
-			setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-		});
-	//}
+			}*/
+		}
+		setTimeout(sessionTimeoutManagement,120000,dbcnx,db);
+	});
 }
 
 function getCustomer(response, request, dbcnx, db) {	
