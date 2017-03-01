@@ -138,7 +138,7 @@ function sessionTimeoutManagement(dbcnx, db) {
 	}
 
 	//function getCustomersToClearSession() {
-		console.log("[requestHAndlers.sessionTimeoutMgt] starting session management");
+		//console.log("[requestHAndlers.sessionTimeoutMgt] starting session management");
 		var query = {'sessionid.timestamp':{$gt: 0}};
 		customer.doGetAll(dbcnx, db, query, function(customerList) {
 			if (customerList == null) {
@@ -178,15 +178,15 @@ function sessionTimeoutManagement(dbcnx, db) {
 	
 	
 							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-						} else {
+						} /*else {
 							console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] session (" + sessionInit + ")not expired yet for customer id " + mycustomerID);
 							//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-						} 
+						}*/ 
 					}
-				} else {
+				} /*else {
 					console.log("[requestHandler.sessionTimeoutMgt.getCustomersToClearSession] NO CUSTOMERS with open sessions");
 					//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
-				}
+				}*/
 			}
 			setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
 		});
@@ -218,7 +218,15 @@ function getCustomer(response, request, dbcnx, db) {
 	
 	function queryAndRespond(query) {
 		customer.doGet(dbcnx, db, query, function(attList) {
-			if (attList != null) {
+			if (attList == "dbcnxerror") {
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "dbcnxerror";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			}else if (attList != null) {
 				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "SUCCESS";

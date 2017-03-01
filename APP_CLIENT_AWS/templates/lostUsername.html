@@ -38,19 +38,6 @@
 		myLangTexts = languages_text[lang];
 
 		setFormErrorHeader(urlParams,myLangTexts);
-		/*if (urlParams["status"] == "ERROR") {
-			if (urlParams["errormessage"] == "input") {
-				setHeader("h2",formatMessage([myLangTexts["errors"]["badfields"]]));
-				for (var field in urlParams) {
-					if ( field != "status" && field != "errormessage" ) {
-						var headText = formatMessage([myLangTexts["customer"][field],":",urlParams[field]]);
-						setHeader("h5",headText);
-					}
-				}
-			} else {
-				setHeader("h4",unescape(urlParams["errormessage"]));
-			}
-		}*/
 	}	
 	function getUsername(){
 		//var attList = ['id','type','name','address','phone','username','password'];
@@ -79,7 +66,8 @@
 			"&surname=" + name +
 			"&email=" + email +
 			"&password=" + password;
-			getCredentialsProcessRequest(myUrl,'password',lang);
+			var errUrl = "pages.lostusername";
+			getCredentialsProcessRequest(myUrl,'username',lang,errUrl);
 			/*xhr.open('GET',myUrl,true);
 			xhr.send();
 			xhr.onreadystatechange = processRequest;
@@ -113,6 +101,7 @@
 <body>
 	<script>init();</script>
 	
+	<div class="errors" id="errors"></div>
 	<div class="container">
 	<form class="form-signin">
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>

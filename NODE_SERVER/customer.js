@@ -115,17 +115,20 @@ function doGetFullData (cnx, db, query, callback) {
 	//console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
-		//try {
-			assert.equal(null, err);
-		//} 
-		var collection = connection.collection(mycollection);
-		collection.findOne(query, function (err, document) {
-			if (document === null) {
-				callback(null);
-			} else {
-				callback(document);
-			}
-		});
+		//assert.equal(null, err);
+		if (err) {
+			console.log("[customer.doGetFullData] Mongo DB connection error: " + err);
+			callback(null);
+		} else {
+			var collection = connection.collection(mycollection);
+			collection.findOne(query, function (err, document) {
+				if (document === null) {
+					callback(null);
+				} else {
+					callback(document);
+				}
+			});
+		}
 	});
 }
 
@@ -135,15 +138,20 @@ function doGetAll (cnx, db, query, callback) {
 	//console.log("[customer.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
-		assert.equal(null, err);
-		var collection = connection.collection(mycollection);
-		collection.find(query).toArray( function (err, documents) {
-			if (documents === null) {
-				callback(null);
-			} else {
-				callback(documents);
-			}
-		});
+		//assert.equal(null, err);
+		if (err) {
+			console.log("[customer.doGetAll] Mongo DB connection error: " + err);
+			callback(null);
+		} else {
+			var collection = connection.collection(mycollection);
+			collection.find(query).toArray( function (err, documents) {
+				if (documents === null) {
+					callback(null);
+				} else {
+					callback(documents);
+				}
+			});
+		}
 	});
 }
 

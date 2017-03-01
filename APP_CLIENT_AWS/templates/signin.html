@@ -57,44 +57,31 @@
 
 			setFormErrorHeader(urlParams,myLangTexts);
 		}
-
-		/*function setSessionId(values,urlParams) {
-		//function update(values) {
-			var id = values["id"];
-			var field = values["field"];
-			var oldvalue = values["oldvalue"];
-			var newvalue = values["newvalue"];
-	
-			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
-			if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
-			xhr.open('GET',myUrl,true);
-			xhr.send();
-			xhr.onreadystatechange = processRequest;
-	
-			function processRequest(e) {
-				if (xhr.readyState == 4) {
-					if (xhr.status == 200) {
-						goTo(pages.home,urlParams);
-					} else {
-						var response = JSON.parse(xhr.responseText);
-						var gotoParams = {};
-						gotoParams["action"] = urlParams["action"];
-						gotoParams["status"] = response["status"];
-						gotoParams["errormessage"] = response["errormessage"];
-						gotoParams["lang"] = lang;
-						goTo(pages.signin,gotoParams);
-					}
-				}
+/*
+		function clear_errors(id) {
+			document.getElementById(id);
+		}
+*/
+		function verify_entry(username,password) {
+			if (username == "") { 
+				//document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]); 
+				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]); 
+				return false; 
+			} else 	if (password == "") { 
+				//document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); 
+				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); 
+				return false; 
+			} else {
+				return true;
 			}
-		}*/
+		}
 
 		function signin_check(){
 			var form = document.querySelector("form");
 			var username = form.elements.inputUsername.value;
 			var password = form.elements.inputPassword.value;
 			var objectConstructor = {}.constructor;
-			var defaultUsername = "changeme";
+			//var defaultUsername = "changeme";
 
 			if ( username == defaultUsername ) {
 				var params = {};
@@ -107,66 +94,70 @@
 			}
 			
 			//console.log("Calling checkCredentials");
-			
-			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
-			xhr.open('GET',myUrl,true);
-			//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
-			xhr.send();
-			xhr.onreadystatechange = processRequest;
-			
-			function processRequest(e) {
-				if (xhr.readyState == 4) {
-					if (xhr.status == 200) {
-						//console.log(xhr.responseText);
-						var response = JSON.parse(xhr.responseText);
-						//var successUrl = "./home.html?";
-						//console.log(response);
-						/*for (var field in response) {
-							if ( field != "status" ) {
-								var value = response[field];
-								if ( value == undefined || value === null ) value = "N/A";
-								if ( value.constructor === objectConstructor ) { value = JSON.stringify(value) }
-								successUrl += field.replace(/_/,'') + "=" + value + "&";
-							}
-						}*/
-
-						if ( response["sessionid"] != "closed" ) {
-							//var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"]["sessionopened"]);
-							//location.href=errorUrl;
-							var gotoParams = {};
-							gotoParams["lang"] = lang;
-							gotoParams["status"] = "ERROR";
-							gotoParams["errormessage"] = "sessionopened";
-							goTo(pages.signin,gotoParams);
-							//goTo(pages.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
-						} else {
+			if ( verify_entry(username,password) ) {
+				var xhr = new XMLHttpRequest();
+				var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
+				xhr.open('GET',myUrl,true);
+				//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
+				xhr.send();
+				xhr.onreadystatechange = processRequest;
+				
+				function processRequest(e) {
+					if (xhr.readyState == 4) {
+						if (xhr.status == 200) {
+							//console.log(xhr.responseText);
+							var response = JSON.parse(xhr.responseText);
+							//var successUrl = "./home.html?";
+							//console.log(response);
+							/*for (var field in response) {
+								if ( field != "status" ) {
+									var value = response[field];
+									if ( value == undefined || value === null ) value = "N/A";
+									if ( value.constructor === objectConstructor ) { value = JSON.stringify(value) }
+									successUrl += field.replace(/_/,'') + "=" + value + "&";
+								}
+							}*/
 	
-							customerId = response["id"];
-							sessionID = randomSessionID(customerId,1,99);
-							lang = response["language"];
-
-							var gotoParams = {};
-							gotoParams["lang"] = lang;
-							gotoParams["action"] = response["action"];
-							gotoParams["sessionid"] = sessionID;
-							
-							var updateValues = {};
-							updateValues["id"] = customerId;
-							updateValues["field"] = "sessionid";
-							updateValues["newvalue"] = sessionID;
-							setSessionId(updateValues,gotoParams);
-							//goTo(pages.home,gotoParams);
+							if ( response["sessionid"] != "closed" ) {
+								//var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"]["sessionopened"]);
+								//location.href=errorUrl;
+								var gotoParams = {};
+								gotoParams["lang"] = lang;
+								gotoParams["status"] = "ERROR";
+								gotoParams["errormessage"] = "sessionopened";
+								goTo(pages.signin,gotoParams);
+								//goTo(pages.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
+							} else {
+		
+								customerId = response["id"];
+								sessionID = randomSessionID(customerId,1,99);
+								lang = response["language"];
+	
+								var gotoParams = {};
+								gotoParams["lang"] = lang;
+								gotoParams["action"] = response["action"];
+								gotoParams["sessionid"] = sessionID;
+								
+								var updateValues = {};
+								updateValues["id"] = customerId;
+								updateValues["field"] = "sessionid";
+								updateValues["newvalue"] = sessionID;
+								setSessionId(updateValues,gotoParams);
+								//goTo(pages.home,gotoParams);
+							}
+						} else {
+							try {
+								var response = JSON.parse(xhr.responseText);
+								var gotoParams = {};
+								gotoParams["lang"] = lang;
+								gotoParams["status"] = response["status"];
+								gotoParams["errormessage"] = response["errormessage"];
+								//goTo(pages.signin,gotoParams);
+								document.getElementById("errors").innerHTML = formatMessage([response["errormessage"]]);
+							} catch (SyntaxError) {
+								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+							}
 						}
-					} else {
-						var response = JSON.parse(xhr.responseText);
-						//var errorUrl = "./signin.html?lang=" + lang + "&status=" + response["status"] + "&errormessage=" + escape(myLangTexts["errors"][response["errormessage"]]);
-						//location.href=errorUrl;
-						var gotoParams = {};
-						gotoParams["lang"] = lang;
-						gotoParams["status"] = response["status"];
-						gotoParams["errormessage"] = response["errormessage"];
-						goTo(pages.signin,gotoParams);
 					}
 				}
 			}
@@ -200,6 +191,7 @@
 	</ul>
 	</div>
 
+	<div class="errors" id="errors"></div>
 	<!-- SIGN IN FORM -->
 	<div class="container">
 		<form class="form-signin">

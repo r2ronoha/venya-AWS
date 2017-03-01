@@ -112,7 +112,8 @@ var languages_text = {
 			"infonotmatch" : "the info entered does not match",
 			"alreadyregistered" : "user already registered",
 			"sessionopened" : "this user is already connected",
-			"invalidsessionid" : "your session is expired"
+			"invalidsessionid" : "your session is expired",
+			"dbcnxerror" : "service is currently unavailable. Please try again later"
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -232,7 +233,8 @@ var languages_text = {
 			"infonotmatch" : "los datos introducidos no corresponden",
 			"alreadyregistered" : "el usuario ya existe",
 			"sessionopened" : "este usuario ya está conectado",
-			"invalidsessionid" : "tu sesión ha cadudcado"
+			"invalidsessionid" : "tu sesión ha cadudcado",
+			"dbcnxerror" : "el servicio no está disponible en este momento. Inténtalo más tarde"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",

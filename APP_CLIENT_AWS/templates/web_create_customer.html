@@ -94,13 +94,18 @@
 						}
 						location.href=successUrl.replace(/&$/,'');
 					} else {
-						var response = JSON.parse(xhr.responseText);
-						var params = {};
-						params["lang"] = lang;
-						params["status"] = response["status"];
-						params["errormessage"] = response["errormessage"];
-						//console.log(params["errormessage"]);
-						goTo(pages.webcreatecustomer,params);
+						try {
+							var response = JSON.parse(xhr.responseText);
+							var params = {};
+							params["lang"] = lang;
+							params["status"] = response["status"];
+							params["errormessage"] = response["errormessage"];
+							//console.log(params["errormessage"]);
+							//goTo(pages.webcreatecustomer,params);
+							document.getElementById("errors").innerHTML = formatMessage([response["errormessage"]]);
+						} catch (err) {
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+						}
 					}
 				}
 			}
@@ -113,6 +118,7 @@
 <body>
 	<script>init();</script>
 	
+	<div class="errors" id="errors"></div>
 	<div class="container">
 	
 	<form class="form">

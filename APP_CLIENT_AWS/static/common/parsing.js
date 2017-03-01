@@ -20,6 +20,7 @@ var phoneFormat = new RegExp("^(\\+|00)?[0-9]{4,}$","g");
 var objectidFormat = new RegExp("^[0-9a-fA-F]{24}$");
 var postcodeFormat = new RegExp("^\\w+([\\s-]*\\w*)?$");
 //var postcodeFormat = new RegExp("^[0-9]+$");
+var defaultUsername = "changeme";
 
 var pages = {
 	"choosesite_esp" : "choose_site_esp.html",
@@ -346,11 +347,12 @@ function setFormErrorHeader(params,langTexts) {
 	}
 }
 
-function getCredentialsProcessRequest(url,credential,lang) {
+function getCredentialsProcessRequest(url,credential,lang,errUrl) {
 	var email;
 	var message;
 	var myCredential;
 	var respStatus;
+	var langTexts = languages_text[lang];
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',url,true);
@@ -363,19 +365,28 @@ function getCredentialsProcessRequest(url,credential,lang) {
 			if (xhr.status == 200) {
 				//console.log(xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
-				myCredential = response[credential];
-				//console.log("response[" + credential + "] = " + myCredential);
-				message = response["errormessage"];
-				email = response["email"];
-				respStatus = "SUCCESS";
+				var params = {};
+				params["lang"] = lang;
+				params["status"] = "SUCCESS";
+				params["message"] = response["errormessage"];
+				params["email"] = response["email"];
+				params["info"] = credential;
+				params["credential"] = response[credential];
+				goTo(pages.showlostinfo,params);
 			} else {
-				var response = JSON.parse(xhr.responseText);
-				myCredential = response[credential];
-				message = response["errormessage"];
-				email = response["email"];
-				respStatus = response["status"];
+				try {
+					var response = JSON.parse(xhr.responseText);
+					var params = {};
+					params["lang"] = lang;
+					params["status"] = response["status"];
+					params["message"] = response["errormessage"];
+					params["email"] = response["email"];
+					goTo(errUrl,params);
+				} catch (err) {
+					document.getElementById("errors").append(formatMessage([langTexts["errors"]["dbcnxerror"]]));
+				}
 			}
-			goTo(pages.showlostinfo,{ 'lang': lang, 'status': respStatus, 'info': credential, 'credential': myCredential, 'email': email, 'message': message});
+			
 		}
 	}
 }
