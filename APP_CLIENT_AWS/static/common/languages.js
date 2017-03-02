@@ -114,7 +114,8 @@ var languages_text = {
 			"sessionopened" : "this user is already connected",
 			"invalidsessionid" : "your session is expired",
 			"dbcnxerror" : "service is currently unavailable. Please try again later",
-			"emailfailed" : "failed to send email"
+			"emailfailed" : "failed to send email",
+			"accountalreadycreated" : "Ya existe una cuenta para este usuario."
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -236,7 +237,8 @@ var languages_text = {
 			"sessionopened" : "este usuario ya está conectado",
 			"invalidsessionid" : "tu sesión ha cadudcado",
 			"dbcnxerror" : "el servicio no está disponible en este momento. Inténtalo más tarde",
-			"emailfailed" : "No a sido posible enviar el email"
+			"emailfailed" : "No a sido posible enviar el email",
+			"accountalreadycreated" : "Ya existe una cuenta para este usuario."
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",

@@ -49,6 +49,12 @@
 		}
 	}
 
+	function clear_error(errorid,id) {
+		document.getElementById(errorid).innerHTML = '';
+		document.getElementById(errorid).style.diplay = "none";
+		document.getElementById(id).style.borderColor = "#ccc";
+	}
+
 	function format_error(errorid,id,message){
 		document.getElementById(errorid).innerHTML = formatMessage(message);
 		document.getElementById(errorid).style.display ="block";
@@ -56,80 +62,18 @@
 		errorcount++;
 	}
 
-	function verify_fields(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword){
-		reset_form_color();
-		errorcount = 0;
-
-		if ( id == "" ) { 
-			format_error("idError","id",[id,myLangTexts["customer"]["id"],myLangTexts["errors"]["required"]]);
-		} else if ( ! objectidFormat.test(id) ) {
-			format_error("idError","id",[id,myLangTexts["errors"]["badformat"],myLangTexts["customer"]["id"]]);
+	function field_format_check(input,message) {
+		if (input.validity.patternMismatch) {
+			//console.log("BAD FORMAT of username");
+			input.setCustomValidity(message);
+			input.style.borderColor = "red";
 		} else {
-			form.elements.id.value = id;
-			document.getElementById("idError").style.display = "none";
-		}
-		
-
-		if ( username == "" ) { 
-			format_error("usernameError","inputUsername",[username,myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]);
-		} else if ( ! usernameFormat.test(username) ) {
-			format_error("usernameError","inputUsername",[username,myLangTexts["errors"]["usernameformat"]]);
-		} else {
-			form.elements.inputUsername.value = username;
-			document.getElementById("usernameError").style.display = "none";
-		}
-
-		if ( surname == "" ) { 
-			format_error("nameError","inputName",[surname,myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]);
-		} else {
-			form.elements.inputName.value = surname;
-			document.getElementById("nameError").style.display = "none";
-		}
-
-		if ( email == "" ) { 
-			format_error("emailError","inputEmail",[email,myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]);
-		} else if ( email != confirmEmail ) {
-			format_error("confirmEmailError","confirmEmail",[email,confirmEmail,myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]);
-		} else if ( ! emailFormat.test(email) ) {
-			format_error("emailError","inputEmail",[email,myLangTexts["errors"]["emailformat"]]);
-		} else {
-			form.elements.inputEmail.value = email;
-			form.elements.confirmEmail.value = confirmEmail;
-			document.getElementById("emailError").style.display = "none";
-			document.getElementById("confirmEmailError").style.display = "none";
-		}
-			
-		if ( phone != "" && ! phoneFormat.test(phone) ) {
-			format_error("phoneError","inputPhone",[phone,myLangTexts["errors"]["phoneformat"]]);
-		} else {
-			form.elements.inputPhone.value = phone;
-			document.getElementById("phoneError").style.display = "none";
-		}
-		phone = phone.replace(/\+/,'%2B');
-
-		if ( password == "" ) { 
-			format_error("passwordError","inputPassword",[password,myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]);
-		} else if ( password != confirmPassword ) {
-			format_error("confirmPasswordError","inputPassword",[password,confirmPassword,myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]);
-		} else if ( ! passwordFormat.test(password) ) {
-			format_error("passwordError","inputPassword",[password,myLangTexts["errors"]["passwordformat"]]);
-		} else {
-			document.getElementById("passwordError").style.display = "none";
-			document.getElementById("confirmPasswordError").style.display = "none";
-		}
-
-		if ( errorcount > 0 ) {
-			//form.elements.inputPassword.value = "";
-			form.elements.confirmPassword.value = "";
-			return false;
-		} else {
-			return true;
+			input.setCustomValidity('');
+			input.style.borderColor = "#ccc";
 		}
 	}
 
-	function register(){
-	//var attList = ['_id','type','name','email','phone','username','password'];
-		var credList = ['username','password'];
+	function verify_form() {
 		var form = document.querySelector("form");
 		var id = form.elements.id.value;
 		var username = form.elements.inputUsername.value;
@@ -139,22 +83,45 @@
 		var phone = form.elements.inputPhone.value;
 		var password = form.elements.inputPassword.value;
 		var confirmPassword = form.elements.confirmPassword.value;
-		var objectConstructor = {}.constructor;
-		
 
-		/*if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input&id=" + id + "&lang=" + lang;
-			if ( urlParams["action"] == "webcreation" ) {
-				errorUrl += "&" + "action=" + urlParams["action"];
-			}
-			for ( var field in error ) {
-				errorUrl += "&" + field + "=" + escape(error[field]);
-			}
-		//var errorUrl = location.href.hostname + location.href.path;
-			//console.log("errorUrl = " + errorUrl);
-			location.href = errorUrl;*/
+		//reset_form_color();
+		clear_error("confirmEmailError","confirmEmail");
+		clear_error("confirmPasswordError","confirmPassword");
+		errorcount = 0;
 
-		if (verify_fields(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword)) {
+		if ( email != confirmEmail ) {
+			format_error("confirmEmailError","confirmEmail",[email,confirmEmail,myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]);
+			errorcount++;
+		}
+			
+
+		if ( password != confirmPassword ) {
+			format_error("confirmPasswordError","confirmPassword",[password,confirmPassword,myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]);
+			errorcount++;
+		}
+
+		if ( errorcount > 0 ) {
+			//form.elements.confirmPassword.value = "";
+			phone = phone.replace(/\+/,'%2B');
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	function register(){
+		//if (verify_form(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword)) {
+		if (verify_form()) {
+			var form = document.querySelector("form");
+			var id = form.elements.id.value;
+			var username = form.elements.inputUsername.value;
+			var surname = form.elements.inputName.value.toLowerCase();
+			var email = form.elements.inputEmail.value.toLowerCase();
+			var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
+			var phone = form.elements.inputPhone.value;
+			var password = form.elements.inputPassword.value;
+			var confirmPassword = form.elements.confirmPassword.value;
+	
 			var xhr = new XMLHttpRequest();
 			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/register?type=customer" +
 				"&id=" + id +
@@ -221,13 +188,13 @@
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 		
 			<fieldset>
-			<input type="text" id="id" class="form-control" placeholder="id" required autofocus>
+			<input type="text" id="id" class="form-control" pattern="^[0-9a-fA-F]{24}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['customer']['id']]))" placeholder="id" required autofocus>
 			<label id="idlabel" for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
 			<span id="idError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,myLangTexts['errors']['usernameformat'])" required autofocus>
 			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["customer"]["username"]]))</script></label>
 			<span id="usernameError" style"display: none;"></span>
 			</fieldset>
@@ -251,13 +218,13 @@
 			</fieldset>
 
 			<fieldset>
-			<input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
+			<input type="text" id="inputPhone" class="form-control" pattern="^(\+|00)?[0-9]{4,}$" oninput="field_format_check(this,myLangTexts['errors']['phoneformat'])" placeholder="Phone number" >
 			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
 			<span id="phoneError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>			
-			<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
 			<span id="passwordError" style"display: none;"></span>
 			</fieldset>
