@@ -17,7 +17,7 @@ function start(route, handle, dbcnx, db) {
 	//console.log("[server] Server running at " + mongodbcnx);
 	
 	//setTimeout(requestHandlers.sessionTimeoutManagement,15000,dbcnx,db);
-	//requestHandlers.sessionTimeoutManagement(dbcnx,db);
+	requestHandlers.sessionTimeoutManagement(dbcnx,db);
 }
 
 exports.start = start;

@@ -347,7 +347,7 @@ function setFormErrorHeader(params,langTexts) {
 	}
 }
 
-function getCredentialsProcessRequest(url,credential,lang,errUrl) {
+function getCredentialsProcessRequest(url,credential,lang,errorid) {
 	var email;
 	var message;
 	var myCredential;
@@ -381,9 +381,10 @@ function getCredentialsProcessRequest(url,credential,lang,errUrl) {
 					params["status"] = response["status"];
 					params["message"] = response["errormessage"];
 					params["email"] = response["email"];
-					goTo(errUrl,params);
+					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"][response["errormessage"]]]);
+					//goTo(errUrl,params);
 				} catch (err) {
-					document.getElementById("errors").append(formatMessage([langTexts["errors"]["dbcnxerror"]]));
+					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"]["dbcnxerror"]]);
 				}
 			}
 			

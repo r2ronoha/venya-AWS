@@ -66,8 +66,9 @@
 			"&surname=" + name +
 			"&email=" + email +
 			"&password=" + password;
-			var errUrl = "pages.lostusername";
-			getCredentialsProcessRequest(myUrl,'username',lang,errUrl);
+			var errUrl = pages.lostusername;
+			console.log("errUrl = " + errUrl);
+			getCredentialsProcessRequest(myUrl,'username',lang,"errors");
 			/*xhr.open('GET',myUrl,true);
 			xhr.send();
 			xhr.onreadystatechange = processRequest;

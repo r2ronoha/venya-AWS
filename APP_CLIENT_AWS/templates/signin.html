@@ -153,6 +153,7 @@
 								gotoParams["status"] = response["status"];
 								gotoParams["errormessage"] = response["errormessage"];
 								//goTo(pages.signin,gotoParams);
+								console.log("Error received from seerver = " + response["errormessage"]);
 								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
 							} catch (SyntaxError) {
 								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);

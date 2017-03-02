@@ -130,7 +130,7 @@
 							gotoParams["errormessage"] = response["errormessage"];
 							gotoParams["lang"] = lang;
 							goTo(pages.settingsPages.username,gotoParams);
-						} catch {
+						} catch(err) {
 							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 						}
 					}

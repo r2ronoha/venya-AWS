@@ -29,6 +29,8 @@
 	var sessionid;
 	var lang = default_lang;
 	var myLangTexts;
+	var formFields = ["id","inputUsername","inputEmail","confirmEmail","inputPhone","inputPassword","confirmPassword"];
+	var errorcount;
 
 	function init() {
 		parseUrl();
@@ -39,6 +41,90 @@
 
 		setFormErrorHeader(urlParams,myLangTexts);
 		var action = urlParams["action"];
+	}
+
+	function reset_form_color(){
+		for ( var i in formFields ) {
+			document.getElementById(formFields[i]).style.borderColor = "#ccc";
+		}
+	}
+
+	function format_error(errorid,id,message){
+		document.getElementById(errorid).innerHTML = formatMessage(message);
+		document.getElementById(errorid).style.display ="block";
+		document.getElementById(id).style.borderColor = "red";
+		errorcount++;
+	}
+
+	function verify_fields(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword){
+		reset_form_color();
+		errorcount = 0;
+
+		if ( id == "" ) { 
+			format_error("idError","id",[id,myLangTexts["customer"]["id"],myLangTexts["errors"]["required"]]);
+		} else if ( ! objectidFormat.test(id) ) {
+			format_error("idError","id",[id,myLangTexts["errors"]["badformat"],myLangTexts["customer"]["id"]]);
+		} else {
+			form.elements.id.value = id;
+			document.getElementById("idError").style.display = "none";
+		}
+		
+
+		if ( username == "" ) { 
+			format_error("usernameError","inputUsername",[username,myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]);
+		} else if ( ! usernameFormat.test(username) ) {
+			format_error("usernameError","inputUsername",[username,myLangTexts["errors"]["usernameformat"]]);
+		} else {
+			form.elements.inputUsername.value = username;
+			document.getElementById("usernameError").style.display = "none";
+		}
+
+		if ( surname == "" ) { 
+			format_error("nameError","inputName",[surname,myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]);
+		} else {
+			form.elements.inputName.value = surname;
+			document.getElementById("nameError").style.display = "none";
+		}
+
+		if ( email == "" ) { 
+			format_error("emailError","inputEmail",[email,myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]);
+		} else if ( email != confirmEmail ) {
+			format_error("confirmEmailError","confirmEmail",[email,confirmEmail,myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]);
+		} else if ( ! emailFormat.test(email) ) {
+			format_error("emailError","inputEmail",[email,myLangTexts["errors"]["emailformat"]]);
+		} else {
+			form.elements.inputEmail.value = email;
+			form.elements.confirmEmail.value = confirmEmail;
+			document.getElementById("emailError").style.display = "none";
+			document.getElementById("confirmEmailError").style.display = "none";
+		}
+			
+		if ( phone != "" && ! phoneFormat.test(phone) ) {
+			format_error("phoneError","inputPhone",[phone,myLangTexts["errors"]["phoneformat"]]);
+		} else {
+			form.elements.inputPhone.value = phone;
+			document.getElementById("phoneError").style.display = "none";
+		}
+		phone = phone.replace(/\+/,'%2B');
+
+		if ( password == "" ) { 
+			format_error("passwordError","inputPassword",[password,myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]);
+		} else if ( password != confirmPassword ) {
+			format_error("confirmPasswordError","inputPassword",[password,confirmPassword,myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]);
+		} else if ( ! passwordFormat.test(password) ) {
+			format_error("passwordError","inputPassword",[password,myLangTexts["errors"]["passwordformat"]]);
+		} else {
+			document.getElementById("passwordError").style.display = "none";
+			document.getElementById("confirmPasswordError").style.display = "none";
+		}
+
+		if ( errorcount > 0 ) {
+			//form.elements.inputPassword.value = "";
+			form.elements.confirmPassword.value = "";
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	function register(){
@@ -55,33 +141,8 @@
 		var confirmPassword = form.elements.confirmPassword.value;
 		var objectConstructor = {}.constructor;
 		
-		var error = {};
-		if ( id == "" ) { error["id"] = formatMessage([myLangTexts["customer"]["id"],myLangTexts["errors"]["required"]]); }
-		else if ( ! objectidFormat.test(id) ) error["uid"] = formatMessage(myLangTexts["errors"]["badformat"],[myLangTexts["customer"]["id"]]);
 
-		if ( ! usernameFormat.test(username) ) error["username"] = myLangTexts["errors"]["usernameformat"];
-		if ( surname == "" ) { error["surname"] = formatMessage([myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]); }
-
-		if ( email == "" ) { error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]); }
-		else { 
-			if ( email != confirmEmail ) error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]); 
-			else {
-				if ( ! emailFormat.test(email) ) error["email"] = myLangTexts["errors"]["emailformat"];
-			}
-		}
-			
-		if ( phone != "" && ! phoneFormat.test(phone) ) error["phone"] = myLangTexts["errors"]["phoneformat"];
-		phone = phone.replace(/\+/,'%2B');
-
-		if ( password == "" ) { error["password"] = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); }
-		else {
-			if ( password != confirmPassword ) error["password"] = formatMessage([myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]).replace(/ s/,'s');
-			else {
-				if ( ! passwordFormat.test(password) ) error["password"] = myLangTexts["errors"]["passwordformat"];
-			}
-		}
-
-		if ( Object.keys(error).length > 0 ) {
+		/*if ( Object.keys(error).length > 0 ) {
 			var errorUrl = location.href.split('?')[0] + "?status=ERROR&errormessage=input&id=" + id + "&lang=" + lang;
 			if ( urlParams["action"] == "webcreation" ) {
 				errorUrl += "&" + "action=" + urlParams["action"];
@@ -91,8 +152,9 @@
 			}
 		//var errorUrl = location.href.hostname + location.href.path;
 			//console.log("errorUrl = " + errorUrl);
-			location.href = errorUrl;
-		} else {
+			location.href = errorUrl;*/
+
+		if (verify_fields(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword)) {
 			var xhr = new XMLHttpRequest();
 			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/register?type=customer" +
 				"&id=" + id +
@@ -112,20 +174,9 @@
 					if (xhr.status == 200) {
 						//console.log(xhr.responseText);
 						var response = JSON.parse(xhr.responseText);
-						//var successUrl = "./home.html?action=registration&";
 						sessionid = randomSessionID(response["id"],1,99);
-						//successUrl += "sessionid=" + sessionid;
-						//successUrl += "&lang=" + lang;
-						//location.href=successUrl.replace(/&$/,'');
-
-						//var urlParams = {};
-						//urlParams["action"] = "registration";
-						//urlParams["sessionid"] = sessionid;
-						//urlParams["lang"] = lang;
-						//goTo(pages.home,urlParams);
 
 						customerId = response["id"];
-						//sessionID = randomSessionID(customerId,1,99);
 						lang = response["language"];
 	
 						var gotoParams = {};
@@ -147,7 +198,8 @@
 							urlParams["errormessage"] = response["errormessage"];
 							//goTo(pages.register,urlParams);
 							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
-						} catsh (err) {
+							return false;
+						} catch (err) {
 							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 							return false;
 						}
@@ -162,42 +214,69 @@
 
 <body>
 	<script>init();</script>
-	
+	<div class="errors" id="errors"></div>
 	<div class="container">
 	
-		<form class="form-signin">
+		<form class="form-signin" id="form" onsubmit="register();return false">
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
-			
+		
+			<fieldset>
 			<input type="text" id="id" class="form-control" placeholder="id" required autofocus>
-			<label for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
+			<label id="idlabel" for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
+			<span id="idError" style"display: none;"></span>
+			</fieldset>
 			
+			<fieldset>
 			<input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
 			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["customer"]["username"]]))</script></label>
-			
+			<span id="usernameError" style"display: none;"></span>
+			</fieldset>
+
+			<fieldset>
 			<input type="text" id="inputName" class="form-control" placeholder="Surname" required autofocus>
 			<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
+			<span id="nameError" style"display: none;"></span>
+			</fieldset>
 			
+			<fieldset>
 			<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
 			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
-			
+			<span id="emailError" style"display: none;"></span>
+			</fieldset>
+
+			<fieldset>
 			<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm Email address" required autofocus>
 			<label for="confirmEmail" class="sr-only"><script>displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["email"]]))</script></label>
+			<span id="confirmEmailError" style"display: none;"></span>
+			</fieldset>
 
+			<fieldset>
 			<input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
 			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
-			
+			<span id="phoneError" style"display: none;"></span>
+			</fieldset>
+
+			<fieldset>			
 			<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
+			<span id="passwordError" style"display: none;"></span>
+			</fieldset>
 			
+			<fieldset>
 			<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
 			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
+			<span id="confirmPasswordError" style"display: none;"></span>
+			</fieldset>
 			
 			<div id="remember" class="checkbox">
 				<input type="checkbox" value="remember-me"><label> <script>javascript:document.getElementById("remember").append(formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
 				<!-- <label><input type="checkbox" value="remember-me"> <script>javascript:document.getElementById("remember").append(formatMessage([myLangTexts["signin"]["rememberme"]]))</script></label>
 				-->
 			</div>
-			<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="register()"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
+			<!--
+			<button id="clickButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="register()"><script>displayForm("clickButton",formatMessage([myLangTexts["form"]["signin"]]))</script></button>
+			-->
+			<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
 		</form>
 		<script>
 			if ( urlParams["action"] == "webcreation" ) {
