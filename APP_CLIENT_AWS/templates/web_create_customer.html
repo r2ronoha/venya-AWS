@@ -28,6 +28,8 @@
 	<script type="text/javascript">
 	var lang = default_lang;
 	var myLangTexts;
+	var dbErrorCount;
+	var respError;
 
 	function init() {	
 		parseUrl();
@@ -58,65 +60,55 @@
 		var email = form.elements.inputEmail.value;
 		//var address = form.elements.inputAddress.value;
 		var phone = form.elements.inputPhone.value;
+
+		dbErrorCount = 0;
 		
-		var error = {};
-		if ( surname == "" ) { error["surname"] = formatMessage([myLangTexts["customer"]["surname"],myLangTexts["errors"]["required"]]); }
-		if ( firstname == "" ) { error["firstname"] = formatMessage([myLangTexts["customer"]["firstname"],myLangTexts["errors"]["required"]]); }
-		if ( email != "" && ! emailFormat.test(email) ) error["email"] = myLangTexts["errors"]["emailformat"];
-		if ( phone != "" && ! phoneFormat.test(phone) ) error["phone"] = myLangTexts["errors"]["phoneformat"];
 		phone = phone.replace(/\+/,'%2B');
 		
-		if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?lang=" + lang + "&status=ERROR&errormessage=input";
-			for ( var field in error ) {
-				errorUrl += "&" + field + "=" + escape(error[field]);
-			}
-			//var errorUrl = location.href.hostname + location.href.path;
-			//console.log("errorUrl = " + errorUrl);
-			location.href = errorUrl;
-		} else { 
-			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/createCustomer?type=customer" + 
-			"&firstname=" + firstname.toLowerCase() +
-			"&surname=" + surname.toLowerCase() +
-			"&email=" + email.toLowerCase() +
-			//"&address=" + address + 
-			"&phone=" + phone +
-			"&language=" + lang;
-			//console.log(myUrl);
-			xhr.open('GET',myUrl,true);
-			//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
-			xhr.send();
-			xhr.onreadystatechange = processRequest;
-		
-			function processRequest(e) {
-				if (xhr.readyState == 4) {
-					if (xhr.status == 200) {
-						//console.log(xhr.responseText);
+		var xhr = new XMLHttpRequest();
+		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/createCustomer?type=customer" + 
+		"&firstname=" + firstname.toLowerCase() +
+		"&surname=" + surname.toLowerCase() +
+		"&email=" + email.toLowerCase() +
+		//"&address=" + address + 
+		"&phone=" + phone +
+		"&language=" + lang;
+		//console.log(myUrl);
+		xhr.open('GET',myUrl,true);
+		//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
+		xhr.send();
+		xhr.onreadystatechange = processRequest;
+	
+		function processRequest(e) {
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					//console.log(xhr.responseText);
+					var response = JSON.parse(xhr.responseText);
+					//var successUrl = "./signin.html?action=registration&";
+					var successUrl = "./register.html?lang=" + lang + "&action=webcreation&";
+					for (var field in response) {
+						if ( field != "status" && field != "action" ) {
+							var value = response[field];
+							if ( value == undefined ) value = "N/A";
+							successUrl += field.replace(/_/,'') + "=" + value + "&";
+						}
+					}
+					location.href=successUrl.replace(/&$/,'');
+				} else {
+					try {
 						var response = JSON.parse(xhr.responseText);
-						//var successUrl = "./signin.html?action=registration&";
-						var successUrl = "./register.html?lang=" + lang + "&action=webcreation&";
-						for (var field in response) {
-							if ( field != "status" && field != "action" ) {
-								var value = response[field];
-								if ( value == undefined ) value = "N/A";
-								successUrl += field.replace(/_/,'') + "=" + value + "&";
-							}
+						respError = response["errormessage"];
+						while ( respError && ((respError == "createcheckfail" || (respError != "createcheckfail" || respError != "notregistered"))) && dbErrorCount++ < 3 ) {
+							var checkUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=register" +
+							"&surname=" + escape(surname) +
+							"&firstname=" + escape(firstname);
+							xhr.open('GET',checkUrl,true);
+							xhr.send();
+							xhr.onreadystatechange = processRequest;
 						}
-						location.href=successUrl.replace(/&$/,'');
-					} else {
-						try {
-							var response = JSON.parse(xhr.responseText);
-							var params = {};
-							params["lang"] = lang;
-							params["status"] = response["status"];
-							params["errormessage"] = response["errormessage"];
-							//console.log(params["errormessage"]);
-							//goTo(pages.webcreatecustomer,params);
-							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
-						} catch (err) {
-							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
-						}
+						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][respError]]);
+					} catch (err) {
+						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 					}
 				}
 			}

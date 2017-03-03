@@ -86,7 +86,6 @@ function goTo(page,params) {
 }
 
 function formatName(value) {
-	console.log("[parsing.formatName] value = " + value);
 	var nameparts = value.split(" ");
 	for (var part in nameparts) {
 		if ( nameparts[part].length > 0 ) {

@@ -172,10 +172,10 @@ function sessionTimeoutManagement(dbcnx, db) {
 						customer.doUpdate(dbcnx, db, myquery, updateQuery, function(err,myquery) {
 							if ( err ) {
 								console.log("[requestHandler.sessionTimeoutMgt] failed to clear session for customerID " + mycustomerID);
-								//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+								setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
 							} else {
 								console.log("[requestHandler.sessionTimeoutMgt] Session successfully cleared for customerID " + mycustomerID);
-								//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
+								setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
 							}
 						});
 
@@ -202,8 +202,12 @@ function getCustomer(response, request, dbcnx, db) {
 	var username = url.parse(request.url, true).query.username;
 	var password = url.parse(request.url, true).query.password;
 	var id = url.parse(request.url, true).query.id;
+	var surname = url.parse(request.url, true).query.surname;
+	var firstname = url.parse(request.url, true).query.firstname;
 	
-	if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
+	//if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
+	//console.log("action = " + action + " - surname = " + surname + " - firstame = " + firstname);
+	if ( (action == "register" && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0 || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
 	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
 		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 		var body = {};
@@ -217,6 +221,7 @@ function getCustomer(response, request, dbcnx, db) {
 	var noUser = 0;
 	var query;	
 	var queryUsername = {};
+	var registerCheckQuery ={};
 	
 	function queryAndRespond(query) {
 		customer.doGet(dbcnx, db, query, function(err,attList) {
@@ -252,7 +257,41 @@ function getCustomer(response, request, dbcnx, db) {
 		});
 	}
 	
-	if ( action == "login" ) {
+	if ( action == "register" ) {
+		registerCheckQuery["firstname.value"] = firstname;
+		registerCheckQuery["surname.value"] = surname;
+		//console.log("registerCheckQuery = " + JSON.stringify(registerCheckQuery));
+		customer.doGet(dbcnx, db, registerCheckQuery, function(err,userAtt) {
+			if (err) {
+				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = err;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if ( userAtt == null ) {
+				noUser = 1;
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "notregistered";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if ( userAtt["username"] != attributesDefault["username"] ) {
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "accountalreadycreated";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else {
+				queryAndRespond(registerCheckQuery);
+			}
+		});
+	} else if ( action == "login" ) {
 		queryUsername["username.value"] = username;
 		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
