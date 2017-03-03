@@ -63,16 +63,16 @@
 	
 	<div class="errors" id="errors"></div>
 	<div class="container">
-	<form class="form-signin" onsubmit="getUSername();return false">
+	<form class="form-signin" onsubmit="getUsername();return false">
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 	
-		<input type="text" id="inputName" class="form-control" placeholder="Surname" required autofocus>
+		<input type="text" id="inputName" class="form-control" oninput="setCustomValidity('')" oninvalid="required_field_empty(this,myLangTexts['customer']['surname'],myLangTexts)"placeholder="Surname" required autofocus>
 		<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
 		
-		<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+		<input type="email" id="inputEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)"placeholder="Email address" required autofocus>
 		<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 		
-		<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['passwordformat']))" placeholder="Password" required>
+		<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['passwordformat']]))" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required>
 		<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
 	
 		<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>

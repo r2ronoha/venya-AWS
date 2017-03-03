@@ -189,13 +189,13 @@
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["signin"]["title"])</script></h2>
 
 			<fieldset>
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat'],myLangTexts['customer']['id']]))" required autofocus>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat'],myLangTexts['customer']['id']]))" oninvalid="required_field_empty(this,myLangTexts['customer']['username'],myLangTexts)" required autofocus>
 			<label for="inputUsername" class="sr-only"><script>javascript:displayForm("inputUsername",myLangTexts["customer"]["username"])</script></label>
 			<span id="usernameErrors" style="display: none"></span>
 			</fieldset>
 
 			<fieldset>
-			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])"placeholder="Password" required>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["customer"]["password"])</script></label>
 			<span id="passwordErrors" style="display: none"></span>
 			</fieldset>

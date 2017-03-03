@@ -21,6 +21,7 @@ var objectidFormat = new RegExp("^[0-9a-fA-F]{24}$");
 var postcodeFormat = new RegExp("^\\w+([\\s-]*\\w*)?$");
 //var postcodeFormat = new RegExp("^[0-9]+$");
 var defaultUsername = "changeme";
+var defaultEmail = "changeme@venya.es";
 
 var pages = {
 	"choosesite_esp" : "choose_site_esp.html",
@@ -477,3 +478,14 @@ function format_error(errorid,id,message){
 	errorcount++;
 }
 
+function invalid_email(input,langTexts) {
+	if ( ! input.validity.valid ) {
+		input.setCustomValidity(formatMessage([langTexts['errors']['emailformat']]));
+	}
+}
+
+function required_field_empty(input,field,langTexts) {
+	if ( ! input.validity.valid ) {
+		input.setCustomValidity(formatMessage([field,langTexts['errors']['required']]));
+	}
+}

@@ -66,12 +66,12 @@
 		errorcount = 0;
 
 		if ( email != confirmEmail ) {
-			format_error("confirmEmailError","confirmEmail",[email,confirmEmail,myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]);
+			format_error("confirmEmailError","confirmEmail",formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]));
 		}
 			
 
 		if ( password != confirmPassword ) {
-			format_error("confirmPasswordError","confirmPassword",[password,confirmPassword,myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]);
+			format_error("confirmPasswordError","confirmPassword",formatMessage([myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]));
 		}
 
 		if ( errorcount > 0 ) {
@@ -88,8 +88,8 @@
 		if (verify_form()) {
 			var form = document.querySelector("form");
 			var id = form.elements.id.value;
-			var username = form.elements.inputUsername.value;
-			var surname = form.elements.inputName.value.toLowerCase();
+			var username = form.elements.inputUsername.value.replace(/\s*$/,'');
+			var surname = form.elements.inputName.value.toLowerCase().replace(/\s*$/,'');
 			var email = form.elements.inputEmail.value.toLowerCase();
 			var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
 			var phone = form.elements.inputPhone.value;
@@ -157,31 +157,31 @@
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 		
 			<fieldset>
-			<input type="text" id="id" class="form-control" pattern="^[0-9a-fA-F]{24}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['customer']['id']]))" placeholder="id" required autofocus>
+			<input type="text" id="id" class="form-control" pattern="^[0-9a-fA-F]{24}$" oninvalid="required_field_empty(this,myLangTexts['customer']['id'],myLangTexts)" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['customer']['id']]))" placeholder="id" required autofocus>
 			<label id="idlabel" for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
 			<span id="idError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,myLangTexts['errors']['usernameformat'])" required autofocus>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninvalid="required_field_empty(this,myLangTexts['customer']['username'],myLangTexts)" oninput="field_format_check(this,myLangTexts['errors']['usernameformat'])" required autofocus>
 			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["customer"]["username"]]))</script></label>
 			<span id="usernameError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>
-			<input type="text" id="inputName" class="form-control" placeholder="Surname" required autofocus>
+			<input type="text" id="inputName" class="form-control" oninvalid="required_field_empty(this,myLangTexts['customer']['surname'],myLangTexts)" oninput="setCustomValidity('')" placeholder="Surname" required autofocus>
 			<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
 			<span id="nameError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
-			<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+			<input type="email" id="inputEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="Email address" required autofocus>
 			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 			<span id="emailError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>
-			<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm Email address" required autofocus>
+			<input type="email" id="confirmEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)"placeholder="Confirm Email address" required autofocus>
 			<label for="confirmEmail" class="sr-only"><script>displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["email"]]))</script></label>
 			<span id="confirmEmailError" style"display: none;"></span>
 			</fieldset>
@@ -192,14 +192,14 @@
 			<span id="phoneError" style"display: none;"></span>
 			</fieldset>
 
-			<fieldset>			
-			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" placeholder="Password" required>
+			<fieldset>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
 			<span id="passwordError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
-			<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+			<input type="password" id="confirmPassword" oninvalid="required_field_empty(this,myLangTexts['form']['confirm'].concat(myLangTexts['customer']['password']),myLangTexts)" oninput="setCustomValidity('')" class="form-control" placeholder="Confirm Password" required>
 			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
 			<span id="confirmPasswordError" style"display: none;"></span>
 			</fieldset>
@@ -219,6 +219,22 @@
 				document.getElementById("id").defaultValue = customerId;
 				document.getElementById("id").autofocus = false;
 				document.getElementById("id").disabled = true;
+
+				document.getElementById("inputName").defaultValue = decodeURIComponent(urlParams["surname"]);
+				document.getElementById("inputName").autofocus = false;
+				document.getElementById("inputName").disabled = true;
+
+				if ( urlParams["email"] != defaultEmail ) {
+					document.getElementById("inputEmail").defaultValue = urlParams["email"];
+					document.getElementById("inputEmail").autofocus = false;
+					document.getElementById("inputEmail").disabled = false;
+				}
+
+				if ( urlParams["phone"] != "N/A" ) {
+					document.getElementById("inputPhone").defaultValue = urlParams["phone"];
+					document.getElementById("inputPhone").autofocus = false;
+					document.getElementById("inputPhone").disabled = false;
+				}
 			}
 		</script>
 	</div> <!-- /container -->

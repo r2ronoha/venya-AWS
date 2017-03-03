@@ -138,7 +138,7 @@
 		<input type="text" id="street" class="form-control" placeholder="Street and number" autofocus>
 		<label for="street" class="sr-only"><script>javascript:displayForm("street",myLangTexts["address"]["street"] + ", " + myLangTexts["address"]["number"])</script></label>
 		
-		<input type="text" id="postcode" class="form-control" pattern="^\w+([\s-]*\w*)?$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['address']['postcode']]))" placeholder="Post Code" required>
+		<input type="text" id="postcode" class="form-control" pattern="^\w+([\s-]*\w*)?$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['address']['postcode']]))" oninvalid="required_field_empty(this,myLangTexts['address']['postcode'],myLangTexts)" placeholder="Post Code" required>
 		<label for="postcode" class="sr-only"><script>javascript:displayForm("postcode",myLangTexts["address"]["postcode"])</script></label>
 		
 		<input type="text" id="city" class="form-control" placeholder="City" >

@@ -98,7 +98,7 @@
 					gotoParams["sessionid"] = sessionid;
 					gotoParams["action"] = response["action"];
 					gotoParams["lang"] = lang;
-					gotoParams["updatefield"] = changeField;
+					gotoParams["updatefield"] = field;
 					/*for (var field in response) {
 						if ( field != "status" ) gotoParams[field] = response[field];
 					}*/
@@ -142,18 +142,18 @@
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
 		
 		<fieldset>
-		<input type="email" id="oldEmail" class="form-control" placeholder="Old Email" required autofocus>
+		<input type="email" id="oldEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="Old Email" required autofocus>
 		<label for="oldEmail" class="sr-only"><script>javascript:displayForm("oldEmail",myLangTexts["form"]["oldemail"])</script></label>
 		</fieldset>
 		
 		<fieldset>
-		<input type="email" id="inputEmail" class="form-control" placeholder="New Email" required autofocus>
+		<input type="email" id="inputEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="New Email" required autofocus>
 		<label for="inputEmail" class="sr-only"><script>javascript:displayForm("inputEmail",myLangTexts["form"]["newemail"])</script></label>
 		<span id="emailErrors" style="display: none"></span>
 		</fieldset>
 		
 		<fieldset>
-		<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm email" required autofocus>
+		<input type="email" id="confirmEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="Confirm email" required autofocus>
 		<label for="confirmEmail" class="sr-only"><script>javascript:displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["form"]["newemail"]]))</script></label>
 		<span id="confirmEmailErrors" style="display: none"></span>
 		</fieldset>

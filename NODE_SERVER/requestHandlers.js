@@ -11,7 +11,7 @@ var ObjectId = require('mongodb').ObjectId;
 
 var exec = require("child_process").exec;
 var myUndefined = [ undefined, "undefined" ];
-var notCaseSensitive = [ "name","username","surname","email","address" ];
+var notCaseSensitive = [ "name","surname","email","address" ];
 /*
 //imports to support aws email
 // load aws sdk
@@ -172,10 +172,10 @@ function sessionTimeoutManagement(dbcnx, db) {
 						customer.doUpdate(dbcnx, db, myquery, updateQuery, function(err,myquery) {
 							if ( err ) {
 								console.log("[requestHandler.sessionTimeoutMgt] failed to clear session for customerID " + mycustomerID);
-								setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
+								//setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
 							} else {
 								console.log("[requestHandler.sessionTimeoutMgt] Session successfully cleared for customerID " + mycustomerID);
-								setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
+								//setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
 							}
 						});
 
@@ -191,7 +191,7 @@ function sessionTimeoutManagement(dbcnx, db) {
 				//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
 			}*/
 		}
-		setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
+		setTimeout(sessionTimeoutManagement,1800000,dbcnx,db);
 	});
 }
 

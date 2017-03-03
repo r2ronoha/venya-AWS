@@ -137,18 +137,18 @@
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
 	
 		<fieldset>
-		<input type="text" id="oldUsername" class="form-control" placeholder="Username" required autofocus>
+		<input type="text" id="oldUsername" class="form-control" oninput="setCustomValidity('')" oninvalid="required_field_empty(this,myLangTexts['form']['old'].replace(/$/,' ').concat(myLangTexts['customer']['username']),myLangTexts)" placeholder="Username" required autofocus>
 		<label for="oldUsername" class="sr-only"><script>javascript:displayMenu("oldUsername",formatMessage([myLangTexts["form"]["old"],myLangTexts["customer"]["username"]]))</script></label>
 		</fieldset>
 	
 		<fieldset>
-		<input type="text" id="inputUsername" class="form-control" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat']]))" placeholder="New Username" required autofocus>
+		<input type="text" id="inputUsername" class="form-control" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat']]))" oninvalid="required_field_empty(this,myLangTexts['customer']['username'],myLangTexts)" placeholder="New Username" required autofocus>
 		<label for="inputUsername" class="sr-only"><script>javascript:displayMenu("inputUsername",formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["username"]]))</script></label>
 		<span id="usernameErrors" style="display: none"></span>
 		</fieldset>
 	
 		<fieldset>
-		<input type="text" id="confirmUsername" class="form-control" placeholder="Confirm new Username" required autofocus>
+		<input type="text" id="confirmUsername" class="form-control" oninput="setCustomValidity('')" oninvalid="required_field_empty(this,myLangTexts['form']['confirm'].replace(/$/,' ').concat(myLangTexts['customer']['username']),myLangTexts)" placeholder="Confirm new Username" required autofocus>
 		<label for="confirmUsername" class="sr-only"><script>javascript:displayMenu("confirmUsername",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["username"]]))</script></label>
 		<span id="confirmUsernameErrors" style="display: none"></span>
 		</fieldset>
