@@ -57,22 +57,15 @@
 
 			setFormErrorHeader(urlParams,myLangTexts);
 		}
-/*
-		function clear_errors(id) {
-			document.getElementById(id);
-		}
-*/
-		function verify_entry(username,password) {
-			if (username == "") { 
-				//document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]); 
-				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["username"],myLangTexts["errors"]["required"]]); 
-				return false; 
-			} else 	if (password == "") { 
-				//document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); 
-				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["customer"]["password"],myLangTexts["errors"]["required"]]); 
-				return false; 
+
+		function field_format_check(input,message) {
+			if (input.validity.patternMismatch) {
+				//console.log("BAD FORMAT of username");
+				input.setCustomValidity(message);
+				input.style.borderColor = "red";
 			} else {
-				return true;
+				input.setCustomValidity('');
+				input.style.borderColor = "#ccc";
 			}
 		}
 
@@ -94,7 +87,7 @@
 			}
 			
 			//console.log("Calling checkCredentials");
-			if ( verify_entry(username,password) ) {
+			//if ( verify_entry(username,password) ) {
 				var xhr = new XMLHttpRequest();
 				var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
 				xhr.open('GET',myUrl,true);
@@ -148,20 +141,17 @@
 						} else {
 							try {
 								var response = JSON.parse(xhr.responseText);
-								var gotoParams = {};
-								gotoParams["lang"] = lang;
-								gotoParams["status"] = response["status"];
-								gotoParams["errormessage"] = response["errormessage"];
-								//goTo(pages.signin,gotoParams);
 								console.log("Error received from seerver = " + response["errormessage"]);
 								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
+								return false;
 							} catch (SyntaxError) {
 								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+								return false;
 							}
 						}
 					}
 				}
-			}
+			//}
 		}
 	</script>
 
@@ -195,14 +185,20 @@
 	<div class="errors" id="errors"></div>
 	<!-- SIGN IN FORM -->
 	<div class="container">
-		<form class="form-signin">
+		<form class="form-signin" onsubmit="signin_check(); return false">
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["signin"]["title"])</script></h2>
 
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+			<fieldset>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat'],myLangTexts['customer']['id']]))" required autofocus>
 			<label for="inputUsername" class="sr-only"><script>javascript:displayForm("inputUsername",myLangTexts["customer"]["username"])</script></label>
+			<span id="usernameErrors" style="display: none"></span>
+			</fieldset>
 
-			<input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+			<fieldset>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])"placeholder="Password" required>
 			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["customer"]["password"])</script></label>
+			<span id="passwordErrors" style="display: none"></span>
+			</fieldset>
 
 			<div id="checkRemember" class="checkbox">
 				<input id="remember" type="checkbox" value="rememberme">
@@ -210,7 +206,7 @@
 				<!-- <label for="remember"> <script>javascript:displayForm("remember",myLangTexts["signin"]["rememberme"])</script></label> -->
 			</div>
 			<!-- <input type="submit" value="submit" onclick="signin_check()"/> -->
-			<button id="signinButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="signin_check()"><script>javascript:displayForm("signinButton",myLangTexts["signin"]["button"])</script></button>
+			<button id="signinButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>javascript:displayForm("signinButton",myLangTexts["signin"]["button"])</script></button>
 			<!-- <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button> -->
 		</form>
 	</div> <!-- /container -->

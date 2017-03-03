@@ -40,6 +40,17 @@
 		setFormErrorHeader(urlParams,myLangTexts);
 	}
 
+	function field_format_check(input,message) {
+		if (input.validity.patternMismatch) {
+			//console.log("BAD FORMAT of username");
+			input.setCustomValidity(message);
+			input.style.borderColor = "red";
+		} else {
+			input.setCustomValidity('');
+			input.style.borderColor = "#ccc";
+		}
+	}
+
 	function create_customer(){
 		var form = document.querySelector("form");
 		var surname = form.elements.inputSurname.value;
@@ -121,7 +132,7 @@
 	<div class="errors" id="errors"></div>
 	<div class="container">
 	
-	<form class="form">
+	<form class="form" onsubmit="create_customer();return false">
 	<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 	
 	<input type="text" id="inputSurname" class="form-control" placeholder="Surname" required autofocus>
@@ -133,10 +144,10 @@
 	<input type="email" id="inputEmail" class="form-control" placeholder="Email address" >
 	<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 	
-	<input type="text" id="inputPhone" class="form-control" placeholder="Phone number" >
+	<input type="text" id="inputPhone" class="form-control" pattern="^(\+|00)?[0-9]{4,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['phoneformat']]))" placeholder="Phone number" >
 	<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
 
-	<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="create_customer()"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
+	<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>displayForm("submitButton",formatMessage([myLangTexts["form"]["submit"]]))</script></button>
 	</form>
 	</div>
 	

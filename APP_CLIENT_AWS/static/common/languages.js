@@ -97,7 +97,7 @@ var languages_text = {
 			"passwordformat" : "password must be at least 6 characters long and contain at least 1 upper case, 1 lower cased and 1 number",
 			"usernameformat" : "username must be at least 8 characters long and alphanumeric",
 			"emailformat" : "invalid email format",
-			"phoneformat" : "invalide phone number",
+			"phoneformat" : "invalid phone number",
 			"notregistered" : "username invalid. Please register to the service with the id provided by your provider",
 			"accountnotfound" : "account not found",
 			"wrongcredentials" : "wrong username or password",

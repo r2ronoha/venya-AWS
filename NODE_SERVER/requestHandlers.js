@@ -191,7 +191,7 @@ function sessionTimeoutManagement(dbcnx, db) {
 				//setTimeout(sessionTimeoutManagement,60000,dbcnx,db);
 			}*/
 		}
-		setTimeout(sessionTimeoutManagement,360000,dbcnx,db);
+		setTimeout(sessionTimeoutManagement,900000,dbcnx,db);
 	});
 }
 
@@ -390,6 +390,7 @@ function register(response, request, dbcnx, db) {
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else {
+			//check id the id and the surname provided match
 			if ( attList["surname"].toLowerCase() != surname.toLowerCase() ){
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
@@ -398,7 +399,17 @@ function register(response, request, dbcnx, db) {
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );				
+			//check if the user account has already been created for the id-name pair
+			} else if ( attList["username"] != attributesDefault["username"].value || attList["email"] != attributesDefault["email"].value ) {
+						response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						var body = {};
+						body["status"] = "ERROR";
+						body["errormessage"] = "accountalreadycreated"
+						body["action"] = action;
+						var respBody = JSON.stringify(body);
+						response.write(respBody, function(err) { response.end(); } );					
 			} else {
+				//verify if the username and/or email are already in use by any account
 				customer.doGet(dbcnx, db, checkUsernameQuery, function(err,attList) {
 					if (err) {
 						response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});

@@ -10,7 +10,7 @@ var customerAttributes = {
 		"type": { "fix": 1, "value": "customer" },
 		"firstname": { "fix": 1, "value": "Change Me" },
 		"surname": { "fix": 1, "value": "Change Me" },
-		"email": { "fix": 0, "value": "changme@venya.com" },
+		"email": { "fix": 0, "value": "changeme@venya.com" },
 		"username": { "fix": 0, "value": "changeme" },
 		"password": { "fix": 0, "value": "changeme" },
 		"address": { "fix": 0, "value": { 
@@ -54,8 +54,10 @@ function doInsert (cnx, db, query, callback) {
 	
 	//console.log("[customer.doInsert()] cnx = " + cnx + " -- db = " + db + " -- checkQuery = " + JSON.stringify(checkQuery) + " -- query = " + JSON.stringify(query));
 	
-	doGet(cnx, db, checkQuery, function(attList) {
-		if (attList != null) {
+	doGet(cnx, db, checkQuery, function(err,attList) {
+		if (err) {
+			callback(null);
+		} else if (attList != null) {
 			var message = "alreadyregistered";
 			exists = 1;
 			callback(query,exists,message);

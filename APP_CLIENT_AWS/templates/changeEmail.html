@@ -28,6 +28,7 @@
 	var sessionid;
 	var myLangTexts;
 	var lang = default_lang;
+	var errorcount;
 
 	function init() {
 		var notErrorFields = { "status": "status", "errormessage": "errormessage", "action": "action", "sessionid": "sessionid", "lang" : "lang" };
@@ -40,7 +41,10 @@
 		customerId = sessionid.substring(0,sessionid.length - 2);
 
 		changeField = urlParams["field"];
-		verifySessionId(sessionid, setFormErrorHeader(urlParams,myLangTexts));
+		//verifySessionId(sessionid, setFormErrorHeader(urlParams,myLangTexts));
+		verifySessionId(sessionid, function(urlParams,myLangTexts) {
+			setFormErrorHeader(urlParams,myLangTexts);
+		});
 	}
 	
 	function readForm() {
@@ -49,24 +53,18 @@
 		var email = form.elements.inputEmail.value;
 		var confirmEmail = form.elements.confirmEmail.value;
 		
-		var error = {};
-		if ( oldEmail == "" ) { error["oldEmail"] = formatMessage(["Old",myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]); }
-		if ( email == "" ) {
-			error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["required"]]); 
-		} else {
-			if ( email != confirmEmail ) { error["email"] = formatMessage([myLangTexts["customer"]["email"],myLangTexts["customer"]["address"] + "es",myLangTexts["errors"]["notmatch"]]); }
-			else {
-				if ( ! emailFormat.test(email) ) { error["email"] = formatMessage([myLangTexts["errors"]["badformat"],myLangTexts["customer"]["email"]]); }
-				else if ( oldEmail == email ) { error["email"] = formatMessage(["New",myLangTexts["customer"]["email"],myLangTexts["errors"]["sameprevious"]]); }
-			}
+		clear_error("confirmEmailErrors","confirmEmail");
+		clear_error("emailErrors","inputEmail");
+		errorcount = 0;
+
+		if ( email != confirmEmail ) { 
+			format_error("confirmEmailErrors","confirmEmail",formatMessage([myLangTexts["customer"]["email"],myLangTexts["customer"]["address"] + "es",myLangTexts["errors"]["notmatch"]]));
+		} else if ( oldEmail == email ) {
+			format_error("emailErrors","inputEmail",formatMessage([myLangTexts["form"]["new"],myLangTexts["customer"]["email"],myLangTexts["errors"]["sameprevious"]]));
 		}
 	
-		if ( Object.keys(error).length > 0 ) {
-			var errorUrl = location.href.split('?')[0] + "?action=update&sessionid=" + sessionid + "&lang=" + lang + "&status=ERROR&errormessage=input";
-			for ( var field in error ) {
-				errorUrl += "&" + field + "=" + escape(error[field]);
-			}
-			location.href = errorUrl;
+		if ( errorcount > 0 ) {
+			return false;
 		} else {
 			var values = {};
 			values["id"] = customerId;
@@ -109,15 +107,11 @@
 					try {
 						var response = JSON.parse(xhr.responseText);
 						var gotoParams = {};
-						gotoParams["action"] = "update";
-						gotoParams["sessionid"] = sessionid;
-						gotoParams["setting"] = field;
-						gotoParams["status"] = response["status"];
-						gotoParams["errormessage"] = response["errormessage"];
-						gotoParams["lang"] = lang;
-						goTo(pages.settingsPages.email,gotoParams);
+						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][response["errormessage"]]]);
+						return false;
 					} catch (err) {
 						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+						return false;
 					}
 				}
 			}
@@ -141,22 +135,30 @@
                 <li><a id="menuLogout" href="javascript:goTo(pages.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
-	
+	<div class="errors" id="errors"></div>	
 	<div class="container">
 	
-		<form class="form-signin">
+		<form class="form-signin" onsubmit="readForm();return false">
 		<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["form"]["enterdetails"])</script></h2>
 		
+		<fieldset>
 		<input type="email" id="oldEmail" class="form-control" placeholder="Old Email" required autofocus>
 		<label for="oldEmail" class="sr-only"><script>javascript:displayForm("oldEmail",myLangTexts["form"]["oldemail"])</script></label>
+		</fieldset>
 		
+		<fieldset>
 		<input type="email" id="inputEmail" class="form-control" placeholder="New Email" required autofocus>
 		<label for="inputEmail" class="sr-only"><script>javascript:displayForm("inputEmail",myLangTexts["form"]["newemail"])</script></label>
+		<span id="emailErrors" style="display: none"></span>
+		</fieldset>
 		
+		<fieldset>
 		<input type="email" id="confirmEmail" class="form-control" placeholder="Confirm email" required autofocus>
 		<label for="confirmEmail" class="sr-only"><script>javascript:displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["form"]["newemail"]]))</script></label>
+		<span id="confirmEmailErrors" style="display: none"></span>
+		</fieldset>
 	
-		<button id="formButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="readForm()"><script>javascript:displayMenu("formButton",myLangTexts["form"]["submit"].toUpperCase())</script></button>
+		<button id="formButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>javascript:displayMenu("formButton",myLangTexts["form"]["submit"].toUpperCase())</script></button>
 		<a id="cancelButton" href="javascript:goTo(pages.settings,{'sessionid' : sessionid, 'lang' : lang})" style="text-align:center"><script>javascript:displayMenu("cancelButton",myLangTexts["form"]["cancel"].toUpperCase())</script></a>
 <!--
 		<button id="cancelButton" class="btn btn-lg btn-primary btn-block" type="button" onclick="goTo(pages.settings,{'sessionid' : sessionid, 'lang' : lang})"><script>javascript:displayMenu("cancelButton",myLangTexts["form"]["cancel"].toUpperCase())</script></button>

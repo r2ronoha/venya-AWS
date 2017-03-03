@@ -413,7 +413,7 @@ function verifySessionId(sessionid,callback) {
 				urlParams["errormessage"] = "invalidsessionid";
 				goTo(pages.signin,urlParams);
 			} else {
-				//console.log("[parsing.verifySessionID] session id verified. Callback");
+				//console.log("[parsing.verifySessionID] session id verified. Callback " + callback.toString());
 				callback();
 			}
 		});
@@ -450,3 +450,28 @@ function setSessionId(values,urlParams) {
 		}
 	}
 }
+
+function field_format_check(input,message) {
+	if (input.validity.patternMismatch) {
+		//console.log("BAD FORMAT of username");
+		input.setCustomValidity(message);
+		input.style.borderColor = "red";
+	} else {
+		input.setCustomValidity('');
+		input.style.borderColor = "#ccc";
+	}
+}
+
+function clear_error(errorid,id) {
+	document.getElementById(errorid).innerHTML = '';
+	document.getElementById(errorid).style.diplay = "none";
+	document.getElementById(id).style.borderColor = "#ccc";
+}
+
+function format_error(errorid,id,message){
+	document.getElementById(errorid).innerHTML = message;
+	document.getElementById(errorid).style.display ="block";
+	document.getElementById(id).style.borderColor = "red";
+	errorcount++;
+}
+

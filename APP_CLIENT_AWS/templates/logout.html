@@ -50,18 +50,25 @@
 						var gotoParams = {};
 						gotoParams["action"] = "logout";
 						gotoParams["lang"] = lang;
-						/*for (var field in response) {
-							if ( field != "status" ) gotoParams[field] = response[field];
-						}*/
 						goTo(pages.signin,gotoParams);
 					} else {
-						var response = JSON.parse(xhr.responseText);
-						var gotoParams = {};
-						gotoParams["action"] = "logout";
-						gotoParams["status"] = response["status"];
-						gotoParams["errormessage"] = response["errormessage"];
-						gotoParams["lang"] = lang;
-						goTo(pages.signin,gotoParams);
+						try {
+							var response = JSON.parse(xhr.responseText);
+							var gotoParams = {};
+							gotoParams["action"] = "logout";
+							gotoParams["status"] = response["status"];
+							gotoParams["errormessage"] = response["errormessage"];
+							gotoParams["lang"] = lang;
+							goTo(pages.signin,gotoParams);
+						} catch (err) {
+							var gotoParams = {};
+							gotoParams["action"] = "logout";
+							gotoParams["status"] = response["status"];
+							gotoParams["errormessage"] = "dbcnxerror";
+							gotoParams["lang"] = lang;
+							goTo(pages.signin,gotoParams);
+
+						}
 					}
 				}
 			}
