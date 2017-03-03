@@ -646,7 +646,7 @@ function updateSetting(response, request, dbcnx, db) {
 						//response.write(body);
 						for ( var field in attList ) {
 							body[field] = attList[field];
-							if (field == "address") console.log(JSON.stringify(attList[field]));
+							//if (field == "address") console.log(JSON.stringify(attList[field]));
 						}
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );

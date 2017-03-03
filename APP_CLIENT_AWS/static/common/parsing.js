@@ -86,9 +86,12 @@ function goTo(page,params) {
 }
 
 function formatName(value) {
+	console.log("[parsing.formatName] value = " + value);
 	var nameparts = value.split(" ");
 	for (var part in nameparts) {
-		nameparts[part] = nameparts[part][0].toUpperCase() + nameparts[part].substring(1);
+		if ( nameparts[part].length > 0 ) {
+			nameparts[part] = nameparts[part][0].toUpperCase() + nameparts[part].substring(1);
+		}
 	}
 	return nameparts.join(' ');
 }
