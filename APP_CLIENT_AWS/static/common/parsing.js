@@ -45,6 +45,7 @@ var pages = {
 	},
 	"lostusername" : "lostUsername.html",
 	"lostpassword" : "lostPassword.html",
+	"lostid" : "lostID.html",
 	"webcreatecustomer" : "web_create_customer.html",
 	"webnewappointment" : "web_new_appointment.html",
 	"showlostinfo" : "show_lost_info.html",

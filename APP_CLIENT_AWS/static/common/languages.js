@@ -1,5 +1,9 @@
 var languages_text = {
         "eng" : {
+				"zone" : {
+					"provider" : "providers area",
+					"customer" : "customers area"
+				},
 				"init" : {
 						"welcome" : "WELCOME TO VENYA",
 						"customer" : "I AM A CUSTOMER",
@@ -104,7 +108,8 @@ var languages_text = {
 			"enterdetails" : "please enter your details",
 			"submit" : "submit",
 			"cancel" : "cancel",
-			"toprovider" : "Don't have an id? Get an account from your provider"
+			"toprovider" : "Don't have an id? Get an account from your provider.",
+			"getid" : "Id lost? Get it here"
                 },
                 "underconstruction" : "under construction",
 		"errors" : {
@@ -146,6 +151,10 @@ var languages_text = {
 		}
         },
         "esp" : {
+				"zone" : {
+					"provider" : "zona de proveedores",
+					"customer" : "zona de clientes"
+				},
 				"init" : {
 						"welcome" : "BIENVENID@ A VENYA",
 						"customer" : "SOY UN CLIENTE",
@@ -250,7 +259,8 @@ var languages_text = {
 			"enterdetails" : "Introduce tus datos",
 			"submit" : "enviar",
 			"cancel" : "anular",
-			"toprovider" : "¿No tiened identificador? Créate una cuenta con tu proveedor."
+			"toprovider" : "¿No tienes identificador? Créate una cuenta con tu proveedor.",
+			"getid" : "¿Identificador perdido? Recupéralo aquí"
                 },
                 "underconstruction" : "en construcción",
 		"errors" : {

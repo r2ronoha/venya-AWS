@@ -314,10 +314,10 @@ function getCustomer(response, request, dbcnx, db) {
 	var surname = url.parse(request.url, true).query.surname;
 	var firstname = url.parse(request.url, true).query.firstname;
 	
-	//if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
 	//console.log("action = " + action + " - surname = " + surname + " - firstame = " + firstname);
-	if ( (action == "register" && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0 || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
+	//if ( ( ((action == "register" || action == "getid" ) && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0) || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+		//console.log("[requestHandlers.getCustomer] bad request based on action : \n- action: \"" + action + "\"\n- surname: \"" + surname + "\"\n- firstname: \"" + firstname);
 		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 		var body = {};
 		body["status"] = "ERROR";
@@ -366,7 +366,7 @@ function getCustomer(response, request, dbcnx, db) {
 		});
 	}
 	
-	if ( action == "register" ) {
+	if ( ["register","getid"].indexOf(action) >= 0 ) {
 		registerCheckQuery["firstname.value"] = firstname;
 		registerCheckQuery["surname.value"] = surname;
 		//console.log("registerCheckQuery = " + JSON.stringify(registerCheckQuery));
@@ -388,7 +388,8 @@ function getCustomer(response, request, dbcnx, db) {
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
-			} else if ( userAtt["username"] != customerAttributesDefault["username"] ) {
+			} else if ( userAtt["username"] != customerAttributesDefault["username"].value ) {
+				//console.log("[requestHandlers.getCustomer] action = " + action + " - username = " + userAtt["username"] + " (default: " + customerAttributesDefault["username"].value);
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";

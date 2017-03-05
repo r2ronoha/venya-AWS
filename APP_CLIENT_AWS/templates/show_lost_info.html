@@ -51,6 +51,11 @@
 <body>
 	
 	<script>init();</script>
+
+	<div class="subscriberarea" id="area">
+		<p><script>javascript:document.getElementById("area").innerHTML = myLangTexts["zone"]["customer"].toUpperCase()</script></p>
+	</div>
+
 	<a id="signin" href="javascript:goTo(pages.signin,{'lang' : lang })"><script>javascript:displayMenu("signin",formatMessage([myLangTexts["signin"]["button"]]))</script></a>
 	
 	

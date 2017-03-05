@@ -129,7 +129,7 @@
 						updateValues["id"] = customerId;
 						updateValues["field"] = "sessionid";
 						updateValues["newvalue"] = sessionid;
-						setSessionId(updateValues,gotoParams,"customer",pages.signin,pages,home);
+						setSessionId(updateValues,gotoParams,"customer",pages.signin,pages.home);
 					} else {
 						try {
 							var response = JSON.parse(xhr.responseText);
@@ -150,6 +150,11 @@
 
 <body>
 	<script>init();</script>
+
+	<div class="subscriberarea" id="area">
+		<p><script>javascript:document.getElementById("area").innerHTML = myLangTexts["zone"]["customer"].toUpperCase()</script></p>
+	</div>
+
 	<div class="errors" id="errors"></div>
 	<div class="container">
 	
@@ -159,7 +164,8 @@
 			<fieldset>
 			<input type="text" id="id" class="form-control" pattern="^[0-9a-fA-F]{24}$" oninvalid="required_field_empty(this,myLangTexts['customer']['id'],myLangTexts)" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['customer']['id']]))" placeholder="id" required autofocus>
 			<label id="idlabel" for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
-			<span id="toprovider" style="display: none;"><a id="toproviderlink"></a></span>
+			<span id="getId" style="display: none;"><a id="getIdLink"></a></span>
+			<span id="toProvider" style="display: none;"><a id="toProviderLink"></a></span>
 			<span id="idError" style"display: none;"></span>
 			</fieldset>
 			
@@ -237,13 +243,19 @@
 					document.getElementById("inputPhone").disabled = false;
 				}
 			} else {
-				var toproviderlink = document.getElementById("toproviderlink");
-				var toproviderspan = document.getElementById("toprovider");
-				//var toproviderlink = document.createElement('a');
-				toproviderlink.setAttribute('href',pages.webcreatecustomer);
-				toproviderlink.innerHTML = formatMessage([myLangTexts["form"]["toprovider"]]);
-				toproviderspan.style.display = "block";
-				//toproviderspan.appendChild(toproviderlink);
+				var toProviderLink = document.getElementById("toProviderLink");
+				toProviderLink.setAttribute('href',pages.webcreatecustomer + "?lang=" + lang);
+				toProviderLink.innerHTML = formatMessage([myLangTexts["form"]["toprovider"]]);
+
+				var toProviderSpan = document.getElementById("toProvider");
+				toProviderSpan.style.display = "block";
+
+				var getIdLink = document.getElementById("getIdLink");
+				getIdLink.setAttribute('href',pages.lostid + "?lang=" + lang);
+				getIdLink.innerHTML = formatMessage([myLangTexts["form"]["getid"]]);
+
+				var getIdSpan = document.getElementById("getId");
+				getIdSpan.style.display = "block";
 			}
 		</script>
 	</div> <!-- /container -->
