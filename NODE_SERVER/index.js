@@ -17,5 +17,8 @@ handle["/getLostUsername"] = requestHandlers.getLostUsername;
 handle["/getLostCredentials"] = requestHandlers.getLostCredentials;
 handle["/updateSetting"] = requestHandlers.updateSetting;
 handle["/createCustomer"] = requestHandlers.createCustomer;
+handle["/createProvider"] = requestHandlers.createProvider;
+handle["/getProvider"] = requestHandlers.getProvider;
+handle["/getFullSubscriberData"] = requestHandlers.getFullSubscriberData;
 
 server.start(router.route, handle, mycnx, mydb);

@@ -9,12 +9,12 @@ function start(route, handle, dbcnx, db) {
 	mongodb = db;
 	function onRequest(request, response, mongodbcnx, mongodb) {
 		var pathname =  url.parse(request.url).pathname;
-		console.log("[server] Request for " + pathname + " received");
+		console.log("[server] " + Math.round(new Date().getTime() / 1000) + " Request for " + pathname + " received");
 		route(handle, pathname, response, request, dbcnx, db);
 	}
 	
 	http.createServer(onRequest).listen(8888);
-	//console.log("[server] Server running at " + mongodbcnx);
+	//console.log("[server] " + Math.round(new Date().getTime() / 1000) + " Server running at " + mongodbcnx);
 	
 	//setTimeout(requestHandlers.sessionTimeoutManagement,15000,dbcnx,db);
 	requestHandlers.sessionTimeoutManagement(dbcnx,db);

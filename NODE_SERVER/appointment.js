@@ -5,69 +5,53 @@ var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 var document = require('mongodb').document;
 var BSON = require('mongodb').BSON;
-var mycollection = 'customers';
-var customerAttributes = {
-		"type": { "fix": 1, "value": "customer" },
-		"firstname": { "fix": 1, "value": "Change Me" },
-		"surname": { "fix": 1, "value": "Change Me" },
-		"email": { "fix": 0, "value": "changeme" },
-		"username": { "fix": 0, "value": "changeme" },
-		"password": { "fix": 0, "value": "changeme" },
-		"address": { "fix": 0, "value": { 
-			"street": "N/A",
-			"postcode": "N/A",
-			"city": "N/A",
-			"country": "N/A" 
-		} },
-		"phone": { "fix": 0, "value": "N/A" },
-		"times": { "fix": 0, "value": "N/A" },
-		"language": { "fix": 0, "value": "ENG" },
-		"notifications": { "fix": 0, "value": "true" },
-		"location": { "fix": 0, "value": "true" },
-		"sessionid" : { "fix": 1, "value": "closed", "timestamp": 0 }
+var mycollection = 'appointments';
+var appointmentAttributes = {
+	"id" : "",
+	"date" : "",
+	"time" : "",
+	"customerid" : "", //customer id
+	"providerid" : "", //provider id
+	"delay" : ""
 };
 
 function getAttFix(callback) {
 	var attFix = {};
-	for ( var field in customerAttributes ) {
-		//console.log("[customer.geetAttFix] field = " + field + " -- FIX = " + customerAttributes.mandatory[field].fix + " or " + customerAttributes.mandatory[field]["fix"]);
-		attFix[field] = customerAttributes[field].fix;
+	for ( var field in appointmentAttributes ) {
+		//console.log("[appointment.geetAttFix] field = " + field + " -- FIX = " + appointmentAttributes.mandatory[field].fix + " or " + appointmentAttributes.mandatory[field]["fix"]);
+		attFix[field] = appointmentAttributes[field].fix;
 	}
 	/*
-	for ( var field in customerAttributes.optional ) {
-		attFix[field] = customerAttributes.optional[field].fix;
+	for ( var field in appointmentAttributes.optional ) {
+		attFix[field] = appointmentAttributes.optional[field].fix;
 	}
 	*/
 	callback(attFix);
 }
 
 function getAttDefault(callback) {
-	callback(customerAttributes);
+	callback(appointmentAttributes);
 }
 
 function doInsert (cnx, db, query, callback) {
 	var exists = 0;
-	var firstname;
-	var surname;
-	try {
-		var firstname = query["firstname"].value.toLowerCase();
-		var surname = query["surname"].value.toLowerCase();
-	} catch (err) {
-		console.log("[customer.doInsert] " + err);
-		callback(null);
-		return;
-
-	}
-	var checkQuery = { "firstname.value": firstname, "surname.value": surname };
+	var date = query["date"].value;
+	var time = query["time"].value;
+	var customerid = query["customerid"].value;
+	var providerid = query["providerid"].value;
+	var checkQuery = {};
 	var insertQuery = query;
 	
-	//console.log("[customer.doInsert()] cnx = " + cnx + " -- db = " + db + " -- checkQuery = " + JSON.stringify(checkQuery) + " -- query = " + JSON.stringify(query));
+	checkQuery["date"] = date;
+	checkQuery["time"] = time;
+	checkQuery["providerid"] = providerid;
+	//console.log("[appointment.doInsert()] cnx = " + cnx + " -- db = " + db + " -- checkQuery = " + JSON.stringify(checkQuery) + " -- query = " + JSON.stringify(query));
 	
 	doGet(cnx, db, checkQuery, function(err,attList) {
 		if (err) {
 			callback(null);
 		} else if (attList != null) {
-			var message = "alreadyregistered";
+			var message = "appointmentalreadyin";
 			exists = 1;
 			callback(query,exists,message);
 		} else {
@@ -75,12 +59,12 @@ function doInsert (cnx, db, query, callback) {
 				cnx + db,
 				function (err, connection) {
 					var collection = connection.collection(mycollection);
-					for ( var opt in customerAttributes ) {
+					for ( var opt in appointmentAttributes ) {
 						if ( ! (opt in query) ) {
-							insertQuery[opt] = customerAttributes[opt];
+							insertQuery[opt] = appointmentAttributes[opt];
 						}
 					}
-					//console.log("[customer.doInsert] collection.insert(" + JSON.stringify(query) + ")");
+					//console.log("[appointment.doInsert] collection.insert(" + JSON.stringify(query) + ")");
 					collection.insert(insertQuery, callback(query,exists));
 				});
 		}
@@ -92,8 +76,8 @@ function doUpdate (cnx, db, query, updateQuery, callback) {
 		cnx + db,
 		function (err, connection) {
 			var collection = connection.collection(mycollection);
-			//console.log("[customer.doUpdate] Executing update");
-			//console.log("[customer.doUpdate] collection.update(query,{'$set': " + JSON.stringify(updateQuery) + "}, callback(err, " + JSON.stringify(query) + "));");
+			//console.log("[appointment.doUpdate] Executing update");
+			//console.log("[appointment.doUpdate] collection.update(query,{'$set': " + JSON.stringify(updateQuery) + "}, callback(err, " + JSON.stringify(query) + "));");
 			collection.update(query,{'$set': updateQuery}, callback(err, query));
 		});
 }
@@ -101,7 +85,7 @@ function doUpdate (cnx, db, query, updateQuery, callback) {
 function doGet (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[customer.doGet()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	//console.log("[appointment.doGet()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	doGetFullData (cnx, db, query, function(err, document) {
 		if (err) {
@@ -113,7 +97,7 @@ function doGet (cnx, db, query, callback) {
 				if (field == "_id"){
 					attList["id"] = document[field];
 				} else {
-					//console.log("[customer.doGet] adding " + field + " = " + document[field].value + " to attList");
+					//console.log("[appointment.doGet] adding " + field + " = " + document[field].value + " to attList");
 					attList[field] = document[field].value;
 				}
 			}
@@ -125,12 +109,13 @@ function doGet (cnx, db, query, callback) {
 function doGetFullData (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+
+	//console.log("[appointment.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);
 		if (err) {
-			console.log("[customer.doGetFullData] Mongo DB connection error: " + err);
+			console.log("[appointment.doGetFullData] Mongo DB connection error: " + err);
 			err = "dbcnxerror";
 			callback(err,null);
 		} else {
@@ -149,12 +134,12 @@ function doGetFullData (cnx, db, query, callback) {
 function doGetAll (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[customer.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	//console.log("[appointment.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);
 		if (err) {
-			console.log("[customer.doGetAll] Mongo DB connection error: " + err);
+			console.log("[appointment.doGetAll] Mongo DB connection error: " + err);
 			callback(err,null);
 		} else {
 			var collection = connection.collection(mycollection);

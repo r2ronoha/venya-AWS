@@ -81,7 +81,7 @@
 				params["lang"] = lang;
 				params["status"] = "ERROR";
 				params["errormessage"] = "notregistered";
-				goTo(pages.signin,params);
+				goTo(pages.provider.signin,params);
 
 				return;
 			}
@@ -89,7 +89,7 @@
 			//console.log("Calling checkCredentials");
 			//if ( verify_entry(username,password) ) {
 				var xhr = new XMLHttpRequest();
-				var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
+				var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getProvider?action=login&username=" + username + "&password=" + password;
 				xhr.open('GET',myUrl,true);
 				//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
 				xhr.send();
@@ -118,12 +118,12 @@
 								gotoParams["lang"] = lang;
 								gotoParams["status"] = "ERROR";
 								gotoParams["errormessage"] = "sessionopened";
-								goTo(pages.signin,gotoParams);
-								//goTo(pages.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
+								goTo(pages.provider.signin,gotoParams);
+								//goTo(pages.provider.signin,{'lang' : lang, 'status' : response["status"], 'errormessage' : escape(myLangTexts["errors"]["sessionopened"])});
 							} else {
 		
-								customerId = response["id"];
-								sessionID = randomSessionID(customerId,1,99);
+								providerId = response["id"];
+								sessionID = randomSessionID(providerId,1,99);
 								lang = response["language"];
 	
 								var gotoParams = {};
@@ -132,12 +132,11 @@
 								gotoParams["sessionid"] = sessionID;
 								
 								var updateValues = {};
-								updateValues["id"] = customerId;
+								updateValues["id"] = providerId;
 								updateValues["field"] = "sessionid";
 								updateValues["newvalue"] = sessionID;
-								setSessionId(updateValues,gotoParams,"customer",pages.signin,pages.home);
-								//setSessionId(updateValues,gotoParams);
-								//goTo(pages.home,gotoParams);
+								setSessionId(updateValues,gotoParams,"provider",pages.provider.signin,pages.provider.home);
+								//goTo(pages.provider.home,gotoParams);
 							}
 						} else {
 							try {
@@ -168,7 +167,7 @@
 
 </head>
 
-<body>
+<body class="provider">
 	<script>init();</script>
 
 	<!-- LANGUAGE SELECTION DROPDOWN MENU -->
@@ -178,8 +177,8 @@
 	<span class="caret"></span></button>
 	<!-- <button class="btn btn-default dropdown-toggle pull-right" type="button" id="langMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LANG<span class="caret"></span></button> -->
 	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="langMenu">
-                <li><a id="signinEsp" href="javascript:goTo(pages.signin,{'lang' : 'esp'})"><script>javascript:displayIcon("signinEsp","esp")</script></a></li>
-                <li><a id="signinEng" href="javascript:goTo(pages.signin,{'lang' : 'eng'})"><script>javascript:displayIcon("signinEng","eng")</script></a></li>
+                <li><a id="signinEsp" href="javascript:goTo(pages.provider.signin,{'lang' : 'esp'})"><script>javascript:displayIcon("signinEsp","esp")</script></a></li>
+                <li><a id="signinEng" href="javascript:goTo(pages.provider.signin,{'lang' : 'eng'})"><script>javascript:displayIcon("signinEng","eng")</script></a></li>
 	</ul>
 	</div>
 
@@ -190,14 +189,14 @@
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayMenu("formHeader",myLangTexts["signin"]["title"])</script></h2>
 
 			<fieldset>
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat'],myLangTexts['customer']['id']]))" oninvalid="required_field_empty(this,myLangTexts['customer']['username'],myLangTexts)" required autofocus>
-			<label for="inputUsername" class="sr-only"><script>javascript:displayForm("inputUsername",myLangTexts["customer"]["username"])</script></label>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['usernameformat'],myLangTexts['provider']['id']]))" oninvalid="required_field_empty(this,myLangTexts['provider']['username'],myLangTexts)" required autofocus>
+			<label for="inputUsername" class="sr-only"><script>javascript:displayForm("inputUsername",myLangTexts["provider"]["username"])</script></label>
 			<span id="usernameErrors" style="display: none"></span>
 			</fieldset>
 
 			<fieldset>
-			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required>
-			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["customer"]["password"])</script></label>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['provider']['password'],myLangTexts)" placeholder="Password" required>
+			<label for="inputPassword" class="sr-only"><script>javascript:displayForm("inputPassword",myLangTexts["provider"]["password"])</script></label>
 			<span id="passwordErrors" style="display: none"></span>
 			</fieldset>
 
@@ -213,9 +212,9 @@
 	</div> <!-- /container -->
 	<div class="links" id="links">
 		<p><script>javascript:document.getElementById("links").append(myLangTexts["signin"]["signup"]["question"])</script></p>
-		<a id="signup" href="javascript:goTo(pages.register,{'lang' : lang})"> <script>javascript:displayForm("signup",myLangTexts["signin"]["signup"]["link"])</script></a><br/>
-		<a id="lostusername" href="javascript:goTo(pages.lostusername,{'lost' : 'username', 'lang' : lang})"><script>javascript:displayForm("lostusername",myLangTexts["signin"]["lostusername"])</script></a><br/>
-		<a id="lostpassword" href="javascript:goTo(pages.lostpassword,{'lost' : 'password', 'lang' : lang})"><script>javascript:displayForm("lostpassword",myLangTexts["signin"]["lostpassword"])</script></a>
+		<a id="signup" href="javascript:goTo(pages.provider.register,{'lang' : lang})"> <script>javascript:displayForm("signup",myLangTexts["signin"]["signup"]["link"])</script></a><br/>
+		<a id="lostusername" href="javascript:goTo(pages.provider.lostusername,{'lost' : 'username', 'lang' : lang})"><script>javascript:displayForm("lostusername",myLangTexts["signin"]["lostusername"])</script></a><br/>
+		<a id="lostpassword" href="javascript:goTo(pages.provider.lostpassword,{'lost' : 'password', 'lang' : lang})"><script>javascript:displayForm("lostpassword",myLangTexts["signin"]["lostpassword"])</script></a>
 	</div>
 	
 	

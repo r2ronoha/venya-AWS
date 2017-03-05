@@ -10,7 +10,7 @@
 	
 	<!-- <link rel="icon" href="/static/favicon.ico"> -->
 	
-	<title>VenYa Registration</title>
+	<title>VenYa Provider Registration</title>
 	
 	<!-- Bootstrap core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -51,12 +51,8 @@
 
 	function verify_form() {
 		var form = document.querySelector("form");
-		var id = form.elements.id.value;
-		var username = form.elements.inputUsername.value;
-		var surname = form.elements.inputName.value.toLowerCase();
 		var email = form.elements.inputEmail.value.toLowerCase();
 		var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
-		var phone = form.elements.inputPhone.value;
 		var password = form.elements.inputPassword.value;
 		var confirmPassword = form.elements.confirmPassword.value;
 
@@ -66,17 +62,16 @@
 		errorcount = 0;
 
 		if ( email != confirmEmail ) {
-			format_error("confirmEmailError","confirmEmail",formatMessage([myLangTexts["customer"]["email"],myLangTexts["errors"]["notmatch"]]));
+			format_error("confirmEmailError","confirmEmail",formatMessage([myLangTexts["provider"]["email"],myLangTexts["errors"]["notmatch"]]));
 		}
 			
 
 		if ( password != confirmPassword ) {
-			format_error("confirmPasswordError","confirmPassword",formatMessage([myLangTexts["customer"]["password"],"s",myLangTexts["errors"]["notmatch"]]));
+			format_error("confirmPasswordError","confirmPassword",formatMessage([myLangTexts["provider"]["password"],"s",myLangTexts["errors"]["notmatch"]]));
 		}
 
 		if ( errorcount > 0 ) {
 			//form.elements.confirmPassword.value = "";
-			phone = phone.replace(/\+/,'%2B');
 			return false;
 		} else {
 			return true;
@@ -87,19 +82,17 @@
 		//if (verify_form(form,id,username,surname,email,confirmEmail,phone,password,confirmPassword)) {
 		if (verify_form()) {
 			var form = document.querySelector("form");
-			var id = form.elements.id.value;
 			var username = form.elements.inputUsername.value.replace(/\s*$/,'');
-			var surname = form.elements.inputName.value.toLowerCase().replace(/\s*$/,'');
+			var name = form.elements.inputName.value.toLowerCase().replace(/\s*$/,'');
 			var email = form.elements.inputEmail.value.toLowerCase();
 			var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
-			var phone = form.elements.inputPhone.value;
+			var phone = form.elements.inputPhone.value.replace(/\+/,'%2B');
 			var password = form.elements.inputPassword.value;
 			var confirmPassword = form.elements.confirmPassword.value;
 	
 			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/register?type=customer" +
-				"&id=" + id +
-				"&surname=" + surname +
+			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/createProvider?type=provider" +
+				"&name=" + name +
 				"&email=" + email +
 				"&phone=" + phone +
 				"&username=" + username +
@@ -117,7 +110,7 @@
 						var response = JSON.parse(xhr.responseText);
 						sessionid = randomSessionID(response["id"],1,99);
 
-						customerId = response["id"];
+						providerId = response["id"];
 						lang = response["language"];
 	
 						var gotoParams = {};
@@ -126,10 +119,10 @@
 						gotoParams["sessionid"] = sessionid;
 	
 						var updateValues = {};
-						updateValues["id"] = customerId;
+						updateValues["id"] = providerId;
 						updateValues["field"] = "sessionid";
 						updateValues["newvalue"] = sessionid;
-						setSessionId(updateValues,gotoParams,"customer",pages.signin,pages,home);
+						setSessionId(updateValues,gotoParams,"provider",pages.provider.signin,pages.provider.home);
 					} else {
 						try {
 							var response = JSON.parse(xhr.responseText);
@@ -148,7 +141,7 @@
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 
-<body>
+<body class="provider">
 	<script>init();</script>
 	<div class="errors" id="errors"></div>
 	<div class="container">
@@ -157,51 +150,44 @@
 			<h2 id="formHeader" class="form-signin-heading"><script>javascript:displayForm("formHeader",formatMessage([myLangTexts["form"]["enterdetails"]]))</script></h2>
 		
 			<fieldset>
-			<input type="text" id="id" class="form-control" pattern="^[0-9a-fA-F]{24}$" oninvalid="required_field_empty(this,myLangTexts['customer']['id'],myLangTexts)" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['badformat'],myLangTexts['customer']['id']]))" placeholder="id" required autofocus>
-			<label id="idlabel" for="id" class="sr-only"><script>displayForm("id",formatMessage([myLangTexts["customer"]["uid"]]))</script></label>
-			<span id="toprovider" style="display: none;"><a id="toproviderlink"></a></span>
-			<span id="idError" style"display: none;"></span>
-			</fieldset>
-			
-			<fieldset>
-			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninvalid="required_field_empty(this,myLangTexts['customer']['username'],myLangTexts)" oninput="field_format_check(this,myLangTexts['errors']['usernameformat'])" required autofocus>
-			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["customer"]["username"]]))</script></label>
-			<span id="usernameError" style"display: none;"></span>
-			</fieldset>
-
-			<fieldset>
-			<input type="text" id="inputName" class="form-control" oninvalid="required_field_empty(this,myLangTexts['customer']['surname'],myLangTexts)" oninput="setCustomValidity('')" placeholder="Surname" required autofocus>
-			<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["customer"]["surname"]]))</script></label>
+			<input type="text" id="inputName" class="form-control" oninvalid="required_field_empty(this,myLangTexts['provider']['name'],myLangTexts)" oninput="setCustomValidity('')" placeholder="name" required autofocus>
+			<label for="inputName" class="sr-only"><script>displayForm("inputName",formatMessage([myLangTexts["provider"]["name"]]))</script></label>
 			<span id="nameError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
+			<input type="text" id="inputUsername" class="form-control" placeholder="Username" pattern="^\w{8,}$" oninvalid="required_field_empty(this,myLangTexts['provider']['username'],myLangTexts)" oninput="field_format_check(this,myLangTexts['errors']['usernameformat'])" required autofocus>
+			<label for="inputUsername" class="sr-only"><script>displayForm("inputUsername",formatMessage([myLangTexts["provider"]["username"]]))</script></label>
+			<span id="usernameError" style"display: none;"></span>
+			</fieldset>
+
+			<fieldset>
 			<input type="email" id="inputEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="Email address" required autofocus>
-			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
-			<span id="emailError" style="display: none;"></span>
+			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["provider"]["email"]]))</script></label>
+			<span id="emailError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>
 			<input type="email" id="confirmEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)"placeholder="Confirm Email address" required autofocus>
-			<label for="confirmEmail" class="sr-only"><script>displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["email"]]))</script></label>
+			<label for="confirmEmail" class="sr-only"><script>displayForm("confirmEmail",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["provider"]["email"]]))</script></label>
 			<span id="confirmEmailError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>
 			<input type="text" id="inputPhone" class="form-control" pattern="^(\+|00)?[0-9]{4,}$" oninput="field_format_check(this,myLangTexts['errors']['phoneformat'])" placeholder="Phone number" >
-			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
+			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["provider"]["phone"]]))</script></label>
 			<span id="phoneError" style"display: none;"></span>
 			</fieldset>
 
 			<fieldset>
-			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required>
-			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["customer"]["password"]]))</script></label>
+			<input type="password" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,myLangTexts['errors']['passwordformat'])" oninvalid="required_field_empty(this,myLangTexts['provider']['password'],myLangTexts)" placeholder="Password" required>
+			<label for="inputPassword" class="sr-only"><script>displayForm("inputPassword",formatMessage([myLangTexts["provider"]["password"]]))</script></label>
 			<span id="passwordError" style"display: none;"></span>
 			</fieldset>
 			
 			<fieldset>
-			<input type="password" id="confirmPassword" oninvalid="required_field_empty(this,myLangTexts['form']['confirm'].concat(myLangTexts['customer']['password']),myLangTexts)" oninput="setCustomValidity('')" class="form-control" placeholder="Confirm Password" required>
-			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["password"]]))</script></label>
+			<input type="password" id="confirmPassword" oninvalid="required_field_empty(this,myLangTexts['form']['confirm'].concat(myLangTexts['provider']['password']),myLangTexts)" oninput="setCustomValidity('')" class="form-control" placeholder="Confirm Password" required>
+			<label for="confirmPassword" class="sr-only"><script>displayForm("confirmPassword",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["provider"]["password"]]))</script></label>
 			<span id="confirmPasswordError" style"display: none;"></span>
 			</fieldset>
 			
@@ -217,7 +203,7 @@
 		</form>
 		<script>
 			if ( urlParams["action"] == "webcreation" ) {
-				document.getElementById("id").defaultValue = customerId;
+				document.getElementById("id").defaultValue = providerId;
 				document.getElementById("id").autofocus = false;
 				document.getElementById("id").disabled = true;
 
@@ -236,20 +222,12 @@
 					document.getElementById("inputPhone").autofocus = false;
 					document.getElementById("inputPhone").disabled = false;
 				}
-			} else {
-				var toproviderlink = document.getElementById("toproviderlink");
-				var toproviderspan = document.getElementById("toprovider");
-				//var toproviderlink = document.createElement('a');
-				toproviderlink.setAttribute('href',pages.webcreatecustomer);
-				toproviderlink.innerHTML = formatMessage([myLangTexts["form"]["toprovider"]]);
-				toproviderspan.style.display = "block";
-				//toproviderspan.appendChild(toproviderlink);
 			}
 		</script>
 	</div> <!-- /container -->
 	<div class="links" id="links">
 		<p id="already"><script>document.getElementById("links").append(myLangTexts["signin"]["already"])</script></p>
-		<a id="signin" href="javascript:goTo(pages.signin,{'lang' : lang})"><script>javascript:displayMenu("signin",formatMessage([myLangTexts["signin"]["button"]]))</script></a>
+		<a id="signin" href="javascript:goTo(pages.provider.signin,{'lang' : lang})"><script>javascript:displayMenu("signin",formatMessage([myLangTexts["signin"]["button"]]))</script></a>
 	</div>
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>

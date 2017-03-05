@@ -40,7 +40,7 @@
 			customerId = sessionid.substring(0,sessionid.length - 2);
 			changeField = urlParams["field"];
 
-			verifySessionId(sessionid, function() {
+			verifySessionId(sessionid, "customer", function() {
 				setFormErrorHeader(urlParams,myLangTexts);
 			});
 		}
@@ -75,7 +75,7 @@
 		//console.log("[changeAddress.update] values = " + JSON.stringify(values) );
 		
 		var xhr = new XMLHttpRequest();
-		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=customer&action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
 		if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
 		xhr.open('GET',myUrl,true);
 		xhr.send();

@@ -30,13 +30,13 @@
 			sessionid = urlParams["sessionid"];
 			lang = urlParams["lang"].toLowerCase();
 			myLangTexts = languages_text[lang];
-			customerId = sessionid.substring(0,sessionid.length - 2);
-			closeSession(customerId);
+			providerId = sessionid.substring(0,sessionid.length - 2);
+			closeSession(providerId);
 		}
 
-		function closeSession(customerid) {
+		function closeSession(providerid) {
 			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=customer&action=update&id=" + customerid + "&field=sessionid&newvalue=closed";
+			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=provider&action=update&id=" + providerid + "&field=sessionid&newvalue=closed";
 			xhr.open('GET',myUrl,true);
 			xhr.send();
 			xhr.onreadystatechange = processRequest;
@@ -50,7 +50,7 @@
 						var gotoParams = {};
 						gotoParams["action"] = "logout";
 						gotoParams["lang"] = lang;
-						goTo(pages.signin,gotoParams);
+						goTo(pages.provider.signin,gotoParams);
 					} else {
 						try {
 							var response = JSON.parse(xhr.responseText);
@@ -59,14 +59,14 @@
 							gotoParams["status"] = response["status"];
 							gotoParams["errormessage"] = response["errormessage"];
 							gotoParams["lang"] = lang;
-							goTo(pages.signin,gotoParams);
+							goTo(pages.provider.signin,gotoParams);
 						} catch (err) {
 							var gotoParams = {};
 							gotoParams["action"] = "logout";
 							gotoParams["status"] = response["status"];
 							gotoParams["errormessage"] = "dbcnxerror";
 							gotoParams["lang"] = lang;
-							goTo(pages.signin,gotoParams);
+							goTo(pages.provider.signin,gotoParams);
 
 						}
 					}

@@ -35,21 +35,21 @@
 		setFormErrorHeader(urlParams,myLangTexts);
 
 		sessionid = urlParams["sessionid"];
-		verifySessionId(sessionid, "customer", function() {
-			//console.log("[settings.init] session successfully verified. Getting customer details");
-			customerId = sessionid.substring(0,sessionid.length - 2);
-			getCustomerFullDetails( action, customerId, "customer", function () {
-				customerId = subscriberDetails["_id"];
+		verifySessionId(sessionid, "provider", function() {
+			//console.log("[settings.init] session successfully verified. Getting provider details");
+			providerId = sessionid.substring(0,sessionid.length - 2);
+			getCustomerFullDetails( action, providerId, "provider", function () {
+				providerId = subscriberDetails["_id"];
 				//updated to make it work on AWS task
-				//customerId = subscriberDetails["id"];
-				//console.log("[settings.init.getFullDetails] customerId = " + customerId);
+				//providerId = subscriberDetails["id"];
+				//console.log("[settings.init.getFullDetails] providerId = " + providerId);
 			
 				if ( action == "update" ) {
-					var updateField = myLangTexts["customer"][urlParams["updatefield"]];
+					var updateField = myLangTexts["provider"][urlParams["updatefield"]];
 					var headText = formatMessage([updateField,myLangTexts["settings"]["updatesuccess"]]);
 					setHeader("h2",headText);
 				}
-				var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + subscriberDetails["surname"].value.toUpperCase() + ", " + subscriberDetails["firstname"].value.toUpperCase();
+				var headerText = myLangTexts["action"]["settings"].toUpperCase() + " " + subscriberDetails["name"].value.toUpperCase();
 				//updated to make it work on AWS task
 				//var headerText = "SETTINGS for " + subscriberDetails["surname"].toUpperCase() + ", " + subscriberDetails["firstname"].toUpperCase();
 				setHeader("h2",headerText);
@@ -66,7 +66,7 @@
 		var newvalue = values["newvalue"];
 		
 		var xhr = new XMLHttpRequest();
-		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=customer&action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=provider&action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
 		if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
 		xhr.open('GET',myUrl,true);
 		//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
@@ -86,7 +86,7 @@
 					urlParams["updatefield"] = response["updatefield"];
 					urlParams["sessionid"] = sessionid;
 					urlParams["lang"] = lang;
-					goTo(pages.settings,urlParams);
+					goTo(pages.provider.settings,urlParams);
 				} else {
 					try {
 						var response = JSON.parse(xhr.responseText);
@@ -94,7 +94,7 @@
 						urlParams["sessionid"] = sessionid;
 						urlParams["status"] = response["status"];
 						urlParams["errormessage"] = response["errormessage"];
-						goTo(pages.settings,urlParams);
+						goTo(pages.provider.settings,urlParams);
 					} catch (err) {
 						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
 					}
@@ -104,7 +104,7 @@
 	}
 	
 	function displaySettings(settings) {
-		var nameFields = ['firstname', 'surname'];
+		//var nameFields = ['firstname', 'surname'];
 		var cellsFormat = {
 			"valueCell": "text-align: center; padding-left: 15px; padding-right: 15px",
 			"settingCell": "text-align: left; padding-left: 15px; padding-right: 15px",
@@ -148,7 +148,7 @@
 				newvalue = !(value)
 				//if ( value.toLowerCase() == "true" ) { value = booleanValues["true"].toUpperCase(); newvalue = "false"; }
 				//else { value = booleanValues["false"].toUpperCase(); newvalue = "true"; }
-				buttonTarget = "javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newvalue + "'})";
+				buttonTarget = "javascript:update({'id': '" + providerId + "','field': '" + field + "', 'newvalue': '" + newvalue + "'})";
 			} else {
 			//console.log(field + " is STRING");
 				//option = optionList["string"];
@@ -156,15 +156,16 @@
 				var gotoParams = {};
 				gotoParams["action"] = "update";
 				gotoParams["sessionid"] = sessionid;
-				//gotoParams["id"] = customerId;
+				//gotoParams["id"] = providerId;
 				gotoParams["setting"] = field;
 				gotoParams["lang"] = lang;
-				var gotoPage = pages.settingsPages[field];
+				var gotoPage = pages.provider.settingsPages[field];
 				buttonTarget = "javascript:goTo(\"" + gotoPage + "\"," + JSON.stringify(gotoParams) + ")";
 			}
 
 			if (secretFields.indexOf(field) > -1 ) {
 				value = hideValue(value);
+
 			} else if ( nameFields.indexOf(field) > -1 ) {
 				value = formatName(value);
 			} else if ( upperCaseFields.indexOf(field) > -1 ) {
@@ -177,8 +178,8 @@
 				var myCell = document.createElement("td");
 				myCell.setAttribute("style",cellsFormat[cell]);
 				if ( cell == "settingCell" ) {
-					//console.log("[parsing.displaySettings] Append \"" + myLangTexts["customer"][cells[cell]] + "\"");
-					var settingText = myLangTexts["customer"][cells[cell]][0].toUpperCase() + myLangTexts["customer"][cells[cell]].substring(1);
+					//console.log("[parsing.displaySettings] Append \"" + myLangTexts["provider"][cells[cell]] + "\"");
+					var settingText = myLangTexts["provider"][cells[cell]][0].toUpperCase() + myLangTexts["provider"][cells[cell]].substring(1);
 					myCell.appendChild(document.createTextNode(settingText));
 				} else {
 					myCell.appendChild(document.createTextNode(cells[cell]));
@@ -213,7 +214,7 @@
 					var newLang = languages[i];
 					var li = document.createElement("li");
 					var link = document.createElement("a");
-					link.setAttribute("href","javascript:update({'id': '" + customerId + "','field': '" + field + "', 'newvalue': '" + newLang + "'})");
+					link.setAttribute("href","javascript:update({'id': '" + providerId + "','field': '" + field + "', 'newvalue': '" + newLang + "'})");
 					link.appendChild(document.createTextNode(newLang));
 					li.appendChild(link);
 					ul.appendChild(li);
@@ -266,20 +267,20 @@
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
 
-<body>
+<body class="provider">
 	<script>init();</script>
 
 	<div class="dropdown">
 	<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
 		<!-- <li><a href="./home.html?action=home&name=Arturo">Home</a></li> -->
-		<!-- <li><a href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})">Home</a></li> -->
-		<li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
-		<li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
-		<li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
-		<li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
+		<!-- <li><a href="javascript:goTo(pages.provider.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})">Home</a></li> -->
+		<li><a id="menuHome" href="javascript:goTo(pages.provider.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
+		<li><a id="menuAppointments" href="javascript:goTo(pages.provider.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
+		<li><a id="menuCreateCustomer" href="javascript:goTo(pages.provider.createcustomer,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCreateCustomer",myLangTexts["menu"]["createcustomer"])</script></a></li>
+		<li><a id="menuSettings" href="javascript:goTo(pages.provider.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
 		<li role="separator" class="divider"></li>
-		<li><a id="menuLogout" href="javascript:goTo(pages.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+		<li><a id="menuLogout" href="javascript:goTo(pages.provider.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 	</ul>
 	</div>
 	<div class="errors" id="errors"></div>

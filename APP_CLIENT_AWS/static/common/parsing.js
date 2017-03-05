@@ -1,11 +1,11 @@
 var urlParams = {};
-var customerDetails = {};
+var subscriberDetails = {};
 var customerId;
 var idLength = 24;
 var sessionidLength = idLength + 2;
 var venya_node_server = document.location.hostname;
 var venya_node_port = 8888;
-var nameFields = ['firstname','surname'];
+var nameFields = ['firstname','surname','name'];
 var upperCaseFields = ['postcode','language','notifications','location'];
 var booleanFields = ['notifications','location'];
 var booleanValues = {'true' : 'on', 'false' : 'off'};
@@ -21,7 +21,8 @@ var objectidFormat = new RegExp("^[0-9a-fA-F]{24}$");
 var postcodeFormat = new RegExp("^\\w+([\\s-]*\\w*)?$");
 //var postcodeFormat = new RegExp("^[0-9]+$");
 var defaultUsername = "changeme";
-var defaultEmail = "changeme@venya.es";
+var defaultEmail = "changeme";
+var subscriberTypes = ['customer','provider'];
 
 var pages = {
 	"choosesite_esp" : "choose_site_esp.html",
@@ -47,7 +48,29 @@ var pages = {
 	"webcreatecustomer" : "web_create_customer.html",
 	"webnewappointment" : "web_new_appointment.html",
 	"showlostinfo" : "show_lost_info.html",
-	"logout" : "logout.html"
+	"logout" : "logout.html",
+	"provider" : {
+		"signin" : "provider_signin.html",
+		"register" : "provider_register.html",
+		"home": "provider_home.html",
+		"settings": "provider_settings.html",
+		"logout" : "provider_logout.html",
+		"createcustomer" : "provider_create_customer.html",
+		"changeSettings": "changeSettings.html",
+		"appointments": "appointments.html",
+		"settingsPages": {
+			"email": "changeEmail.html",
+			"password": "changePassword.html",
+			"times": "changeTimes.html",
+			"username": "changeUsername.html",
+			"address": "changeAddress.html",
+			"times": "changeTimes.html",
+			"phone": "changePhone.html"
+		},
+		"lostusername" : "lostUsername.html",
+		"lostpassword" : "lostPassword.html",
+		"showlostinfo" : "show_lost_info.html"
+	}
 }
 
 
@@ -103,7 +126,7 @@ function hideValue(value) {
 function createDataTable(tableData, lang, action){
 	if ( tableData == null ) tableData = urlParams;
 	if ( lang == null || languages.indexOf(lang) < 0 ) {
-		console.log("[parsing.createDataTable] language " + lang + " not supported. Setting it to " + default_lang);
+		console.log("[parsing.createDataTable] " + Math.round(new Date().getTime() / 1000) + " language " + lang + " not supported. Setting it to " + default_lang);
 		lang = default_lang;
 	}
 	if ( action == null ) action = "home";
@@ -111,7 +134,7 @@ function createDataTable(tableData, lang, action){
 	var table = document.createElement("table");
 	table.className = "settings";
 	for (var field in tableData) {
-		//console.log("[parsing.createDataTable] field to process : " + field);
+		//console.log("[parsing.createDataTable] " + Math.round(new Date().getTime() / 1000) + " field to process : " + field);
 		if ( privateFields.indexOf(field) < 0 ) {
 			var row = document.createElement("tr");
 			
@@ -124,7 +147,7 @@ function createDataTable(tableData, lang, action){
 			var valueCell = document.createElement("td");
 			
 			var value = tableData[field];
-			//console.log("[parsing.createDataTable] value = " + value);
+			//console.log("[parsing.createDataTable] " + Math.round(new Date().getTime() / 1000) + " value = " + value);
 			
 			if ( booleanFields.indexOf(field) > -1 ) {
 				value = booleanValues[value];
@@ -142,7 +165,7 @@ function createDataTable(tableData, lang, action){
 				var myAddress = "";
 				for ( var elt in value ) {
 					if ( value[elt].toLowerCase() != "n/a" ) {
-						//console.log("[parsing.creatDataTable] Adding value[elt] " + value[elt] + " to user address");
+						//console.log("[parsing.creatDataTable] " + Math.round(new Date().getTime() / 1000) + " Adding value[elt] " + value[elt] + " to user address");
 						if ( upperCaseFields.indexOf(elt) > -1 ) { 
 							myAddress += value[elt].toUpperCase() + ", "
 						} else { myAddress += formatName(value[elt]) + ", "; }
@@ -164,9 +187,21 @@ function createDataTable(tableData, lang, action){
 	document.body.appendChild(table);
 }
 
-function getCustomerSessionidDetails(action,sessionid,callback) {
+function getCustomerSessionidDetails(action,sessionid,type,callback) {
 	venya_node_server = document.location.hostname;
-	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=" + action + "&sessionid=" + sessionid;
+
+	var serverRequest;
+	if ( type == "customer" ) {
+		serverRequest = "getCustomer";
+	} else if ( type == "provider" ) {
+		serverRequest = "getProvider";
+	} else {
+		console.log("[requestHandlers.getSubscriberDetails] " + Math.round(new Date().getTime() / 1000) + " type " + type + " not supported");
+		callback(null);
+		return;
+	}
+	//var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=" + action + "&sessionid=" + sessionid;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/" + serverRequest + "?action=" + action + "&sessionid=" + sessionid;
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -181,7 +216,7 @@ function getCustomerSessionidDetails(action,sessionid,callback) {
 					if ( field != "status" ) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
-						customerDetails[field] = response[field];
+						subscriberDetails[field] = response[field];
 					}
 				}
 				callback();
@@ -198,10 +233,23 @@ function getCustomerSessionidDetails(action,sessionid,callback) {
 	}
 }
 
-function getCustomerSessionidFullDetails(action,sessionid,callback) {
+function getCustomerSessionidFullDetails(action,sessionid,type,callback) {
 	venya_node_server = document.location.hostname;
-	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&sessionid=" + sessionid;
-	//console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
+
+	var serverRequest;
+	if ( type == "customer" ) {
+		serverRequest = "getFullCustomerData";
+	} else if ( type == "provider" ) {
+		serverRequest = "getFullProviderData";
+	} else {
+		console.log("[requestHandlers.getSubscriberDetails] " + Math.round(new Date().getTime() / 1000) + " type " + type + " not supported");
+		callback(null);
+		return;
+	}
+
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/" + serverRequest + "?action=" + action + "&sessionid=" + sessionid;
+	//var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&sessionid=" + sessionid;
+	//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -210,14 +258,14 @@ function getCustomerSessionidFullDetails(action,sessionid,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				//console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
+				//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " xhr.responseText: " + xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
-						customerDetails[field] = response[field];
-						//console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
+						subscriberDetails[field] = response[field];
+						//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " field: \"" + field + "\" : " + JSON.stringify(subscriberDetails[field]));
 					}
 				}
 				callback();
@@ -234,9 +282,20 @@ function getCustomerSessionidFullDetails(action,sessionid,callback) {
 	}
 }
 
-function getCustomerDetails(action,id,callback) {
+function getSubscriberDetails(action,id,type,callback) {
 	venya_node_server = document.location.hostname;
-	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=" + action + "&id=" + id;
+
+	var serverRequest;
+	if ( type == "customer" ) {
+		serverRequest = "getCustomer";
+	} else if ( type == "provider" ) {
+		serverRequest = "getProvider";
+	} else {
+		console.log("[requestHandlers.getSubscriberDetails] " + Math.round(new Date().getTime() / 1000) + " type " + type + " not supported");
+		callback(null);
+		return;
+	}
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/" + serverRequest + "?action=" + action + "&id=" + id;
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -251,7 +310,7 @@ function getCustomerDetails(action,id,callback) {
 					if ( field != "status" ) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
-						customerDetails[field] = response[field];
+						subscriberDetails[field] = response[field];
 					}
 				}
 				callback();
@@ -268,10 +327,23 @@ function getCustomerDetails(action,id,callback) {
 	}
 }
 
-function getCustomerFullDetails(action,id,callback) {
+function getCustomerFullDetails(action,id,type,callback) {
 	venya_node_server = document.location.hostname;
-	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&id=" + id;
-	//console.log("[parsing.getCustomerFullDetails] myUrl : " + myUrl);
+
+	var serverRequest;
+	if ( type == "customer" ) {
+		serverRequest = "getFullCustomerData";
+	} else if ( type == "provider" ) {
+		serverRequest = "getFullProviderData";
+	} else {
+		console.log("[requestHandlers.getSubscriberDetails] " + Math.round(new Date().getTime() / 1000) + " type " + type + " not supported");
+		callback(null);
+		return;
+	}
+	//var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullCustomerData?action=" + action + "&id=" + id;
+	//var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/" + serverRequest + "?action=" + action + "&id=" + id;
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getFullSubscriberData?type=" + type + "&action=" + action + "&id=" + id;
+	//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " myUrl : " + myUrl);
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET',myUrl,true);
 	xhr.send();
@@ -280,14 +352,14 @@ function getCustomerFullDetails(action,id,callback) {
 	function processRequest(e) {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				//console.log("[parsing.getCustomerFullDetails] xhr.responseText: " + xhr.responseText);
+				//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " xhr.responseText: " + xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
 				for (var field in response) {
 					if ( field != "status" ) {
 						var value = response[field];
 						if ( value == undefined ) value = "N/A";
-						customerDetails[field] = response[field];
-						//console.log("[parsing.getCustomerFullDetails] field: \"" + field + "\" : " + JSON.stringify(customerDetails[field]));
+						subscriberDetails[field] = response[field];
+						//console.log("[parsing.getCustomerFullDetails] " + Math.round(new Date().getTime() / 1000) + " field: \"" + field + "\" : " + JSON.stringify(subscriberDetails[field]));
 					}
 				}
 				callback();
@@ -307,7 +379,7 @@ function getCustomerFullDetails(action,id,callback) {
 function randomSessionID(id,min,max) {
 	var sufix = Math.floor( Math.random()*(max - min + 1) + min );
 	var sessionId = id + sufix.toString().replace(/^([0-9])$/,"0$1");
-	//console.log("[parsing.randomSessionID] Session ID = " + sessionId );
+	//console.log("[parsing.randomSessionID] " + Math.round(new Date().getTime() / 1000) + " Session ID = " + sessionId );
 	return sessionId;
 }
 
@@ -395,34 +467,41 @@ function getCredentialsProcessRequest(url,credential,lang,errorid) {
 	}
 }
 
-function verifySessionId(sessionid,callback) {
-	//console.log("[parsing.verifySessionID] checking sessionid");
-	if ( sessionid.length != sessionidLength ) {
-		console.log("[parsing.verifySessionID] session id FAILED. Wrong length." );
-		var urlParams = {};
-		urlParams["lang"] = default_lang;
-		urlParams["status"] = "ERROR";
-		urlParams["errormessage"] = "invalidsessionid";
-		goTo(pages.signin,urlParams);
+function verifySessionId(sessionid,type,callback) {
+	var signinPage;
+	//console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " checking sessionid");
+	if ( subscriberTypes.indexOf(type) < 0 ) {
+		console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " subscriber type " + type + " not supported");
+		return;
 	} else {
-		var customerid = sessionid.substring(0,sessionid.length - 2);
-		getCustomerDetails("checksessionid",customerid,function() {
-			var currentSessionid = customerDetails["sessionid"];
-			if ( sessionid != currentSessionid ) {
-				console.log("[parsing.verifySessionID] session id FAILED");
-				var urlParams = {};
-				urlParams["lang"] = customerDetails["language"];
-				urlParams["status"] = "ERROR";
-				urlParams["errormessage"] = "invalidsessionid";
-				goTo(pages.signin,urlParams);
-			} else {
-				//console.log("[parsing.verifySessionID] session id verified. Callback " + callback.toString());
-				callback();
-			}
-		});
+		signinPage = ( type == "customer" ) ? pages.signin : pages.provider.signin;
+		if ( sessionid.length != sessionidLength ) {
+			console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " session id " + sessionid + " FAILED. Wrong length." );
+			var urlParams = {};
+			urlParams["lang"] = default_lang;
+			urlParams["status"] = "ERROR";
+			urlParams["errormessage"] = "invalidsessionid";
+			goTo(signinPage,urlParams);
+		} else {
+			var customerid = sessionid.substring(0,sessionid.length - 2);
+			getSubscriberDetails("checksessionid",customerid,type,function() {
+				var currentSessionid = subscriberDetails["sessionid"];
+				if ( sessionid != currentSessionid ) {
+					console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " session id FAILED");
+					var urlParams = {};
+					urlParams["lang"] = subscriberDetails["language"];
+					urlParams["status"] = "ERROR";
+					urlParams["errormessage"] = "expiredsessionid";
+					goTo(signinPage,urlParams);
+				} else {
+					//console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " session id verified. Callback " + callback.toString());
+					callback();
+				}
+			});
+		}
 	}
 }
-
+/*
 function setSessionId(values,urlParams) {
 //function update(values) {
 	var id = values["id"];
@@ -449,6 +528,38 @@ function setSessionId(values,urlParams) {
 				gotoParams["errormessage"] = response["errormessage"];
 				gotoParams["lang"] = urlParams["lang"];
 				goTo(pages.signin,gotoParams);
+			}
+		}
+	}
+}
+*/
+
+function setSessionId(values,urlParams,type,signinPage,homePage) {
+//function update(values) {
+	var id = values["id"];
+	var field = values["field"];
+	var oldvalue = values["oldvalue"];
+	var newvalue = values["newvalue"];
+
+	var xhr = new XMLHttpRequest();
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?action=update&type=" + type + "&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+	if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
+	xhr.open('GET',myUrl,true);
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				goTo(homePage,urlParams);
+			} else {
+				var response = JSON.parse(xhr.responseText);
+				var gotoParams = {};
+				gotoParams["action"] = urlParams["action"];
+				gotoParams["status"] = response["status"];
+				gotoParams["errormessage"] = response["errormessage"];
+				gotoParams["lang"] = urlParams["lang"];
+				goTo(signinPage,gotoParams);
 			}
 		}
 	}

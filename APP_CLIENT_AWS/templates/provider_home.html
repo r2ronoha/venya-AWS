@@ -28,18 +28,30 @@
 			sessionid = urlParams["sessionid"];
 			lang = urlParams["lang"].toLowerCase();
 			myLangTexts = languages_text[lang];
+			customerid = urlParams["customerid"]
 			
-			verifySessionId(sessionid, "customer", function() {
-				customerId = sessionid.substring(0,sessionid.length - 2);
-				//getSubscriberDetails( "home", customerId, function () {
-				getSubscriberDetails( "home", customerId, "customer", function () {
-					customerId = subscriberDetails["id"];
+			verifySessionId(sessionid, "provider", function() {
+				providerId = sessionid.substring(0,sessionid.length - 2);
+				getSubscriberDetails( "home", providerId, "provider", function () {
+					console.log(JSON.stringify(subscriberDetails));
+					providerId = subscriberDetails["id"];
 					myLangTexts;
 					var action = urlParams["action"];
-					var headerText = formatMessage([myLangTexts["action"][action]]);
-					if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
-					headerText = formatMessage([headerText,unescape(subscriberDetails["surname"].toUpperCase()),",",unescape(subscriberDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
+					var headerText = formatMessage([myLangTexts["action"][subscriberDetails["action"]]]);
 					setHeader("h2",headerText);
+					headerText = formatMessage([unescape(subscriberDetails["name"]).toUpperCase()]);
+					setHeader("h2",headerText);
+
+					if ( action == "webcreation" ) {
+						headerText = formatMessage([myLangTexts["provider"]["webcreation"],".",myLangTexts["customer"]["id"],customerid]);
+						setHeader("h2",headerText);
+					} else if ( action != "home" ) {
+						headerText = formatMessage([myLangTexts["home"]["welcome"]]);
+						setHeader("h2",headerText);
+					}
+
+					//if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
+					//headerText = formatMessage([headerText,unescape(subscriberDetails["name"].toUpperCase())]).replace(/ ,/,',');
 					setHeader("h4",myLangTexts["home"]["yourdata"]);
 					createDataTable(subscriberDetails, lang, action);
 				});
@@ -48,17 +60,17 @@
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
-<body>
+<body class="provider">
 	<script>init();</script>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                <li><a id="menuHome" href="javascript:goTo(pages.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
-                <li><a id="menuAppointments" href="javascript:goTo(pages.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
-                <li><a id="menuNotifications" href="javascript:goTo(pages.notifications,{'action': 'notifications', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuNotifications",myLangTexts["menu"]["notifications"])</script></a></li>
-                <li><a id="menuSettings" href="javascript:goTo(pages.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
+                <li><a id="menuHome" href="javascript:goTo(pages.provider.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
+                <li><a id="menuAppointments" href="javascript:goTo(pages.provider.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
+                <li><a id="menuCreateCustomer" href="javascript:goTo(pages.provider.createcustomer,{'action': 'createcustomer', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCreateCustomer",myLangTexts["menu"]["createcustomer"])</script></a></li>
+                <li><a id="menuSettings" href="javascript:goTo(pages.provider.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
                 <li role="separator" class="divider"></li>
-                <li><a id="menuLogout" href="javascript:goTo(pages.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+                <li><a id="menuLogout" href="javascript:goTo(pages.provider.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
 		</ul>
 	</div>
 	

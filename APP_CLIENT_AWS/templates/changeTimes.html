@@ -29,15 +29,15 @@
 			lang = urlParams["lang"];
 			myLangTexts = languages_text[lang];
 			customerId = sessionid.substring(0,sessionid.length - 2);
-			//getCustomerDetails( urlParams["action"], urlParams["id"], function () {
+			//getSubscriberDetails( urlParams["action"], urlParams["id"], function () {
 			verifySessionId(sessionid,setHeader("h2",formatMessage([myLangTexts["form"]["page"],myLangTexts["underconstruction"]])));
-			/*getCustomerDetails( "home", urlParams["id"], function () {
-				customerId = customerDetails["id"];
+			/*getSubscriberDetails( "home", urlParams["id"], function () {
+				customerId = subscriberDetails["id"];
 				
 				var action = urlParams["action"];
 				var headerText = "HOME ";
 				if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
-				headerText += unescape(customerDetails["surname"].toUpperCase()) + ", " + unescape(customerDetails["firstname"].toUpperCase());
+				headerText += unescape(subscriberDetails["surname"].toUpperCase()) + ", " + unescape(subscriberDetails["firstname"].toUpperCase());
 				setHeader("h2",headerText);
 				setHeader("h4","This is your data");
 				createDataTable();

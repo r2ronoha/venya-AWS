@@ -10,7 +10,8 @@ var languages_text = {
                         "appointments" : "appointments",
                         "notifications" : "notifications",
                         "settings" : "settings",
-                        "logout" : "logout"
+                        "logout" : "logout",
+						"createcustomer" : "add new customer"
                 },
                 "action" : {
                         "login" : "login successful",
@@ -66,6 +67,22 @@ var languages_text = {
 						"oldemail" : "old email",
 						"sessionid" : "session id"
                 },
+				"provider" : {
+						"id" : "id",
+                        "type" : "type",
+                        "name" : "name",
+                        "address" : "address",
+                        "email" : "email",
+                        "username" : "username",
+                        "password" : "password",
+                        "phone" : "phone",
+                        "language" : "language",
+						"oldpassword" : "old password",
+						"oldusername" : "old username",
+						"oldemail" : "old email",
+						"sessionid" : "session id",
+						"webcreation" : "customer successfully created"
+				},
                 "settings" : {
                         "yoursettings" : "these are your settings",
                         "setting" : "setting",
@@ -80,12 +97,14 @@ var languages_text = {
 			"page" : "page",
 			"old" : "old",
 			"new" : "new",
+			"of" : "of",
 			"confirm" : "confirm",
 			"oldemail" : "old email address",
 			"newemail" : "new email address",
 			"enterdetails" : "please enter your details",
 			"submit" : "submit",
-			"cancel" : "cancel"
+			"cancel" : "cancel",
+			"toprovider" : "Don't have an id? Get an account from your provider"
                 },
                 "underconstruction" : "under construction",
 		"errors" : {
@@ -111,11 +130,15 @@ var languages_text = {
 			"updatedatacheckfail" : "Warning: failed to check info after update. Verify your data or contact your provider",
 			"infonotmatch" : "the info entered does not match",
 			"alreadyregistered" : "user already registered",
+			"provideralreadyregistered" : "the provider is already registered",
+			"appointmentalreadyin" : "there is already an appointment for this priovider at this time",
 			"sessionopened" : "this user is already connected",
-			"invalidsessionid" : "your session is expired",
+			"invalidsessionid" : "your session is not valid",
+			"expiredsessionid" : "your session is expired",
 			"dbcnxerror" : "service is currently unavailable. Please try again later",
 			"emailfailed" : "failed to send email",
-			"accountalreadycreated" : "Ya existe una cuenta para este usuario."
+			"accountalreadycreated" : "An account already exists for this users",
+			"badrequest" : "the request is not supported"
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -133,7 +156,8 @@ var languages_text = {
                         "appointments" : "citas",
                         "notifications" : "notificaciones",
                         "settings" : "ajustes",
-                        "logout" : "desconexión"
+                        "logout" : "desconexión",
+						"createcustomer" : "crear nuevo cliente"
                 },
                 "action" : {
                         "login" : "login realizado con éxito",
@@ -189,6 +213,22 @@ var languages_text = {
 						"oldemail" : "antiguo email",
 						"sessionid" : "ID de la sesión"
                 },
+				"provider" : {
+						"id" : "id",
+                        "type" : "tipo",
+                        "name" : "nombre/compañía",
+                        "address" : "dirección",
+                        "email" : "email",
+                        "username" : "nombre de usuario",
+                        "password" : "contraseña",
+                        "phone" : "teléfono",
+                        "language" : "idioma",
+						"oldpassword" : "antigua contraseña",
+						"oldusername" : "antiguo nombre de usuario",
+						"oldemail" : "antiguo email",
+						"sessionid" : "ID de la sesión",
+						"webcreation" : "Cliente creado con éxito"
+				},
                 "settings" : {
                         "yoursettings" : "estos son tus ajustes",
                         "setting" : "ajuste",
@@ -203,12 +243,14 @@ var languages_text = {
 			"page" : "página",
 			"old" : "antiguo",
 			"new" : "nuevo",
+			"of" : "de",
 			"confirm" : "confirma",
 			"oldemail" : "antigua dirección de email",
 			"newemail" : "nueva dirección de email",
 			"enterdetails" : "Introduce tus datos",
 			"submit" : "enviar",
-			"cancel" : "anular"
+			"cancel" : "anular",
+			"toprovider" : "¿No tiened identificador? Créate una cuenta con tu proveedor."
                 },
                 "underconstruction" : "en construcción",
 		"errors" : {
@@ -234,11 +276,15 @@ var languages_text = {
 			"updatedatacheckfail" : "aviso: no ha sido posible verificar después de los cambios. Comprueba tus datos",
 			"infonotmatch" : "los datos introducidos no corresponden",
 			"alreadyregistered" : "el usuario ya existe",
+			"provideralreadyregistered" : "el proveedor ya está registrado",
+			"appointmentalreadyin" : "ya hay una cita con este proveedor a esta hora",
 			"sessionopened" : "este usuario ya está conectado",
-			"invalidsessionid" : "tu sesión ha cadudcado",
+			"invalidsessionid" : "tu sesión no es válida",
+			"expiredsessionid" : "tu sesión ha cadudcado",
 			"dbcnxerror" : "el servicio no está disponible en este momento. Inténtalo más tarde",
 			"emailfailed" : "No a sido posible enviar el email",
-			"accountalreadycreated" : "Ya existe una cuenta para este usuario."
+			"accountalreadycreated" : "Ya existe una cuenta para este usuario.",
+			"badrequest" : "el formato solicitado no está soportado"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",
