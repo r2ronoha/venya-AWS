@@ -10,6 +10,7 @@ var customerAttributes = {
 		"type": { "fix": 1, "value": "customer" },
 		"firstname": { "fix": 1, "value": "Change Me" },
 		"surname": { "fix": 1, "value": "Change Me" },
+		"dob" : { "fix" : 1, "value" : "ddmmyyyy" },
 		"email": { "fix": 0, "value": "changeme" },
 		"username": { "fix": 0, "value": "changeme" },
 		"password": { "fix": 0, "value": "changeme" },
@@ -49,16 +50,18 @@ function doInsert (cnx, db, query, callback) {
 	var exists = 0;
 	var firstname;
 	var surname;
+	var dob;
 	try {
-		var firstname = query["firstname"].value.toLowerCase();
-		var surname = query["surname"].value.toLowerCase();
+		firstname = query["firstname"].value.toLowerCase();
+		surname = query["surname"].value.toLowerCase();
+		dob = query["dob"].value;
 	} catch (err) {
 		console.log("[customer.doInsert] " + err);
 		callback(null);
 		return;
 
 	}
-	var checkQuery = { "firstname.value": firstname, "surname.value": surname };
+	var checkQuery = { "firstname.value": firstname, "surname.value": surname, "dob.value" : dob };
 	var insertQuery = query;
 	
 	//console.log("[customer.doInsert()] cnx = " + cnx + " -- db = " + db + " -- checkQuery = " + JSON.stringify(checkQuery) + " -- query = " + JSON.stringify(query));

@@ -58,6 +58,7 @@ var languages_text = {
                         "firstname" : "firstname",
                         "surname" : "surname",
                         "address" : "address",
+						"dob" : "date of birth",
                         "email" : "email",
                         "username" : "username",
                         "password" : "password",
@@ -109,7 +110,9 @@ var languages_text = {
 			"submit" : "submit",
 			"cancel" : "cancel",
 			"toprovider" : "Don't have an id? Get an account from your provider.",
-			"getid" : "Id lost? Get it here"
+			"getid" : "Id lost? Get it here",
+			"dobformatexample" : "DD/MM/YYYY",
+			"optional" : "optional"
                 },
                 "underconstruction" : "under construction",
 		"errors" : {
@@ -123,6 +126,7 @@ var languages_text = {
 			"emailformat" : "invalid email format",
 			"phoneformat" : "invalid phone number",
 			"notregistered" : "username invalid. Please register to the service with the id provided by your provider",
+			"notcreated" : "the user profile has not been created. Please contact your provider",
 			"accountnotfound" : "account not found",
 			"wrongcredentials" : "wrong username or password",
 			"registrationerror" : "Registration error",
@@ -208,6 +212,7 @@ var languages_text = {
                         "type" : "tipo",
                         "firstname" : "nombre",
                         "surname" : "apellidos",
+						"dob" : "fecha de nacimiento",
                         "address" : "dirección",
                         "email" : "email",
                         "username" : "nombre de usuario",
@@ -260,7 +265,9 @@ var languages_text = {
 			"submit" : "enviar",
 			"cancel" : "anular",
 			"toprovider" : "¿No tienes identificador? Créate una cuenta con tu proveedor.",
-			"getid" : "¿Identificador perdido? Recupéralo aquí"
+			"getid" : "¿Identificador perdido? Recupéralo aquí",
+			"dobformatexample" : "DD/MM/AAAA",
+			"optional" : "opcional"
                 },
                 "underconstruction" : "en construcción",
 		"errors" : {
@@ -274,6 +281,7 @@ var languages_text = {
 			"emailformat" : "formato de email erróneo",
 			"phoneformat" : "formato de teléfono no válido",
 			"notregistered" : "nombre de usuario no válido. Regístrate con el identificador proporcionado por tu proveedor",
+			"notcreated" : "no hay un perfil para este usuario.Contacte a su proveedor",
 			"accountnotfound" : "no hemos encontrado tu cuenta",
 			"wrongcredentials" : "nombre de usuario o contraseña erróneos",
 			"registrationerror" : "error de inscripción",

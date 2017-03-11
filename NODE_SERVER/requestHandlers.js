@@ -140,6 +140,9 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 	//console.log("[requestHandlres.getFullProviderData] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
+	var surname = url.parse(request.url, true).query.surname;
+	var firstname = url.parse(request.url, true).query.firstname;
+	var dob = url.parse(request.url, true).query.dob;
 	var username = url.parse(request.url, true).query.username;
 	var password = url.parse(request.url, true).query.password;
 	var id = url.parse(request.url, true).query.id;
@@ -155,8 +158,9 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 		return;
 	}
 	var subscriber = ( type == "customer" ) ? customer : provider;
-	
-	if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
+
+	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+	//if ( () || (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 )) ) {
 	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
 		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 		var body = {};
@@ -205,7 +209,43 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 		});
 	}
 	
-	if ( action == "login" ) {
+	if ( ["register","getid"].indexOf(action) >= 0 ) {
+		queryUsername["firstname.value"] = firstname;
+		queryUsername["surname.value"] = surname;
+		queryUsername["dob.value"] = dob;
+		//console.log("queryUsername = " + JSON.stringify(queryUsername));
+		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
+			if (err) {
+				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = err;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if ( userAtt == null ) {
+				noUser = 1;
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "notcreated";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else if ( userAtt["username"] != customerAttributesDefault["username"].value ) {
+				//console.log("[requestHandlers.getCustomer] action = " + action + " - username = " + userAtt["username"] + " (default: " + customerAttributesDefault["username"].value);
+				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "accountalreadycreated";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			} else {
+				queryAndRespond(queryUsername);
+			}
+		});
+	} else if ( action == "login" ) {
 		queryUsername["username.value"] = username;
 		subscriber.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
@@ -313,11 +353,12 @@ function getCustomer(response, request, dbcnx, db) {
 	var id = url.parse(request.url, true).query.id;
 	var surname = url.parse(request.url, true).query.surname;
 	var firstname = url.parse(request.url, true).query.firstname;
+	var dob = url.parse(request.url, true).query.dob;
 	
-	//console.log("action = " + action + " - surname = " + surname + " - firstame = " + firstname);
+	//console.log("action = " + action + " - username = " + username + " - password = " + password);
 	//if ( ( ((action == "register" || action == "getid" ) && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0) || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-		//console.log("[requestHandlers.getCustomer] bad request based on action : \n- action: \"" + action + "\"\n- surname: \"" + surname + "\"\n- firstname: \"" + firstname);
+	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+		console.log("[requestHandlers.getCustomer] bad request based on action : \n- action: \"" + action + "\"\n- username: \"" + username + "\"\n- password: \"" + password);
 		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 		var body = {};
 		body["status"] = "ERROR";
@@ -369,6 +410,7 @@ function getCustomer(response, request, dbcnx, db) {
 	if ( ["register","getid"].indexOf(action) >= 0 ) {
 		registerCheckQuery["firstname.value"] = firstname;
 		registerCheckQuery["surname.value"] = surname;
+		registerCheckQuery["dob.value"] = dob;
 		//console.log("registerCheckQuery = " + JSON.stringify(registerCheckQuery));
 		customer.doGet(dbcnx, db, registerCheckQuery, function(err,userAtt) {
 			if (err) {
@@ -704,6 +746,7 @@ function register(response, request, dbcnx, db) {
 	var id = urlParams["id"];
 	var surname = urlParams["surname"];
 	var username = urlParams["username"];
+	var dob = urlParams["dob"];
 	var email = urlParams["email"];
 	var password = urlParams["password"];
 	
@@ -738,12 +781,12 @@ function register(response, request, dbcnx, db) {
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else {
-			//check id the id and the surname provided match
-			if ( attList["surname"].toLowerCase() != surname.toLowerCase() ){
+			//check id the id and the surname and the DOB provided match
+			if ( attList["surname"].toLowerCase() != surname.toLowerCase() || attList["dob"] != dob ){
 				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "idnamenotmatch";
+				body["errormessage"] = "infonotmatch";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );				
@@ -833,7 +876,7 @@ function register(response, request, dbcnx, db) {
 
 function getLostCredentials(response, request, dbcnx, db) {
 	//console.log("[requestHandlers.getLostCredentials] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
-	var optFields = ["name","password","username"];
+	var optFields = ["surname","name","password","username"];
 	var urlParams = url.parse(request.url, true).query;
 	
 	var name = url.parse(request.url, true).query.name;
@@ -909,6 +952,13 @@ function getLostCredentials(response, request, dbcnx, db) {
 					body["status"] = "ERRORMAIL";
 					body["errormessage"] = "emailfailed";
 					body["email"] = email;
+					// Send customer data to redirect directly to signin page
+					for ( var field in attList ) {
+						if ( field != "email" ) {
+							body[field] = attList[field];
+							console.log("[requestHandler.getCustomer.queryandRespond] " + Math.round(new Date().getTime() / 1000) + " field: \"" + field + "\" : \"" + JSON.stringify(body[field]) );
+						}
+					}
 					//body[credential] = attList[credential];
 					var respBody = JSON.stringify(body);
 					response.writeHead(500, {"Content-Type": "text/plain", "Access-Control-Allow-Origin" : "*"});
@@ -934,6 +984,8 @@ function updateSetting(response, request, dbcnx, db) {
 	//console.log("[requestHandlers.updasteSetting] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var id = urlParams["id"];
+	var password = urlParams["password"];
+	var username = urlParams["username"];
 	var field = urlParams["field"];
 	var newvalue = urlParams["newvalue"];
 	var oldvalue = urlParams["oldvalue"];
@@ -1037,6 +1089,14 @@ function updateSetting(response, request, dbcnx, db) {
 			oldvalue = oldvalue.toLowerCase();
 		}
 		checkQuery[updateQueryField] = oldvalue;
+
+		if ( myUndefined.indexOf(password) < 0 && !("password" in checkQuery)) {
+			checkQuery["password.value"] = password;
+		}
+
+		if ( myUndefined.indexOf(username) < 0 && !("username" in checkQuery)) {
+			checkQuery["username.value"] = username;
+		}
 		//console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		mycollection.doGet(dbcnx, db, checkQuery, function(err,attList) {
 			if (err) {

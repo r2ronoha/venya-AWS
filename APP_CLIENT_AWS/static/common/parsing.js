@@ -11,6 +11,7 @@ var booleanFields = ['notifications','location'];
 var booleanValues = {'true' : 'on', 'false' : 'off'};
 var privateFields = ['id','sessionid','type','action'];
 var secretFields = ['password'];
+var dateFields = ['dob'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -160,6 +161,8 @@ function createDataTable(tableData, lang, action){
 				value = formatName(value);
 			} else if ( upperCaseFields.indexOf(field) > -1 ) {
 				value = value.toUpperCase();
+			} else if ( dateFields.indexOf(field) > -1 ) {
+				value = format_dob(value);
 			}
 
 			if ( field == "address" ) {
@@ -450,6 +453,7 @@ function getCredentialsProcessRequest(url,credential,lang,errorid) {
 				params["credential"] = response[credential];
 				goTo(pages.showlostinfo,params);
 			} else {
+				console.log("raw responseText" + xhr.responseText);
 				try {
 					var response = JSON.parse(xhr.responseText);
 					var params = {};
@@ -458,9 +462,12 @@ function getCredentialsProcessRequest(url,credential,lang,errorid) {
 					params["message"] = response["errormessage"];
 					params["email"] = response["email"];
 					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"][response["errormessage"]]]);
+					console.log(JSON.stringify(response));
 					//goTo(errUrl,params);
 				} catch (err) {
 					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"]["dbcnxerror"]]);
+					console.log(err.stack);
+					//console.log(JSON.stringify(reponse));
 				}
 			}
 			
@@ -600,4 +607,8 @@ function required_field_empty(input,field,langTexts) {
 	if ( ! input.validity.valid ) {
 		input.setCustomValidity(formatMessage([field,langTexts['errors']['required']]));
 	}
+}
+
+function format_dob(dob) {
+	return dob.replace(/^([0-9]{2})([0-9]{2})([0-9]*)$/,"$1/$2/$3");
 }
