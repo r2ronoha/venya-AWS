@@ -51,6 +51,7 @@
 			var oldUsername = form.elements.oldUsername.value;
 			var username = form.elements.inputUsername.value;
 			var confirmUsername = form.elements.confirmUsername.value;
+			var password = form.elements.inputPassword.value;
 			
 			clear_error("confirmUsernameErrors","confirmUsername");
 			clear_error("usernameErrors","inputUsername");
@@ -68,6 +69,7 @@
 				var values = {};
 				values["id"] = customerId;
 				values["field"] = "username";
+				values["password"] = password;
 				values["oldvalue"] = oldUsername;
 				values["newvalue"] = username;
 				update(values);
@@ -77,11 +79,12 @@
 		function update(values) {
 			var id = values["id"];
 			var field = values["field"];
+			var password = values["password"];
 			var oldvalue = values["oldvalue"];
 			var newvalue = values["newvalue"];
 			
 			var xhr = new XMLHttpRequest();
-			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=customer&action=update&id=" + id + "&field=" + field + "&newvalue=" + newvalue;
+			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?type=customer&action=update&id=" + id + "&password=" + password + "&field=" + field + "&newvalue=" + newvalue;
 			if ( oldvalue != undefined ) myUrl += "&oldvalue=" + oldvalue;
 			xhr.open('GET',myUrl,true);
 			xhr.send();
@@ -156,6 +159,12 @@
 		<input type="text" id="confirmUsername" class="form-control" oninput="setCustomValidity('')" oninvalid="required_field_empty(this,myLangTexts['form']['confirm'].replace(/$/,' ').concat(myLangTexts['customer']['username']),myLangTexts)" placeholder="Confirm new Username" required autofocus>
 		<label for="confirmUsername" class="sr-only"><script>javascript:displayMenu("confirmUsername",formatMessage([myLangTexts["form"]["confirm"],myLangTexts["customer"]["username"]]))</script></label>
 		<span id="confirmUsernameErrors" style="display: none"></span>
+		</fieldset>
+	
+		<fieldset>
+		<input type="text" id="inputPassword" class="form-control" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$" oninput="field_format_check(this,formatMessage([myLangTexts['errors']['passwordformat']]))" oninvalid="required_field_empty(this,myLangTexts['customer']['password'],myLangTexts)" placeholder="Password" required autofocus>
+		<label for="inputPassword" class="sr-only"><script>javascript:displayMenu("inputPassword",myLangTexts["customer"]["password"]]))</script></label>
+		<span id="passwordErrors" style="display: none"></span>
 		</fieldset>
 	
 		<button id="submitButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>javascript:displayForm("submitButton",myLangTexts["form"]["submit"])</script></button>

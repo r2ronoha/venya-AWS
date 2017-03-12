@@ -169,6 +169,8 @@
 				value = formatName(value);
 			} else if ( upperCaseFields.indexOf(field) > -1 ) {
 				value = value.toUpperCase();
+			} else if ( dateFields.indexOf(field) > -1 ) {
+				value = format_dob(value);
 			}
 	
 			var cells = { "settingCell": field, "valueCell": value };

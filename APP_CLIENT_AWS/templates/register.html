@@ -54,6 +54,7 @@
 		var id = form.elements.id.value;
 		var username = form.elements.inputUsername.value;
 		var surname = form.elements.inputName.value.toLowerCase();
+		var dob = form.elements.inputDOB.value.replace("/\//g",'');
 		var email = form.elements.inputEmail.value.toLowerCase();
 		var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
 		var phone = form.elements.inputPhone.value;
@@ -90,6 +91,7 @@
 			var id = form.elements.id.value;
 			var username = form.elements.inputUsername.value.replace(/\s*$/,'');
 			var surname = form.elements.inputName.value.toLowerCase().replace(/\s*$/,'');
+			var dob = form.elements.inputDOB.value.replace("/\//g",'');
 			var email = form.elements.inputEmail.value.toLowerCase();
 			var confirmEmail = form.elements.confirmEmail.value.toLowerCase();
 			var phone = form.elements.inputPhone.value;
@@ -101,6 +103,7 @@
 				"&id=" + id +
 				"&surname=" + surname +
 				"&email=" + email +
+				"&dob=" + dob +
 				"&phone=" + phone +
 				"&username=" + username +
 				"&password=" + password +
@@ -182,6 +185,12 @@
 			</fieldset>
 			
 			<fieldset>
+			<input type="text" id="inputDOB" class="form-control" oninvalid="required_field_empty(this,myLangTexts['customer']['dob'],myLangTexts)" oninput="setCustomValidity('')" pattern="^[0-9]{2}\/[0-9]{2}\/[0-9]{4}" placeholder="Surname" required autofocus>
+			<label for="inputDOB" class="sr-only"><script>displayForm("inputDOB",formatMessage([myLangTexts["customer"]["dob"]]))</script></label>
+			<span id="dobError" style"display: none;"></span>
+			</fieldset>
+			
+			<fieldset>
 			<input type="email" id="inputEmail" class="form-control" oninput="setCustomValidity('')" oninvalid="invalid_email(this,myLangTexts)" placeholder="Email address" required autofocus>
 			<label for="inputEmail" class="sr-only"><script>displayForm("inputEmail",formatMessage([myLangTexts["customer"]["email"]]))</script></label>
 			<span id="emailError" style="display: none;"></span>
@@ -195,7 +204,7 @@
 
 			<fieldset>
 			<input type="text" id="inputPhone" class="form-control" pattern="^(\+|00)?[0-9]{4,}$" oninput="field_format_check(this,myLangTexts['errors']['phoneformat'])" placeholder="Phone number" >
-			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]]))</script></label>
+			<label for="inputPhone" class="sr-only"><script>displayForm("inputPhone",formatMessage([myLangTexts["customer"]["phone"]," - ",myLangTexts["form"]["optional"]]))</script></label>
 			<span id="phoneError" style"display: none;"></span>
 			</fieldset>
 
@@ -230,6 +239,10 @@
 				document.getElementById("inputName").defaultValue = decodeURIComponent(urlParams["surname"]);
 				document.getElementById("inputName").autofocus = false;
 				document.getElementById("inputName").disabled = true;
+
+				document.getElementById("inputDOB").defaultValue = decodeURIComponent(urlParams["dob"]);
+				document.getElementById("inputDOB").autofocus = false;
+				document.getElementById("inputDOB").disabled = true;
 
 				if ( urlParams["email"] != defaultEmail ) {
 					document.getElementById("inputEmail").defaultValue = urlParams["email"];

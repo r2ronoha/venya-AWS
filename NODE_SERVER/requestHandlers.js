@@ -1034,7 +1034,7 @@ function updateSetting(response, request, dbcnx, db) {
 	var query = { "_id": ObjectId(id) };
 	
 	function updateAndRespond(query, updateQuery) {
-		//console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
+		console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
 		mycollection.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
 				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});

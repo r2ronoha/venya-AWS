@@ -90,6 +90,7 @@
 			//if ( verify_entry(username,password) ) {
 				var xhr = new XMLHttpRequest();
 				var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomer?action=login&username=" + username + "&password=" + password;
+				console.log(myUrl);
 				xhr.open('GET',myUrl,true);
 				//xhr.setRequestHeader('Access-Control-Allow-Origin','*');
 				xhr.send();
