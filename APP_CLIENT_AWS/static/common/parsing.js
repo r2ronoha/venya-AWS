@@ -32,6 +32,7 @@ var pages = {
 	"home": "home.html",
 	"register": "register.html",
 	"settings": "settings.html",
+	"customerproviders": "customerProviders.html",
 	"changeSettings": "changeSettings.html",
 	"appointments": "appointments.html",
 	"notifications": "notifications.html",
@@ -119,6 +120,17 @@ function formatName(value) {
 		}
 	}
 	return nameparts.join(' ');
+}
+
+function formatAddress(value) {
+	var address = "";
+	for ( var field in value ) {
+		if ( value[field].toLowerCase() != "n/a" ) {
+			address += ( upperCaseFields.indexOf(field) >= 0 ) ? value[field].toUpperCase() : formatName(value[field]);
+			address += ", ";
+		}
+	}
+	return ( address == "" ) ? "N/A" : address.replace(/, $/,'');
 }
 
 function hideValue(value) {
@@ -561,13 +573,22 @@ function setSessionId(values,urlParams,type,signinPage,homePage) {
 			if (xhr.status == 200) {
 				goTo(homePage,urlParams);
 			} else {
-				var response = JSON.parse(xhr.responseText);
-				var gotoParams = {};
-				gotoParams["action"] = urlParams["action"];
-				gotoParams["status"] = response["status"];
-				gotoParams["errormessage"] = response["errormessage"];
-				gotoParams["lang"] = urlParams["lang"];
-				goTo(signinPage,gotoParams);
+				try {
+					var response = JSON.parse(xhr.responseText);
+					var gotoParams = {};
+					gotoParams["action"] = urlParams["action"];
+					gotoParams["status"] = response["status"];
+					gotoParams["errormessage"] = response["errormessage"];
+					gotoParams["lang"] = urlParams["lang"];
+					goTo(signinPage,gotoParams);
+				} catch (err) {
+					var gotoParams = {};
+					gotoParams["action"] = urlParams["action"];
+					gotoParams["status"] = "ERROR";
+					gotoParams["errormessage"] = "dbcnxerror";
+					gotoParams["lang"] = urlParams["lang"];
+					goTo(signinPage,gotoParams);
+				}
 			}
 		}
 	}
@@ -597,13 +618,13 @@ function format_error(errorid,id,message){
 	errorcount++;
 }
 
-function invalid_email(input,langTexts) {
+function invalid_email(input,langTexts) { 
 	if ( ! input.validity.valid ) {
 		input.setCustomValidity(formatMessage([langTexts['errors']['emailformat']]));
 	}
 }
 
-function required_field_empty(input,field,langTexts) {
+function required_field_empty(input,field,langTexts) { //If the required field is empty, display error messge in input tag provided
 	if ( ! input.validity.valid ) {
 		input.setCustomValidity(formatMessage([field,langTexts['errors']['required']]));
 	}
@@ -611,4 +632,35 @@ function required_field_empty(input,field,langTexts) {
 
 function format_dob(dob) {
 	return dob.replace(/^([0-9]{2})([0-9]{2})([0-9]*)$/,"$1/$2/$3");
+}
+
+function get_id_from_sessionid(type,sessionid,callback) {
+	var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getSubscriber" +
+		"?type=" + type +
+		"&action=getidfromsessionid" +
+		"&sessionid=" + sessionid;
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET',myUrl,true);
+	xhr.send();
+	xhr.onreadystatechange = processRequest;
+	
+	function processRequest(e) {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				//console.log(xhr.responseText);
+				var response = JSON.parse(xhr.responseText);
+				var id = response["id"];
+				callback(null,id);
+			} else {
+				try {
+					var response = JSON.parse(xhr.responseText);
+					var err = response["errormessage"];
+					callback(err,null);
+				} catch (err) {
+					callback("unknownerror",null);
+				}
+			}
+		}
+	}
 }

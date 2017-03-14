@@ -9,10 +9,14 @@ var provider = require("./provider.js");
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 var ObjectId = require('mongodb').ObjectId;
+var subscriberTypes = [ "customer" , "provider" ];
+var default_provider = "venyadefault";
 
 var exec = require("child_process").exec;
 var myUndefined = [ undefined, "undefined" ];
 var notCaseSensitive = [ "name","surname","email","address" ];
+
+var responseHeadParams =  { "Content-Type" : "text/plain" , "Access-Control-Allow-Origin" : "*" };
 /*
 //imports to support aws email
 // load aws sdk
@@ -45,6 +49,33 @@ provider.getAttDefault( function(attDef) {
 	providerAttributesDefault = attDef;
 });	
 
+function writeErrorResponse(response,statuscode,errormessage,action) {
+	response.writeHead(statuscode, responseHeadParams);
+	var body = {};
+	body["status"] = "ERROR";
+	body["errormessage"] = errormessage;
+	body["action"] = action;
+	var respBody = JSON.stringify(body);
+	response.write(respBody, function(err) { response.end(); });
+}
+
+function writeSuccessResponse(response,body) {
+	response.writeHead(200, responseHeadParams);
+	body["status"] = "SUCCESS";
+	var respBody = JSON.stringify(body);
+	response.write(respBody, function(err) { response.end(); });
+}
+
+function doGetHandler(response,err, attList, action, callback) {
+	if (err) {
+		writeErrorResponse(response,500,err,action);
+	} else if (attList == null) {
+		writeErrorResponse(response,401,"nullfromserver",action);
+	} else {
+		callback();
+	}
+}
+
 function getFullCustomerData(response, request, dbcnx, db) {	
 	//console.log("[requestHandlres.getFullCustomerData] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
@@ -55,7 +86,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	
 	if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
 	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
-		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
@@ -71,7 +102,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		customer.doGetFullData(dbcnx, db, query, function(err,document) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -79,7 +110,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			} else if (document != null) {
-				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(200, responseHeadParams);
 				var body = {};
 				body["status"] = "SUCCESS";
 				body["action"] = action;
@@ -91,7 +122,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 				//console.log("[requestHandlers.getFullCustomerData.q&R] " + Math.round(new Date().getTime() / 1000) + " respBody = " + respBody);
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "wrongcredentials";
@@ -106,7 +137,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 		queryUsername["username.value"] = username;
 		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -115,7 +146,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -148,8 +179,8 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 	var id = url.parse(request.url, true).query.id;
 	var type = url.parse(request.url, true).query.type;
 
-	if ( myUndefined.indexOf(type) >= 0 ) {
-		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+	if ( myUndefined.indexOf(type) >= 0 || subscriberTypes.indexOf(type) < 0 ) {
+		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
@@ -162,7 +193,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
 	//if ( () || (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 )) ) {
 	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
-		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
@@ -178,7 +209,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		subscriber.doGetFullData(dbcnx, db, query, function(err,document) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -186,7 +217,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			} else if (document != null) {
-				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(200, responseHeadParams);
 				var body = {};
 				body["status"] = "SUCCESS";
 				body["action"] = action;
@@ -198,7 +229,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 				//console.log("[requestHandlers.getFullCustomerData.q&R] " + Math.round(new Date().getTime() / 1000) + " respBody = " + respBody);
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "wrongcredentials";
@@ -216,7 +247,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 		//console.log("queryUsername = " + JSON.stringify(queryUsername));
 		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -225,7 +256,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notcreated";
@@ -234,7 +265,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt["username"] != customerAttributesDefault["username"].value ) {
 				//console.log("[requestHandlers.getCustomer] action = " + action + " - username = " + userAtt["username"] + " (default: " + customerAttributesDefault["username"].value);
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "accountalreadycreated";
@@ -249,7 +280,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 		queryUsername["username.value"] = username;
 		subscriber.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -258,7 +289,7 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -344,6 +375,29 @@ function sessionTimeoutManagement(dbcnx, db) {
 	});
 }
 
+function getSubscriber(response,request,dbcnx,db) {
+	var type = url.parse(request.url, true).query.type;
+
+	if ( myUndefined.indexOf(type) >= 0 || subscriberTypes.indexOf(type) < 0 ) {
+		response.writeHead(500, responseHeadParams);
+		var body = {};
+		body["status"] = "ERROR";
+		body["errormessage"] = "badrequest";
+		var respBody = JSON.stringify(body);
+		response.write(respBody, function(err) { response.end(); } );
+		return;
+	}
+	
+	switch (type) {
+		case "customer":
+			getCustomer(response, request, dbcnx, db);
+			break;
+		case "provider":
+			getProvider(response, request, dbcnx, db);
+			break;
+	}
+}
+
 function getCustomer(response, request, dbcnx, db) {	
 	//console.log("[requestHandlers.getCustomer] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
@@ -354,17 +408,27 @@ function getCustomer(response, request, dbcnx, db) {
 	var surname = url.parse(request.url, true).query.surname;
 	var firstname = url.parse(request.url, true).query.firstname;
 	var dob = url.parse(request.url, true).query.dob;
+	var sessionid = url.parse(request.url, true).query.sessionid;
 	
 	//console.log("action = " + action + " - username = " + username + " - password = " + password);
 	//if ( ( ((action == "register" || action == "getid" ) && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0) || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || 
+		( action == "getidfromsessionid" && myUndefined.indexOf(sessionid) >= 0 ) ||
+		["register","getid","getidfromsessionid"].indexOf(action) < 0 && (
+			( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || 
+			( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || 
+			( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
 		console.log("[requestHandlers.getCustomer] bad request based on action : \n- action: \"" + action + "\"\n- username: \"" + username + "\"\n- password: \"" + password);
-		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+
+		writeErrorResponse(response,400,"badrequest",action);
+/*
+		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
 		var respBody = JSON.stringify(body);
 		response.write(respBody, function(err) { response.end(); } );
+*/
 		return;
 	}
 	
@@ -376,15 +440,18 @@ function getCustomer(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		customer.doGet(dbcnx, db, query, function(err,attList) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				writeErrorResponse(response,500,err,action);
+				/*
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
+				*/
 			}else if (attList != null) {
-				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(200, responseHeadParams);
 				var body = {};
 				body["status"] = "SUCCESS";
 				body["action"] = action;
@@ -396,13 +463,17 @@ function getCustomer(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				respErrorMessage = ( action == "getidfromsessionid" ) ? "invalidsessionid" : "wrongcredentials";
+				writeErrorResponse(response,401,respErrorMessage,action);
+				/*
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "wrongcredentials";
+				body["errormessage"] = ( action == "getidfromsessionid" ) ? "invalidsessionid" : "wrongcredentials";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
+				*/
 			}
 		});
 	}
@@ -414,7 +485,7 @@ function getCustomer(response, request, dbcnx, db) {
 		//console.log("registerCheckQuery = " + JSON.stringify(registerCheckQuery));
 		customer.doGet(dbcnx, db, registerCheckQuery, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -423,7 +494,7 @@ function getCustomer(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -432,7 +503,7 @@ function getCustomer(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt["username"] != customerAttributesDefault["username"].value ) {
 				//console.log("[requestHandlers.getCustomer] action = " + action + " - username = " + userAtt["username"] + " (default: " + customerAttributesDefault["username"].value);
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "accountalreadycreated";
@@ -447,7 +518,7 @@ function getCustomer(response, request, dbcnx, db) {
 		queryUsername["username.value"] = username;
 		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -456,7 +527,7 @@ function getCustomer(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -473,8 +544,8 @@ function getCustomer(response, request, dbcnx, db) {
 		});
 	} else {
 		//console.log("[requestHandlers.getCustomer] " + Math.round(new Date().getTime() / 1000) + "query = { \"_id\": ObjectId(" + id + ") }");
-		query = { "_id": ObjectId(id) }
-		queryAndRespond(query)
+		query = ( myUndefined.indexOf(sessionid) >= 0 ) ? { "_id": ObjectId(id) } : { "sessionid.value" : sessionid };
+		queryAndRespond(query);
 	}
 }
 
@@ -486,62 +557,112 @@ function createCustomer(response, request, dbcnx, db) {
 	for ( var field in url.parse(request.url, true).query ) {
 		if ( url.parse(request.url, true).query[field] != "" ) {
 			//var fieldQuery = { "fix": attributesFix[field], "value": url.parse(request.url, true).query[field] };
-			var fieldQuery = { "fix": customerAttributesDefault[field].fix, "value": url.parse(request.url, true).query[field].toLowerCase() };
+			var value = url.parse(request.url, true).query[field].toLowerCase();
+			if ( field == "providerid" ) {
+				var myprovider = {}
+				myprovider[value] = true;
+				value = myprovider;
+				field = "providers";
+			}
+			var fieldQuery = { "fix": customerAttributesDefault[field].fix, "value": value };
 			insertQuery[field] = fieldQuery;
-			//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
+			console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
 		}
+	}
+
+	//set provider to VenyaDefault if no provider sent (i.e. created via self customer creation during development/testing phase
+	if ( !( "providers" in insertQuery ) ) {
+		console.log("Getting default provider info");
+		//var providername = default_provider;
+		var getProviderQuery = { 'name.value' : default_provider };
+		console.log(JSON.stringify(getProviderQuery));
+		provider.doGet(dbcnx, db, getProviderQuery, function(err, attList) {
+			if(err) {
+				console.log("[createProvider] error : " + err);
+				response.writeHead(500, responseHeadParams);
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = err;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+				return;
+			} else if (attList == null) {
+				console.log("[createProvider] error : NULL FROM DB");
+				response.writeHead(500, responseHeadParams);
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = "unknownprovider";
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+				return;
+			} else {
+				var providerid = attList["id"];
+				console.log("default provider id = " + providerid);
+				var value = {};
+				value[providerid] = true;
+				insertQuery["providers"] = { "fix" : customerAttributesDefault["providers"].fix, "value" : value };
+				console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
+				insert(dbcnx, db, insertQuery)
+			}
+		});
+	} else {
+		console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
+		insert(dbcnx, db, insertQuery)
 	}
 	
 	//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling customer.doInsert\n[requestHandler.createCustomer()] dbcnx = " + dbcnx + " -- db = " + db + " insertQuery = " + JSON.stringify(insertQuery))
-	
-	customer.doInsert(dbcnx, db, insertQuery, function(query,exists,message){
-		if ( exists == 0 ) {
-			//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling customer.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
-			customer.doGet(dbcnx, db, query, function(err,attList) {
-				if (err) {
-					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
-					var body = {};
-					body["status"] = "ERROR";
-					body["errormessage"] = err;
-					body["action"] = action;
-					var respBody = JSON.stringify(body);
-					response.write(respBody, function(err) { response.end(); } );
-				} else if (attList != null) {
-					response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
-					var body = {};
-					body["status"] = "SUCCESS";
-					body["action"] = action;
-					//response.write(body);
-					for ( var field in attList ) {
-						body[field] = attList[field];
+	function insert(dbcnx, db, insertQuery) {
+		customer.doInsert(dbcnx, db, insertQuery, function(query,exists,message){
+			if ( exists == 0 ) {
+				//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling customer.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
+				customer.doGet(dbcnx, db, query, function(err,attList) {
+					if (err) {
+						response.writeHead(500, responseHeadParams);
+						var body = {};
+						body["status"] = "ERROR";
+						body["errormessage"] = err;
+						body["action"] = action;
+						var respBody = JSON.stringify(body);
+						response.write(respBody, function(err) { response.end(); } );
+					} else if (attList != null) {
+						response.writeHead(200, responseHeadParams);
+						var body = {};
+						body["status"] = "SUCCESS";
+						body["action"] = action;
+						//response.write(body);
+						for ( var field in attList ) {
+							body[field] = attList[field];
+						}
+						var respBody = JSON.stringify(body);
+						response.write(respBody, function(err) { response.end(); } );
+					} else {
+						response.writeHead(500, responseHeadParams);
+						var body = {};
+						body["status"] = "ERROR";
+						body["errormessage"] = "createcheckfail";
+						body["action"] = action;
+						var respBody = JSON.stringify(body);
+						response.write(respBody, function(err) { response.end(); } );
+						//response.end();
 					}
-					var respBody = JSON.stringify(body);
-					response.write(respBody, function(err) { response.end(); } );
-				} else {
-					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
-					var body = {};
-					body["status"] = "ERROR";
-					body["errormessage"] = "createcheckfail";
-					body["action"] = action;
-					var respBody = JSON.stringify(body);
-					response.write(respBody, function(err) { response.end(); } );
-					//response.end();
-				}
-			})
-		} else {
-			response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
-			var body = {};
-			body["status"] = "ERROR";
-			body["errormessage"] = message;
-			body["action"] = action;
-			var respBody = JSON.stringify(body);
-			response.write(respBody, function(err) { response.end(); } );
-		}
-	});
+				})
+			} else {
+				response.writeHead(401, responseHeadParams);
+				var body = {};
+				body["status"] = "ERROR";
+				body["errormessage"] = message;
+				body["action"] = action;
+				var respBody = JSON.stringify(body);
+				response.write(respBody, function(err) { response.end(); } );
+			}
+		});
+	}
 }
 
 function getProvider(response, request, dbcnx, db) {	
-	//console.log("[requestHandlers.getProvider] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
+	console.log("[requestHandlers.getProvider] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
@@ -549,12 +670,17 @@ function getProvider(response, request, dbcnx, db) {
 	var id = url.parse(request.url, true).query.id;
 	var surname = url.parse(request.url, true).query.surname;
 	var firstname = url.parse(request.url, true).query.firstname;
+	var sessionid = url.parse(request.url, true).query.sessionid;
 	
 	//if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
-	//console.log("action = " + action + " - surname = " + surname + " - firstame = " + firstname);
-	if ( (action == "register" && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname)) >= 0 || (action != "register") && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
-		response.writeHead(400, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+	if ( (action == "register" && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0) || 
+		(action == "getidfromsessionid" && myUndefined.indexOf(sessionid) >= 0 ) ||
+		( ["register","getidfromsessionid"].indexOf(action) < 0 ) && (
+			( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || 
+			( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || 
+			( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
+	//console.log("[reqHandler.getProvider] action = " + action + " -- sessionid = " + sessionid);
+		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
@@ -571,7 +697,7 @@ function getProvider(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		provider.doGet(dbcnx, db, query, function(err,attList) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -579,7 +705,7 @@ function getProvider(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			}else if (attList != null) {
-				response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(200, responseHeadParams);
 				var body = {};
 				body["status"] = "SUCCESS";
 				body["action"] = action;
@@ -591,10 +717,10 @@ function getProvider(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = "wrongcredentials";
+				body["errormessage"] = ( action == "getidfromsessionid" ) ? "invalidsessionid" : "wrongcredentials";
 				body["action"] = action;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
@@ -608,7 +734,7 @@ function getProvider(response, request, dbcnx, db) {
 		//console.log("registerCheckQuery = " + JSON.stringify(registerCheckQuery));
 		provider.doGet(dbcnx, db, registerCheckQuery, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -617,7 +743,7 @@ function getProvider(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -625,7 +751,7 @@ function getProvider(response, request, dbcnx, db) {
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt["username"] != providerAttributesDefault["username"] ) {
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "accountalreadycreated";
@@ -640,7 +766,7 @@ function getProvider(response, request, dbcnx, db) {
 		queryUsername["username.value"] = username;
 		provider.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -649,7 +775,7 @@ function getProvider(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( userAtt == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "notregistered";
@@ -666,8 +792,8 @@ function getProvider(response, request, dbcnx, db) {
 		});
 	} else {
 		//console.log("[requestHandlers.getProvider] " + Math.round(new Date().getTime() / 1000) + "query = { \"_id\": ObjectId(" + id + ") }");
-		query = { "_id": ObjectId(id) }
-		queryAndRespond(query)
+		query = ( myUndefined.indexOf(sessionid) >= 0 ) ? { "_id": ObjectId(id) } : { "sessionid.value" : sessionid };
+		queryAndRespond(query);
 	}
 }
 
@@ -698,7 +824,7 @@ function createProvider(response, request, dbcnx, db) {
 			//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling provider.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
 			provider.doGet(dbcnx, db, query, function(err,attList) {
 				if (err) {
-					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+					response.writeHead(500, responseHeadParams);
 					var body = {};
 					body["status"] = "ERROR";
 					body["errormessage"] = err;
@@ -706,7 +832,7 @@ function createProvider(response, request, dbcnx, db) {
 					var respBody = JSON.stringify(body);
 					response.write(respBody, function(err) { response.end(); } );
 				} else if (attList != null) {
-					response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+					response.writeHead(200, responseHeadParams);
 					var body = {};
 					body["status"] = "SUCCESS";
 					body["action"] = action;
@@ -717,7 +843,7 @@ function createProvider(response, request, dbcnx, db) {
 					var respBody = JSON.stringify(body);
 					response.write(respBody, function(err) { response.end(); } );
 				} else {
-					response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+					response.writeHead(500, responseHeadParams);
 					var body = {};
 					body["status"] = "ERROR";
 					body["errormessage"] = "createcheckfail";
@@ -728,7 +854,7 @@ function createProvider(response, request, dbcnx, db) {
 				}
 			})
 		} else {
-			response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+			response.writeHead(401, responseHeadParams);
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = message;
@@ -765,7 +891,7 @@ function register(response, request, dbcnx, db) {
 	
 	customer.doGet(dbcnx, db, checkIDquery, function(err,attList) {
 		if (err) {
-			response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+			response.writeHead(500, responseHeadParams);
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = err;
@@ -773,7 +899,7 @@ function register(response, request, dbcnx, db) {
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else if ( attList == null ) {			
-			response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+			response.writeHead(401, responseHeadParams);
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = "idnotinsystem";
@@ -783,7 +909,7 @@ function register(response, request, dbcnx, db) {
 		} else {
 			//check id the id and the surname and the DOB provided match
 			if ( attList["surname"].toLowerCase() != surname.toLowerCase() || attList["dob"] != dob ){
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "infonotmatch";
@@ -792,7 +918,7 @@ function register(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );				
 			//check if the user account has already been created for the id-name pair
 			} else if ( attList["username"] != customerAttributesDefault["username"].value || attList["email"] != customerAttributesDefault["email"].value ) {
-						response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(401, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = "accountalreadycreated"
@@ -803,7 +929,7 @@ function register(response, request, dbcnx, db) {
 				//verify if the username and/or email are already in use by any account
 				customer.doGet(dbcnx, db, checkUsernameQuery, function(err,attList) {
 					if (err) {
-						response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(500, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = err;
@@ -812,7 +938,7 @@ function register(response, request, dbcnx, db) {
 						response.write(respBody, function(err) { response.end(); } );
 					} else if ( attList != null && attList["username"] != customerAttributesDefault["username"].value ) {
 						var errormessage = ( attList["username"] == username ) ? "usernameexists" : "emailregistered";
-						response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(401, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = errormessage;
@@ -822,7 +948,7 @@ function register(response, request, dbcnx, db) {
 					}else{
 						customer.doUpdate(dbcnx, db, checkIDquery, updateQuery, function(err,checkIDquery){
 							if ( err ) {
-								response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+								response.writeHead(500, responseHeadParams);
 								var body = {};
 								body["status"] = "ERROR";
 								body["errormessage"] = err;
@@ -836,7 +962,7 @@ function register(response, request, dbcnx, db) {
 									//var password = urlParams["password"];
 									//console.log("[requestHandlers.register] " + Math.round(new Date().getTime() / 1000) + " username: " + username + ", password: " + password + ",  email: " + email);
 									if (err) {	
-										response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+										response.writeHead(500, responseHeadParams);
 										var body = {};
 										body["status"] = "ERROR";
 										body["errormessage"] = err;
@@ -844,7 +970,7 @@ function register(response, request, dbcnx, db) {
 										var respBody = JSON.stringify(body);
 										response.write(respBody, function(err) { response.end(); } );
 									} else if ( attList != null && attList["username"] == username && attList["email"] == email && attList["password"] == password ) {
-										response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+										response.writeHead(200, responseHeadParams);
 										var body = {};
 										body["status"] = "SUCCESS";
 										body["action"] = action;
@@ -855,7 +981,7 @@ function register(response, request, dbcnx, db) {
 										var respBody = JSON.stringify(body);
 										response.write(respBody, function(err) { response.end(); } );
 									} else {
-										response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+										response.writeHead(503, responseHeadParams);
 										var body = {};
 										body["status"] = "ERROR";
 										body["errormessage"] = "regdatacheckfail";
@@ -904,14 +1030,14 @@ function getLostCredentials(response, request, dbcnx, db) {
 	
 	customer.doGet(dbcnx, db, query, function(err,attList) {
 		if (err) {
-			response.writeHead(500, {"Content-Type": "text/plain", "Access-Control-Allow-Origin" : "*"});
+			response.writeHead(500, responseHeadParams);
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = "err";
 			var respBody = JSON.stringify(body);
 			response.write(respBody, function(err) { response.end(); } );
 		} else if (attList == null) {
-			response.writeHead(401, {"Content-Type": "text/plain", "Access-Control-Allow-Origin" : "*"});
+			response.writeHead(401, responseHeadParams);
 			var body = {};
 			body["status"] = "ERROR";
 			body["errormessage"] = "accountnotfound";
@@ -961,7 +1087,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 					}
 					//body[credential] = attList[credential];
 					var respBody = JSON.stringify(body);
-					response.writeHead(500, {"Content-Type": "text/plain", "Access-Control-Allow-Origin" : "*"});
+					response.writeHead(500, responseHeadParams);
 					response.write(respBody, function(err) { response.end(); });
 					return console.log(error);
 				}
@@ -973,7 +1099,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 				body["email"] = email;
 				//body[credential] = attList[credential];
 				var respBody = JSON.stringify(body);
-				response.writeHead(200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(200, responseHeadParams);
 				response.write(respBody, function(err) { response.end(); });
 			});
 		}
@@ -991,6 +1117,7 @@ function updateSetting(response, request, dbcnx, db) {
 	var oldvalue = urlParams["oldvalue"];
 	var action = urlParams["action"];
 	var type = urlParams["type"];
+	var sessionid = urlParams["sessionid"];
 
 	var mycollection;
 	if ( type == "customer" ) {
@@ -1000,7 +1127,7 @@ function updateSetting(response, request, dbcnx, db) {
 		mycollection = provider;
 	} else {
 		console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " type " + type + " not supported");
-		response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+		response.writeHead(500, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
 		body["errormessage"] = "badrequest";
@@ -1020,6 +1147,11 @@ function updateSetting(response, request, dbcnx, db) {
 			updateQuery[updateQueryField] = value.toLowerCase();
 		}
 		//console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " Update address query string = " + JSON.stringify(updateQuery));
+	} else if ( field == "providers" ) {
+		var provid = newvalue.split('=')[0];
+		var active = newvalue.split('=')[1];
+		var updateQueryField = "providers.value." + provid;
+		updateQuery[updateQueryField] = ( active == "true" );
 	} else {
 		var updateQueryField = field + ".value";
 		if ( notCaseSensitive.indexOf(field) > -1 ) {
@@ -1027,17 +1159,17 @@ function updateSetting(response, request, dbcnx, db) {
 		}
 		updateQuery[updateQueryField] = newvalue;
 		if ( field == "sessionid") {
-			var timestamp = Math.round(new Date().getTime()/1000); // get timestamp in seconds
+			var timestamp = ( newvalue == "closed" ) ? 0 : Math.round(new Date().getTime()/1000); // get timestamp in seconds
 			updateQuery['sessionid.timestamp'] = timestamp;
 		}
 	}
-	var query = { "_id": ObjectId(id) };
+	var query = ( myUndefined.indexOf(sessionid) < 0 ) ? { "sessionid.value" : sessionid } : { "_id": ObjectId(id) };
 	
 	function updateAndRespond(query, updateQuery) {
 		console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
 		mycollection.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -1049,7 +1181,7 @@ function updateSetting(response, request, dbcnx, db) {
 				mycollection.doGet(dbcnx, db, query, function(err,attList) {
 					var field = urlParams["field"];
 					if (err) {
-						response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(500, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = err;
@@ -1057,7 +1189,7 @@ function updateSetting(response, request, dbcnx, db) {
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
 					} else if ( attList != null ) {
-						response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(200, responseHeadParams);
 						var body = {};
 						body["status"] = "SUCCESS";
 						body["action"] = action;
@@ -1070,7 +1202,7 @@ function updateSetting(response, request, dbcnx, db) {
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
 					} else {
-						response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(503, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = "updatedatacheckfail";
@@ -1100,7 +1232,7 @@ function updateSetting(response, request, dbcnx, db) {
 		//console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		mycollection.doGet(dbcnx, db, checkQuery, function(err,attList) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -1109,7 +1241,7 @@ function updateSetting(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( attList == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "infonotmatch";
@@ -1156,7 +1288,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 	function updateAndRespond(query, updateQuery) {
 		customer.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -1167,7 +1299,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 				customer.doGet(dbcnx, db, query, function(err,attList) {
 					var field = urlParams["field"];
 					if (err) {
-						response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(500, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = err;
@@ -1175,7 +1307,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
 					} else if ( attList != null && attList[field] == newvalue ) {
-						response.writeHead(200, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(200, responseHeadParams);
 						var body = {};
 						body["status"] = "SUCCESS";
 						body["action"] = action;
@@ -1187,7 +1319,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 						var respBody = JSON.stringify(body);
 						response.write(respBody, function(err) { response.end(); } );
 					} else {
-						response.writeHead(503, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+						response.writeHead(503, responseHeadParams);
 						var body = {};
 						body["status"] = "ERROR";
 						body["errormessage"] = "updatedatacheckfail";
@@ -1209,7 +1341,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 		//console.log("\ncheckQuery" + JSON.stringify(checkQuery) + "\n");
 		customer.doGet(dbcnx, db, checkQuery, function(err,attList) {
 			if (err) {
-				response.writeHead(500, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = err;
@@ -1218,7 +1350,7 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else if ( attList == null ) {
 				noUser = 1;
-				response.writeHead(401, {"Content-Type" : "text/plain", "Access-Control-Allow-Origin" : "*"});
+				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
 				body["errormessage"] = "infonotmatch";
@@ -1230,8 +1362,115 @@ function updateSetting_extraManualCheck(response, request, dbcnx, db) {
 			}
 		});
 	} else {
-		updateAndRespond(query, updateQuery)
+		updateAndRespond(query, updateQuery);
 	}
+}
+
+function getCustomerProviders(response, request, dbcnx, db) {
+// Get the info for all providers that a customer is registerd with
+// Called based either on the customer's id or the current sessionid
+
+	var sessionid = url.parse(request.url, true).query.sessionid;
+	var customerid = url.parse(request.url, true).query.id;
+	var action = url.parse(request.url, true).query.action;
+
+	if ( myUndefined.indexOf(sessionid) >= 0 && myUndefined.indexOf(customerid) >= 0 ) { //at least one them needs to be privided to query the DB
+		response.writeHead(500, responseHeadParams);
+	}
+
+	if ( myUndefined.indexOf(action) >= 0 ) action = "getcustomerproviders"; // if no action is passed default to getcustomerproviders
+
+	// if we have a sessionid,, we use it as field for the request. Otherwise we'll use the customer id
+	var getQuery = ( myUndefined.indexOf(sessionid) < 0 ) ? { "sessionid.value" : sessionid } : { "_id" : ObjectId(customerid) };
+	console.log("[reqHandlers.getCustomerProviders] getQuery = " + JSON.stringify(getQuery));
+
+	/*
+		1. get the information for the customer based on the sessionid or customerid
+		2. extract the list of providers linked to it
+		3. get the info for each provider
+	*/
+	customer.doGetFullData(dbcnx, db, getQuery, function (err, attList) {
+		if (err) {
+			writeErrorResponse(response,500,err,action);
+		} else if (attList == null) {
+			writeErrorResponse(response,401,"nullfromserver",action);
+		} else {
+			var providers = attList["providers"].value;
+			console.log("Providers = " + JSON.stringify(providers));
+			if ( myUndefined.indexOf(providers) >= 0 || providers.length <= 0 ) {
+				writeErrorResponse(response,400,"noprovider",action);
+			} else {
+				var queryList = [];
+				//for ( var providerid in Object.keys(providers) ) {
+				for ( var providerid in providers ) {
+					console.log("Providerid = " + providerid + " (" + providers[providerid] + ")");
+					if ( providers[providerid] ) {
+						console.log("Pushing to queryList");
+						queryList.push({ "_id" : ObjectId(providerid) });
+					}
+				}
+				if ( queryList.length > 0 ) {
+					var query = { "$or" : queryList };
+					console.log("[reqHandlers.getCustProvs] queryProvIds = " + JSON.stringify(query));
+					provider.doGetAll(dbcnx, db, query, function(err, attList) {
+						doGetHandler(response,err,attList,action, function() {
+							var body = {};
+							var providersList = {};
+							for ( var prov in attList ) {
+								var myProvider = {};
+								var provId = attList[prov]._id;
+								myProvider["name"] = attList[prov].name.value;
+								myProvider["email"] = attList[prov].email.value;
+								myProvider["address"] = attList[prov].address.value;
+								myProvider["phone"] = attList[prov].phone.value;
+								providersList[provId] = myProvider;
+							}
+							body["providers"] = providersList;
+							writeSuccessResponse(response,body);	
+						});
+						/*
+						if (err) {
+							writeErrorResponse(response,500,err,action);
+						} else if (attList == null) {
+							writeErrorResponse(response,401,"nullfromserver",action);
+						} else {
+							writeSuccessResponse(response,respBody);
+						}
+						*/
+					});
+				} else {
+					writeErrorResponse(response,400,"noprovider",action);
+				}
+
+			}
+		}
+	});
+}
+
+function getAllSubscribers(response, request, dbcnx, db) {
+	var type = url.parse(request.url, true).query.type;
+	var action = url.parse(request.url, true).query.action;
+	var subscriber;
+
+	switch (type) {
+		case "customer":
+			subscriber = customer;
+			break;
+		case "provider":
+			subscriber = provider;
+			break;
+		default:
+			response.writeHead(500, responseHeadParams);
+			var body = {};
+			body["status"] = "ERROR";
+			body["errormessage"] = "badrequest";
+			body["action"] = action;
+			var respBody = JSON.stringify(body);
+			response.write(respBody, function(err) { response.end(); });
+			return;
+	}
+
+
 }
 
 exports.getCustomer = getCustomer;
@@ -1245,3 +1484,5 @@ exports.sessionTimeoutManagement = sessionTimeoutManagement;
 exports.getProvider = getProvider;
 exports.createProvider = createProvider;
 exports.getFullSubscriberData = getFullSubscriberData;
+exports.getSubscriber = getSubscriber;
+exports.getCustomerProviders = getCustomerProviders;

@@ -15,7 +15,8 @@ var languages_text = {
                         "notifications" : "notifications",
                         "settings" : "settings",
                         "logout" : "logout",
-						"createcustomer" : "add new customer"
+						"createcustomer" : "add new customer",
+						"providers" : "my providers"
                 },
                 "action" : {
                         "login" : "login successful",
@@ -24,7 +25,8 @@ var languages_text = {
 			"appointments" : "appointments",
 			"notifications" : "notifications",
 			"registration" : "successfully registered",
-			"logout" : "logout"
+			"logout" : "logout",
+			"unsubscribe" : "unsubscribe"
                 },
                 "username" : "username",
                 "password" : "password",
@@ -114,6 +116,11 @@ var languages_text = {
 			"dobformatexample" : "DD/MM/YYYY",
 			"optional" : "optional"
                 },
+				"tableheaders" : {
+					"name" : "name",
+					"details" : "details",
+					"action" : "option"
+				},
                 "underconstruction" : "under construction",
 		"errors" : {
 			"badfields" : "please double check the following fields",
@@ -148,7 +155,10 @@ var languages_text = {
 			"dbcnxerror" : "service is currently unavailable. Please try again later",
 			"emailfailed" : "failed to send email",
 			"accountalreadycreated" : "An account already exists for this users",
-			"badrequest" : "the request is not supported"
+			"badrequest" : "the request is not supported",
+			"unknownprovider" : "the provider does not exist",
+			"nullfromserver" : "null response from server",
+			"noprovider" : "your are not registered with any provider"
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
@@ -171,7 +181,8 @@ var languages_text = {
                         "notifications" : "notificaciones",
                         "settings" : "ajustes",
                         "logout" : "desconexión",
-						"createcustomer" : "crear nuevo cliente"
+						"createcustomer" : "crear nuevo cliente",
+						"providers" : "mis proveedores"
                 },
                 "action" : {
                         "login" : "login realizado con éxito",
@@ -180,7 +191,8 @@ var languages_text = {
 			"appointments" : "citas",
 			"notifications" : "notificaciones",
 			"registration" : "Ya estás inscrito.",
-			"logout" : "desconexión"
+			"logout" : "desconexión",
+			"unsubscribe" : "desinscribirse"
                 },
                 "username" : "nombre de usuario",
                 "password" : "contraseña",
@@ -270,6 +282,11 @@ var languages_text = {
 			"dobformatexample" : "DD/MM/AAAA",
 			"optional" : "opcional"
                 },
+				"tableheaders" : {
+					"name" : "nombre",
+					"details" : "detalles",
+					"action" : "opción"
+				},
                 "underconstruction" : "en construcción",
 		"errors" : {
 			"badfields" : "por favor, revisa los campos siguientes",
@@ -304,7 +321,176 @@ var languages_text = {
 			"dbcnxerror" : "el servicio no está disponible en este momento. Inténtalo más tarde",
 			"emailfailed" : "No a sido posible enviar el email",
 			"accountalreadycreated" : "Ya existe una cuenta para este usuario.",
-			"badrequest" : "el formato solicitado no está soportado"
+			"badrequest" : "el formato solicitado no está soportado",
+			"unknownprovider" : "el proveedor no existe",
+			"nullfromserver" : "respuesta vacía (NULL) recibida del servidor",
+			"noprovider" : "No estás registrado con ningún proveedor"
+		},
+		"email" : {
+			"credentialssent" : "Las credenciales se han enviado a",
+			"emailfailed" : "No a sido posible enviar el email a"
+		}
+        },
+        "fra" : {
+				"zone" : {
+					"provider" : "zona de proveedores",
+					"customer" : "zona de clientes"
+				},
+				"init" : {
+						"welcome" : "BIENVENID@ A VENYA",
+						"customer" : "SOY UN CLIENTE",
+						"provider" : "SOY UN PROVEEDOR"
+				},
+                "menu" : {
+                        "home" : "inicio",
+                        "appointments" : "citas",
+                        "notifications" : "notificaciones",
+                        "settings" : "ajustes",
+                        "logout" : "desconexión",
+						"createcustomer" : "crear nuevo cliente",
+						"providers" : "mes spécialistes"
+                },
+                "action" : {
+                        "login" : "login realizado con éxito",
+                        "home" : "hola",
+                        "settings" : "ajustes de ",
+			"appointments" : "citas",
+			"notifications" : "notificaciones",
+			"registration" : "Ya estás inscrito.",
+			"logout" : "desconexión",
+			"unsubscribe" : "desenregistrement"
+                },
+                "username" : "nombre de usuario",
+                "password" : "contraseña",
+                "signin" : {
+                        "title" : "Conéctate",
+                        "button" : "Acceder",
+                        "rememberme" : "Recuérdame",
+                        "signup" : {
+                                "question" : "¿No tienes una cuenta?",
+                                "link" : "Regístrate"
+                        },
+						"already" : "¿Ya tienes una cuenta?",
+                        "lostusername" : "Nombre de usuario perdido",
+                        "lostpassword" : "contraseña perdida"
+                },
+                "home" : {
+                        "welcome" : "bienvenid@",
+                        "yourdata" : "Estos son tus datos"
+                },
+		"address" : {
+			"street" : "calle",
+			"number" : "número",
+			"postcode" : "código postal",
+			"city" : "ciudad",
+			"country" : "país"
+		},
+                "customer" : {
+						"uid" : "identificador",
+                        "id" : "id",
+                        "type" : "tipo",
+                        "firstname" : "nombre",
+                        "surname" : "apellidos",
+						"dob" : "fecha de nacimiento",
+                        "address" : "dirección",
+                        "email" : "email",
+                        "username" : "nombre de usuario",
+                        "password" : "contraseña",
+                        "phone" : "teléfono",
+                        "times" : "horas preferidas",
+                        "language" : "idioma",
+                        "notifications" : "notificaciones",
+                        "location" : "localización",
+						"oldpassword" : "antigua contraseña",
+						"oldusername" : "antiguo nombre de usuario",
+						"oldemail" : "antiguo email",
+						"sessionid" : "ID de la sesión"
+                },
+				"provider" : {
+						"id" : "id",
+                        "type" : "tipo",
+                        "name" : "nombre/compañía",
+                        "address" : "dirección",
+                        "email" : "email",
+                        "username" : "nombre de usuario",
+                        "password" : "contraseña",
+                        "phone" : "teléfono",
+                        "language" : "idioma",
+						"oldpassword" : "antigua contraseña",
+						"oldusername" : "antiguo nombre de usuario",
+						"oldemail" : "antiguo email",
+						"sessionid" : "ID de la sesión",
+						"webcreation" : "Cliente creado con éxito"
+				},
+                "settings" : {
+                        "yoursettings" : "estos son tus ajustes",
+                        "setting" : "ajuste",
+                        "value" : "valor",
+                        "option" : "opción",
+                        "stringoption" : "editar",
+                        "booleanoption" : "on/off",
+                        "listoption" : "seleccionar",
+						"updatesuccess" : "cambiado con éxito"
+                },
+		"form" : {
+			"page" : "página",
+			"old" : "antiguo",
+			"new" : "nuevo",
+			"of" : "de",
+			"confirm" : "confirma",
+			"oldemail" : "antigua dirección de email",
+			"newemail" : "nueva dirección de email",
+			"enterdetails" : "Introduce tus datos",
+			"submit" : "enviar",
+			"cancel" : "anular",
+			"toprovider" : "¿No tienes identificador? Créate una cuenta con tu proveedor.",
+			"getid" : "¿Identificador perdido? Recupéralo aquí",
+			"dobformatexample" : "DD/MM/AAAA",
+			"optional" : "opcional"
+                },
+				"tableheaders" : {
+					"name" : "nom",
+					"details" : "détails",
+					"action" : "option"
+				},
+                "underconstruction" : "en construcción",
+		"errors" : {
+			"badfields" : "por favor, revisa los campos siguientes",
+			"required" : "es obligatorio",
+			"badformat" : "formato erróneo de",
+			"notmatch" : "no coinciden",
+			"sameprevious" : "debe ser diferente del anterior",
+			"passwordformat" : "la contraseña debe tener mínimo 6 caracteres in contener al menos 1 mayúscula, 1 minúscula y 1 número",
+			"usernameformat" : "el nombre de usuario debe tener al menos 8 caracteres y todos alfanuméricos",
+			"emailformat" : "formato de email erróneo",
+			"phoneformat" : "formato de teléfono no válido",
+			"notregistered" : "nombre de usuario no válido. Regístrate con el identificador proporcionado por tu proveedor",
+			"notcreated" : "no hay un perfil para este usuario.Contacte a su proveedor",
+			"notcreatedselfcreation" : "no hay un perfil para este usuario. Crea un perfile con tu proveedor aquí",
+			"accountnotfound" : "no hemos encontrado tu cuenta",
+			"wrongcredentials" : "nombre de usuario o contraseña erróneos",
+			"registrationerror" : "error de inscripción",
+			"idnotinsystem" : "El identificador no existe. Por favor, contacta a tu proveedor",
+			"idnamenotmatch" : "el identificador y el apellido no corresponden",
+			"usernameexists" : "el nombre de usuario ya existe",
+			"emailregistered" : "el email ya esta inscrito",
+			"createcheckfail" : "aviso: no ha sido posible verificar los datos después de la creación. Revise su registro",
+			"regdatacheckfail" : "Aviso: no ha sido posible verificar los datos después de la inscripción. Intente conectarse o contacte a su proveedor.",
+			"updatedatacheckfail" : "aviso: no ha sido posible verificar después de los cambios. Comprueba tus datos",
+			"infonotmatch" : "los datos introducidos no corresponden",
+			"alreadyregistered" : "el usuario ya existe",
+			"provideralreadyregistered" : "el proveedor ya está registrado",
+			"appointmentalreadyin" : "ya hay una cita con este proveedor a esta hora",
+			"sessionopened" : "este usuario ya está conectado",
+			"invalidsessionid" : "tu sesión no es válida",
+			"expiredsessionid" : "tu sesión ha cadudcado",
+			"dbcnxerror" : "el servicio no está disponible en este momento. Inténtalo más tarde",
+			"emailfailed" : "No a sido posible enviar el email",
+			"accountalreadycreated" : "Ya existe una cuenta para este usuario.",
+			"badrequest" : "el formato solicitado no está soportado",
+			"unknownprovider" : "el proveedor no existe",
+			"nullfromserver" : "respuesta vacía (NULL) recibida del servidor",
+			"noprovider" : "vous n'etes enregistré avec aucun professionel"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",

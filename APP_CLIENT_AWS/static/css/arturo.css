@@ -136,6 +136,20 @@ h1 {
 	font-weight: bold;
 }
 
+.providers table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.providers th, td {
+	border: 0;
+}
+
+.providers tr {
+	border: 1px solid blue;
+	border-collapse: collapse;
+}
+
 .pageContiner {
 	width: 100%;
 }

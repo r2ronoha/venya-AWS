@@ -20,5 +20,7 @@ handle["/createCustomer"] = requestHandlers.createCustomer;
 handle["/createProvider"] = requestHandlers.createProvider;
 handle["/getProvider"] = requestHandlers.getProvider;
 handle["/getFullSubscriberData"] = requestHandlers.getFullSubscriberData;
+handle["/getSubscriber"] = requestHandlers.getSubscriber;
+handle["/getCustomerProviders"] = requestHandlers.getCustomerProviders;
 
 server.start(router.route, handle, mycnx, mydb);

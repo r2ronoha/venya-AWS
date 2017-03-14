@@ -25,7 +25,8 @@ var customerAttributes = {
 		"language": { "fix": 0, "value": "ENG" },
 		"notifications": { "fix": 0, "value": "true" },
 		"location": { "fix": 0, "value": "true" },
-		"sessionid" : { "fix": 1, "value": "closed", "timestamp": 0 }
+		"sessionid" : { "fix": 1, "value": "closed", "timestamp": 0 },
+		"providers" : { "fix": 1, "value": {} }
 };
 
 function getAttFix(callback) {
@@ -128,7 +129,7 @@ function doGet (cnx, db, query, callback) {
 function doGetFullData (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);
