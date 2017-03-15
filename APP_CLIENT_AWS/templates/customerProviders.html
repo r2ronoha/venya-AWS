@@ -111,6 +111,7 @@
 		for ( var providerid in providersList) {
 			//console.log("[DEBUG] providerid = " + providerid);
 			var row = document.createElement("tr");
+			row.setAttribute("id","row" + providerid);
 
 			var provider = providersList[providerid];
 			//console.log(JSON.stringify(provider));
@@ -164,17 +165,11 @@
 				3. add a button to receive and trigger the onsubmit action
 			*/
 			// 1
-			//var actionTarget = "return unsubscribe(\'" + providerid + "\',\'" + document.getElementById("button_" + providerid) + "\')";
-
-			var actionTarget = "javascript:unsubscribe(\'" + providerid + "\',\'button_" + providerid + "\')";
-			//var actionTarget = "return unsubscribe(\'" + providerid + "\',\'button_" + providerid + "\')";
-			//var actionTarget = "return unsubscribe(\'" + providerid + "\',\'" + this + "\')";
-			//var actionTarget = "javascript:unsubscribe(" + providerid + "," + this + ")";
+			var actionTarget = "javascript:unsubscribe(\'" + providerid + "\')";
 			
 			// 2
 			var actionForm = document.createElement("form");
 			actionForm.setAttribute("name","form_" + providerid);
-			//actionForm.setAttribute("action",actionTarget);
 			actionForm.setAttribute("onclick",actionTarget);
 
 			// 3
@@ -183,11 +178,7 @@
 			actionButton.setAttribute("id","button_" + providerid);
 			actionButton.setAttribute("name",providerid);
 			actionButton.setAttribute("type","button");
-			//actionButton.setAttribute("onclik",actionTarget);
 			actionButton.setAttribute("value",myLangTexts["action"]["unsubscribe"].toUpperCase());
-
-			//var actionTarget = "return unsubscribe(\'" + providerid + "\',\'" + document.getElementById("button_" + providerid) + "\')";
-			//actionForm.setAttribute("onclick",actionTarget);
 
 			// link all the elements
 			actionForm.appendChild(actionButton);
@@ -200,7 +191,7 @@
 		document.body.appendChild(div);
 	}
 
-	function unsubscribe(providerid,rowid) {
+	function unsubscribe(providerid) {
 	/*
 		unsubscribe from service: set value for the provider id to "false" in the customer's profile
 		if update is successful, delete the row from the table
@@ -223,10 +214,23 @@
 		function processRequest(e) {
 			if ( xhr.readyState == 4 ){
 				if ( xhr.status == 200 ) {
-					var row = document.getElementById(rowid);
-					var rowIndex = row.parentNode.parentNode.rowIndex;
-					console.log("SUCCESS: deleting row");
-					document.getElementById("providersTable").deleteRow(rowIndex);
+				// if the update was successful, delete the row for that providerid
+				
+					//var row = document.getElementById(rowid);
+					//var rowIndex = row.parentNode.parentNode.rowIndex;
+					var table = document.getElementById("providersTable");
+					for ( var i in table.rows ){
+						var row = table.rows[i];
+						console.log("(i = " + i + ") row index = " + row + " -- row id = " + row.id);
+						if ( row.id == "row" + providerid ) {
+							//console.log("SUCCESS: deleting rowid " + row);
+							table.deleteRow(i);
+							break;
+						}
+					}
+
+					//document.getElementById("providersTable").deleteRow(rowid);
+					//document.getElementById("providersTable").deleteRow(rowIndex);
 					//return false;
 				} else {
 					try {
