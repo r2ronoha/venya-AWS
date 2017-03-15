@@ -78,7 +78,7 @@ var pages = {
 
 
 //var languages = ["eng","esp","fra","ger"];
-var languages = ["eng","esp"];
+var languages = ["eng","esp","fra"];
 var default_lang = "eng";
 
 function parseUrl(callback){
