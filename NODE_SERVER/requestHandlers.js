@@ -6,6 +6,7 @@ var fs = require("fs");
 var sys = require("sys");
 var customer = require("./customer.js");
 var provider = require("./provider.js");
+var appointment = require("./appointment.js");
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 var ObjectId = require('mongodb').ObjectId;
@@ -46,6 +47,11 @@ customer.getAttDefault( function(attDef) {
 
 var providerAttributesDefault = {};
 provider.getAttDefault( function(attDef) {
+	providerAttributesDefault = attDef;
+});	
+
+var appointmentAttributesDefault = {};
+appointment.getAttDefault( function(attDef) {
 	providerAttributesDefault = attDef;
 });	
 
@@ -679,7 +685,7 @@ function getProvider(response, request, dbcnx, db) {
 			( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || 
 			( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || 
 			( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	//console.log("[reqHandler.getProvider] action = " + action + " -- sessionid = " + sessionid);
+		console.log("[reqHandler.getProvider] [DEBUG] action = " + action + " -- id = " + id);
 		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
@@ -1473,6 +1479,105 @@ function getAllSubscribers(response, request, dbcnx, db) {
 
 }
 
+function insertAppointment(response, request, dbcnx, db) {
+	var customerid = url.parse(request.url, true).query.customerid;
+	var sessionid = url.parse(request.url, true).query.sessionid;
+	var providerid = url.parse(request.url, true).query.providerid;
+	var date = url.parse(request.url, true).query.date;
+	var action = url.parse(request.url, true).query.action;
+
+	if ( myUndefined.indexOf(action) >= 1 ) { action = "insertappointment"; }
+
+	/* 
+		the insertion requester (customer/provider) may provide sessionid or his id (customerid,providerid).
+		A combination of customerid/prov-sessionid -- cust-sessionid/provideid -- custoemrid/providerid must be prvided
+		along with appointment date
+	*/
+
+	if ( ( myUndefined.indexOf(sessionid) >= 0 && ( myUndefined.indexOf(customerid) >= 0 && myUndefined.indexOf(providerid) >= 0 ) ) ||
+		( myUndefined.indexOf(sessionid) < 0 && ( myUndefined.indexOf(customerid) >= 0 || myUndefined.indexOf(providerid) >=0 ) ) ||
+		myUndefined.indexOf(date) >= 0 ) {
+
+		writeErrorResponse(response, 400, "badrequest", action);
+		return;
+	}
+
+	var insertQuery = {};
+	insertQuery["customerid"] = customerid;
+	insertQuery["providerid"] = providerid;
+	insertQuery["date"] = date;
+
+	// check that both customer and provider exist
+	var customerCheckQuery = ( myUndefined.indexOf(customerid) >= 0 ) ? { "sessionid.value" : sessionid } : { "_id" : ObjectId(customerid) };
+	var providerCheckQuery = ( myUndefined.indexOf(providerid) >= 0 ) ? { "sessionid.value" : sessionid } : { "_id" : ObjectId(providerid) };
+
+	customer.doGet(dbcnx, db, customerCheckQuery, function(err,attList) {
+		if ( err || attList == null ) {
+			writeErrorResponse(response, 404, "accountnotfound", action);
+		} else {
+			provider.doGet(dbcnx, db, providerCheckQuery, function(err,attList) {
+				if ( err || attList == null ) {
+					writeErrorResponse(response, 404, "unknownprovider", action);
+				} else {
+					appointment.doInsert(dbcnx, db, insertQuery, function(query,exists,message) {
+						if ( exists == 1 ) {
+							writeErrorResponse(response, 401, message, action);
+						} else if ( exists ==0 ) {
+							appointment.doGet(dbcnx, db, query, function(err,attList) {
+								if (err) {
+									writeErrorResponse(response,500,err,action);
+								} else if (attList == null) {
+									writeErrorResponse(response,404,"nullfromserver",action);
+								} else { 
+									var body = {};
+									body["action"] = action;
+									body["id"] = attList["id"];
+									writeSuccessResponse(response,body);
+								}
+							});
+						} else {
+							writeErrorResponse(response, 500, "dbcnxerror", action);
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+function getCustomerAppointments(response, request, dbcnx, db) {
+	var customerid = url.parse(request.url, true).query.customerid;
+	var action = url.parse(request.url, true).query.action;
+
+	if ( myUndefined.indexOf(action) >= 0 ) { action = getcustomerappointments; }
+	
+	if ( myUndefined.indexOf(customerid) >= 0 ) {
+		writeErrorResponse(response, 400, "badrequest", action);
+	} else {
+		var getQuery = { "customerid" : customerid };
+		appointment.doGetAll(dbcnx, db, getQuery, function(err,appList) {
+			if (err) {
+				writeErrorResponse(response,500,err,action);
+			} else if (appList == null) {
+				writeErrorResponse(response,404,"nullfromserver",action);
+			} else {
+				var body = {};
+				var appointments = {};
+				for ( var i in appList ) {
+					var appt = appList[i];
+					var appid = appt["_id"];
+					appointments[appid] = appt;
+				}
+				body["appointments"] = appointments;
+				writeSuccessResponse(response,body);
+			}
+		});
+	}
+}
+
+function updateAppointment(response, request, dbcnx, db) {
+}
+
 exports.getCustomer = getCustomer;
 exports.getFullCustomerData = getFullCustomerData;
 //exports.checkCredentials = checkCredentials;
@@ -1486,3 +1591,6 @@ exports.createProvider = createProvider;
 exports.getFullSubscriberData = getFullSubscriberData;
 exports.getSubscriber = getSubscriber;
 exports.getCustomerProviders = getCustomerProviders;
+exports.insertAppointment = insertAppointment;
+exports.getCustomerAppointments = getCustomerAppointments;
+exports.updateAppointment = updateAppointment;

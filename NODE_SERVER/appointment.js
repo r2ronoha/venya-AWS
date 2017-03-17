@@ -7,27 +7,12 @@ var document = require('mongodb').document;
 var BSON = require('mongodb').BSON;
 var mycollection = 'appointments';
 var appointmentAttributes = {
-	"id" : "",
-	"date" : "",
-	"time" : "",
+	"date" : "", // milliseconds from 1 Jan 1970
 	"customerid" : "", //customer id
 	"providerid" : "", //provider id
-	"delay" : ""
+	"delay" : 0,
+	"status" : "future"
 };
-
-function getAttFix(callback) {
-	var attFix = {};
-	for ( var field in appointmentAttributes ) {
-		//console.log("[appointment.geetAttFix] field = " + field + " -- FIX = " + appointmentAttributes.mandatory[field].fix + " or " + appointmentAttributes.mandatory[field]["fix"]);
-		attFix[field] = appointmentAttributes[field].fix;
-	}
-	/*
-	for ( var field in appointmentAttributes.optional ) {
-		attFix[field] = appointmentAttributes.optional[field].fix;
-	}
-	*/
-	callback(attFix);
-}
 
 function getAttDefault(callback) {
 	callback(appointmentAttributes);
@@ -36,14 +21,12 @@ function getAttDefault(callback) {
 function doInsert (cnx, db, query, callback) {
 	var exists = 0;
 	var date = query["date"].value;
-	var time = query["time"].value;
 	var customerid = query["customerid"].value;
 	var providerid = query["providerid"].value;
 	var checkQuery = {};
 	var insertQuery = query;
 	
 	checkQuery["date"] = date;
-	checkQuery["time"] = time;
 	checkQuery["providerid"] = providerid;
 	//console.log("[appointment.doInsert()] cnx = " + cnx + " -- db = " + db + " -- checkQuery = " + JSON.stringify(checkQuery) + " -- query = " + JSON.stringify(query));
 	
@@ -98,7 +81,7 @@ function doGet (cnx, db, query, callback) {
 					attList["id"] = document[field];
 				} else {
 					//console.log("[appointment.doGet] adding " + field + " = " + document[field].value + " to attList");
-					attList[field] = document[field].value;
+					attList[field] = document[field];
 				}
 			}
 			callback(err,attList);
@@ -154,7 +137,6 @@ function doGetAll (cnx, db, query, callback) {
 	});
 }
 
-exports.getAttFix = getAttFix;
 exports.getAttDefault = getAttDefault;
 exports.doInsert = doInsert;
 exports.doUpdate = doUpdate;
