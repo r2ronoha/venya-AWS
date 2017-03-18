@@ -55,6 +55,14 @@ appointment.getAttDefault( function(attDef) {
 	providerAttributesDefault = attDef;
 });	
 
+function printError(tag,message,err) {
+	try {
+		console.log("[requestHandlers." + tag + "] !!!ERROR!!! " + message + ". Error: \"" + err + "\"");
+	} catch (e) {
+		console.log("[requestHandlers.printError] " + e.stack);
+	}
+}
+
 function writeErrorResponse(response,statuscode,errormessage,action) {
 	response.writeHead(statuscode, responseHeadParams);
 	var body = {};
@@ -83,21 +91,18 @@ function doGetHandler(response,err, attList, action, callback) {
 }
 
 function getFullCustomerData(response, request, dbcnx, db) {	
+	var TAG = "getfullcustomerdata";
 	//console.log("[requestHandlres.getFullCustomerData] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
 	var password = url.parse(request.url, true).query.password;
 	var id = url.parse(request.url, true).query.id;
+	action = ( myUndefined.indexOf(action) >= 0 || action == "" ) ? "getfullcustomerdata" : action;
 	
 	if ( ( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ) ) {
-	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
-		response.writeHead(400, responseHeadParams);
-		var body = {};
-		body["status"] = "ERROR";
-		body["errormessage"] = "badrequest";
-		var respBody = JSON.stringify(body);
-		response.write(respBody, function(err) { response.end(); } );
+		printError(TAG,"Wrong parameters provided in URL",JSON.stringify(url.parse(request.url, true)));
+		writeErrorResponse(response,400,"badrequest",action);
 		return;
 	}
 	
@@ -108,33 +113,18 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		customer.doGetFullData(dbcnx, db, query, function(err,document) {
 			if (err) {
-				response.writeHead(500, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = err;
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
+				printError(TAG,"FAiled to get customer data",err);
+				writeErrorResponse(response,500,err,action);
 			} else if (document != null) {
-				response.writeHead(200, responseHeadParams);
 				var body = {};
-				body["status"] = "SUCCESS";
 				body["action"] = action;
-				//response.write(body);
 				for ( var field in document ) {
 					body[field] = document[field];
 				}
-				var respBody = JSON.stringify(body);
-				//console.log("[requestHandlers.getFullCustomerData.q&R] " + Math.round(new Date().getTime() / 1000) + " respBody = " + respBody);
-				response.write(respBody, function(err) { response.end(); } );
+				writeSuccessResponse(response,body);
 			} else {
-				response.writeHead(401, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = "wrongcredentials";
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
+				printError(TAG,"Failed to get customer dats","NULL response from DB (wrongcredentials?)");
+				writeErrorResponse(response,401,"wrongcredentials",action);
 			}
 		});
 	}
@@ -143,22 +133,13 @@ function getFullCustomerData(response, request, dbcnx, db) {
 		queryUsername["username.value"] = username;
 		customer.doGet(dbcnx, db, queryUsername, function(err,userAtt) {
 			if (err) {
-				response.writeHead(500, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = err;
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
+				printError(TAG,"FAiled to get customer data for login",err);
+				writeErrorResponse(response,500,err,action);
 			} else if ( userAtt == null ) {
 				noUser = 1;
+				printError(TAG,"FAiled to get customer data for login","notregistered");
+				writeErrorResponse(response,500,"notregistered",action);
 				response.writeHead(401, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = "notregistered";
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
 			} else {
 				query = { 
 					"username.value":  username, 
@@ -174,6 +155,7 @@ function getFullCustomerData(response, request, dbcnx, db) {
 	}
 }
 function getFullSubscriberData(response, request, dbcnx, db) {	
+	var TAG = "getFullSubscriberData";
 	//console.log("[requestHandlres.getFullProviderData] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
@@ -185,26 +167,18 @@ function getFullSubscriberData(response, request, dbcnx, db) {
 	var id = url.parse(request.url, true).query.id;
 	var type = url.parse(request.url, true).query.type;
 
+	action = ( myUndefined.indexOf(action) >= 0 ) ? "getfullsubscriberdata" : action;
+
 	if ( myUndefined.indexOf(type) >= 0 || subscriberTypes.indexOf(type) < 0 ) {
-		response.writeHead(400, responseHeadParams);
-		var body = {};
-		body["status"] = "ERROR";
-		body["errormessage"] = "badrequest";
-		var respBody = JSON.stringify(body);
-		response.write(respBody, function(err) { response.end(); } );
+		printError(TAG,"Missing required parameters in URL",JSON.stringify(url.parse(request.url, true).query));
+		writeErrorResponse(response,400,"badrequest",action);
 		return;
 	}
 	var subscriber = ( type == "customer" ) ? customer : provider;
 
 	if ( ( (["register","getid"].indexOf(action) >= 0 && (myUndefined.indexOf(surname) >= 0 || myUndefined.indexOf(firstname) >= 0 || myUndefined.indexOf(dob) >= 0)) || ["register","getid"].indexOf(action) < 0 && (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-	//if ( () || (( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || ( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || ( action != "login" && myUndefined.indexOf(id) >= 0 )) ) {
-	//if ( ( id == undefined && username == undefined ) || ( action == "login" && ( username == undefined || password == undefined ) ) || ( action != "login" && id == undefined ) ) {
-		response.writeHead(400, responseHeadParams);
-		var body = {};
-		body["status"] = "ERROR";
-		body["errormessage"] = "badrequest";
-		var respBody = JSON.stringify(body);
-		response.write(respBody, function(err) { response.end(); } );
+		printError(TAG,"wrong parameters passed in URL",JSON.stringify(url.parse(request.url, true).query));
+		writeErrorResponse(response,400,"badrequest",action);
 		return;
 	}
 	
@@ -1496,7 +1470,7 @@ function insertAppointment(response, request, dbcnx, db) {
 
 	if ( ( myUndefined.indexOf(sessionid) >= 0 && ( myUndefined.indexOf(customerid) >= 0 && myUndefined.indexOf(providerid) >= 0 ) ) ||
 		( myUndefined.indexOf(sessionid) < 0 && ( myUndefined.indexOf(customerid) >= 0 || myUndefined.indexOf(providerid) >=0 ) ) ||
-		myUndefined.indexOf(date) >= 0 ) {
+		myUndefined.indexOf(date) >= 0 || date == "" ) {
 
 		writeErrorResponse(response, 400, "badrequest", action);
 		return;
@@ -1576,6 +1550,75 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 }
 
 function updateAppointment(response, request, dbcnx, db) {
+	var TAG = arguments.callee.name;
+
+	var urlQuery = url.parse(request.url, true).query;
+	var id = urlQuery["id"];
+	var customerid = urlQuery["customerid"];
+	var providerid = urlQuery["providerid"];
+	var date = urlQuery["date"];
+	var appStatus = urlQuery["status"];
+	var delay = urlQuery["delay"];
+	var action = urlQuery["action"];
+
+	if ( myUndefined.indexOf(action) >= 0 || action == "" ) { action = "update"; }
+
+	// either id or (customerid + providerid + date) need to be provided to locate the appointment
+	if ( 
+		((myUndefined.indexOf(id) >=0 || id == "" ) && ( myUndefined.indexOf(customerid) >= 0 || customerid == "" || myUndefined.indexOf(providerid) >= 0 || providerid == "" || myUndefined.idexOf(date) >= 0 || date == "")) 
+
+	) {
+		printError(TAG,"Missing required parameters in URL",JSON.stringify(urlQuery));
+		writeErrorResponse(response, 400, "badrequest", action);
+	} else {
+		/*
+			query to search for the appointment and verify it exists. if id is provided, use it as unique identifier.
+			if no id is privided, the unique identifier is the combination of customerid + providerid + date
+		*/
+		var checkQuery = {}; 
+		if ( myUndefined.indexOf(id) < 0 && id != "" ) { 
+			checkQuery["_id"] = ObjectId(id);
+		} else {
+			checkQuery["customerid"] = customerid;
+			checkQuery["providerid"] = providerid;
+			checkQuery["date"] = date;
+		}
+
+		var updateQuery = {};
+		for ( var field in urlQuery ) {
+			if ( ["id","customerid","providerid"].indexOf(field) < 0 ) { //add only the fields provided that are not fixed (id, customer, provider) for update
+				updateQuery[field] = urlQuery[field];
+			}
+		}
+
+		// verify that the update query is not empty. i.e. no updatable fields sent in the url
+		if ( Object.keys(updateQuery).length <= 0 ) {
+			printError(TAG,"No updatable parameters provided",JSON.stringify(urlQuery));
+			writeErrorResponse(response, 400, "badrequest", action);
+		} else {
+			appointment.doUpdate(dbcnx, db, checkQuery, updateQuery, function(err,query) {
+				if (err) {
+					console.log(TAG,"Failed to perform update",err);
+					writeErrorResponse(response, 500, err, action);
+				} else {
+					appointment.doGet(dbcnx, db, query, function(err,attList) {
+						if (err){
+							printError(TAG,"Failed to perform appointment check after update.",err);
+							writeErrorResponse(response, 500, err, action);
+						} else if ( attList == null ) {
+							printError(TAG,"NULL response from server when checking updated appointment","NULL");
+							writeErrorResponse(response, 500, "nullfromserver", action);
+						} else {
+							var body = {};
+							var appId = attList["id"];
+							body[appId] = attList;
+							writeSuccessResponse(response,body);
+						}
+					});
+				}
+			});
+		}
+	}
 }
 
 exports.getCustomer = getCustomer;
