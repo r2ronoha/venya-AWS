@@ -25,5 +25,6 @@ handle["/getCustomerProviders"] = requestHandlers.getCustomerProviders;
 handle["/insertAppointment"] = requestHandlers.insertAppointment;
 handle["/getCustomerAppointments"] = requestHandlers.getCustomerAppointments;
 handle["/updateAppointment"] = requestHandlers.updateAppointment;
+handle["/getProvidersList"] = requestHandlers.getProvidersList;
 
 server.start(router.route, handle, mycnx, mydb);

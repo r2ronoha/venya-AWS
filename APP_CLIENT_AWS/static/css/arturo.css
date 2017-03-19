@@ -8,7 +8,20 @@ body {
 }
 
 .provider {
-	background-color: #edf;
+	background-color: #1a7a90;
+	vertical-align: middle;
+}
+
+.provider table, th {
+	background-color: #1a7a90;
+}
+
+/*.provider td {
+	background-color: #88beca;
+}*/
+
+.cancelled {
+	background-color: #c9c9ca;
 }
 
 .errors {
@@ -99,6 +112,10 @@ h1 {
 	padding-right: 10px;
 	max-width: 400px;
 	margin: 0 auto;
+}
+
+.settings {
+	vertical-align: middle;
 }
 
 .settings table, th, td {

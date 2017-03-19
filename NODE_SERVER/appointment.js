@@ -117,7 +117,7 @@ function doGetFullData (cnx, db, query, callback) {
 function doGetAll (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[appointment.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	console.log("[appointment.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);
@@ -130,6 +130,7 @@ function doGetAll (cnx, db, query, callback) {
 				if (documents === null) {
 					callback(err,null);
 				} else {
+					console.log("[appointment.doGetAll] Number of documents = " + documents.length);
 					callback(err,documents);
 				}
 			});

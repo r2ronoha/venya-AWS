@@ -14,15 +14,24 @@
 	<link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 	<link href="/static/css/navbar.css" rel="stylesheet">
 	<link href="/static/css/arturo.css" rel="stylesheet">
+	<link href="/static/css/jquery-ui-timepicker-addon.css" rel="stylesheet">
 
 	<script src="/static/js/ie-emulation-modes-warning.js"></script>
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 	<script type="text/javascript" src="/static/common/parsing.js"></script>
+
+	<!--
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script type="text/javascript" src="/statis/js/jquery-ui-timepicker-addon.js"></script>
+	-->
+
 	<script type="text/javascript">
 		var sessionid;
 		var myLangTexts;
 		var lang;
+		var providersList;
 
 		function init() {
 			parseUrl();
@@ -34,19 +43,224 @@
 			verifySessionId(sessionid, "customer", function() {
 				customerId = sessionid.substring(0,sessionid.length - 2);
 				//getSubscriberDetails( urlParams["action"], urlParams["id"], function () {
-				setHeader("h2",formatMessage([myLangTexts["action"][action],myLangTexts["form"]["page"],myLangTexts["underconstruction"]]));
-				/*getSubscriberDetails( "home", urlParams["id"], function () {
-					customerId = subscriberDetails["id"];
-					
-					var action = urlParams["action"];
-					var headerText = "HOME ";
-					if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
-					headerText += unescape(subscriberDetails["surname"].toUpperCase()) + ", " + unescape(subscriberDetails["firstname"].toUpperCase());
-					setHeader("h2",headerText);
-					setHeader("h4","This is your data");
-					createDataTable();
-				});*/
+				//setHeader("h2",formatMessage([myLangTexts["action"][action]]));
+				document.getElementById("pageTitle").appendChild(document.createElement("h2").appendChild(document.createTextNode(formatMessage([myLangTexts["action"][action]]))));
+				get_appointments();
 			});
+		}
+
+		function get_appointments() {
+			var url = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomerAppointments" +
+				"?type=customer" +
+				"&action=getcustomerappointments" +
+				"&customerid=" + customerId;
+				//"&sessionid=" + sessionid;
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET',url,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+
+			function processRequest(e) {
+				if ( xhr.readyState == 4 ){
+					if ( xhr.status = 200 ){
+						//get the list of providers to get info fro appointments
+						var getProvsUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getProvidersList";
+						var provxhr = new XMLHttpRequest();
+						provxhr.open('GET',getProvsUrl,true);
+						provxhr.send();
+						provxhr.onreadystatechange = processProviders;
+
+						function processProviders(e) {
+							if ( provxhr.readyState == 4 ) {
+								if ( provxhr.status == 200 ) {
+									var providersResponse = JSON.parse(provxhr.responseText);
+									providersList = providersResponse["providers"];
+									
+									// iterate through the appointments list and create table with combined appointment - provider info
+									var response = JSON.parse(xhr.responseText);
+			
+									var table = document.createElement("table");
+									table.className = "provider";
+									table.setAttribute("id","appointmentsTable");
+			
+									var row = document.createElement("tr");
+									for ( var i in appointmentHeaders ) {
+										var field = appointmentHeaders[i];
+										var cell = document.createElement("th");
+										var cellText = formatName(myLangTexts["appointment"][field]);
+										cell.appendChild(document.createTextNode(cellText));
+										row.appendChild(cell);
+									}
+									table.appendChild(row);
+									
+									var appList = response["appointments"];
+									for ( var appId in appList ) {
+										var appt = appList[appId];
+										var appointmentid = appt["_id"];
+										var providerid = appt["providerid"];
+										var appStatus = appt["status"];
+										var delay = appt["delay"];
+										var dateMilliseconds = appt["date"];
+										var date = new Date(parseInt(dateMilliseconds,10));
+										//console.log("date in milliseconds = " + dateMilliseconds);
+										var dateStr = date.toLocaleDateString();
+										//var timeStr = date.toTimeString();
+										var timeStr = date.getHours() + ":" + date.getMinutes();
+
+										var myProvider = providersList[providerid];
+										var name = formatName(myProvider.name.value);
+										var address = formatAddress(myProvider.address.value);
+
+										var appData = {
+											'provider' : name,
+											'date' : dateStr,
+											'time' : timeStr,
+											'address' : address,
+											'status' : appStatus,
+											'delay' : delay
+										};
+
+										var row = document.createElement("tr");
+										row.setAttribute("id","row_" + appointmentid);
+										row.style.backgroundColor = "#88beca";
+
+										for ( var i in appointmentHeaders ) {
+											var field = appointmentHeaders[i];
+											var cell = document.createElement("td");
+											cell.setAttribute("id",field + "_" + appointmentid);
+											cell.appendChild(document.createTextNode(appData[field]));
+											row.appendChild(cell);
+										}
+
+										//add edit and cancel buttons
+										var editTarget = "javascript:updateAppointment(\'" + appointmentid + "\',\'" + dateMilliseconds + "\'); return false;"; // to implement
+										var editCell = document.createElement("td");
+										var editForm = document.createElement("form");
+										editForm.setAttribute("onsubmit",editTarget);
+										var editButton = document.createElement("button");
+										editButton.setAttribute("id","edit_" + appointmentid);
+										editButton.appendChild(document.createTextNode(myLangTexts["form"]["change"].toUpperCase()));
+										editForm.appendChild(editButton);
+										editCell.appendChild(editForm);
+										row.appendChild(editCell);
+
+										var cancelTarget = "javascript:cancelAppointment(\'" + appointmentid + "\'); return false;";
+										var cancelCell = document.createElement("td");
+										var cancelForm = document.createElement("form");
+										cancelForm.setAttribute("onsubmit",cancelTarget);
+										var cancelButton = document.createElement("button");
+										cancelButton.setAttribute("id","cancel_" + appointmentid);
+										cancelButton.appendChild(document.createTextNode(myLangTexts["form"]["cancel"].toUpperCase()));
+										cancelForm.appendChild(cancelButton);
+										cancelCell.appendChild(cancelForm);
+										row.appendChild(cancelCell);
+										
+										if ( appStatus.toLowerCase() == "cancelled" ) {
+											row.style.color = "#87878f";
+											row.style.backgroundColor = "#c9c9ca";
+											cancelButton.disabled = true;
+											editButton.disabled = true;
+										}
+
+										table.appendChild(row);
+
+
+									}
+									document.getElementById("tableDiv").appendChild(table);
+								} else {
+									try {
+										var response = JSON.parse(provxhr.responseText);
+										var errormessage = response["errormessage"];
+										document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][errormessage]]); 
+									} catch (err) {
+										document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+									}
+								}
+							}
+						}
+
+					} else {
+						try {
+							var response = JSON.parse(xhr.responseText);
+							var errormessage = response["errormessage"];
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][errormessage]]); 
+						} catch (err) {
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+						}
+					}
+				}
+			}
+		}
+
+		function createAppointment() {
+			//alert(myLangTexts["underconstruction"].toUpperCase());
+			//$('#selector').datetimepicker();
+			
+			var params = {};
+			params["sessionid"] = sessionid;
+			params["lang"] = lang;
+
+			var providersInfo = "";
+			for ( var providerid in providersList ) {
+				name = providersList[providerid].name.value;
+				providersInfo += providerid + "=" + name + ";";
+			}
+			params["providers"] = encodeURIComponent(providersInfo.replace(/;$/,''));
+			//console.log(encodeURIComponent(params["providers"]));
+
+			goTo(pages.newappointment,params);
+			
+			return false;
+		}
+
+		function updateAppointment(appointmentid,date) {
+			var params = {};
+			params["lang"] = lang;
+			params["sessionid"] = sessionid;
+			params["appointmentid"] = appointmentid;
+			params["date"] = date;
+			try {
+				goTo(pages.updateappointment,params);
+			} catch (err) {
+				console.log("error : " + err);
+			}
+		}
+
+		function cancelAppointment(appointmentid) {
+			var TAG = arguments.callee.name;
+
+			var cancelUrl = "http://" + venya_node_server + ":" + venya_node_port + 
+				"/updateAppointment" +
+				"?id=" + appointmentid +
+				"&status=cancelled";
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET',cancelUrl,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+
+			function processRequest(e) {
+				if ( xhr.readyState == 4 ) {
+					if ( xhr.status == 200 ) {
+						document.getElementById("status_" + appointmentid).innerHTML = "CANCELLED";
+						//document.getElementById("row_" + appointmentid).className = cancelled;
+						document.getElementById("row_" + appointmentid).style.backgroundColor = "#c9c9ca";
+						//document.getElementById("row_" + appointmentid).style.color = "#87878f";
+						document.getElementById("row_" + appointmentid).style.color = "red";
+						document.getElementById("cancel_" + appointmentid).disabled = true;
+						document.getElementById("edit_" + appointmentid).disabled = true;
+					} else {
+						try {
+							var response = JSON.parse(xhr.responseText);
+							var errormessage = response["errormessage"];
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][errormessage]]);
+						} catch (err) {
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+						}
+					}
+				}
+			}
 		}
 	</script>
 </head>
@@ -54,6 +268,7 @@
 </header>
 <body>
 	<script>init();</script>
+	<div class="errors" id="errors"></div>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
@@ -69,6 +284,14 @@
 
 	<div class="subscriberarea" id="area">
 		<p><script>javascript:document.getElementById("area").innerHTML = myLangTexts["zone"]["customer"].toUpperCase()</script></p>
+	</div>
+	<div id="pageTitle"></div>
+	<div class="container" id="tableDiv"></div>
+	<div class="container" id="newButtonDiv">
+		<!-- <form id="newForm" class="form-signin" onsubmit="$('#selector').datetimepicker(); return false;"> -->
+		<form id="newForm" class="form-signin" onsubmit="javascript:createAppointment(); return false;">
+			<button id="newButton" class="btn btn-lg btn-primary btn-block" type="submit"><script>javascript:displayMenu("newButton",myLangTexts["form"]["new"])</script></button>
+		</form>
 	</div>
 
 	

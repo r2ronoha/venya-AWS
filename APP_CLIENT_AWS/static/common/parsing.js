@@ -12,6 +12,7 @@ var booleanValues = {'true' : 'on', 'false' : 'off'};
 var privateFields = ['id','sessionid','type','action'];
 var secretFields = ['password'];
 var dateFields = ['dob'];
+var appointmentHeaders = ['provider','date','time','address','status','delay'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -45,6 +46,8 @@ var pages = {
 		"times": "changeTimes.html",
 		"phone": "changePhone.html"
 	},
+	"newappointment": "newAppointment.html",
+	"updateappointment" : "updateAppointment.html",
 	"lostusername" : "lostUsername.html",
 	"lostpassword" : "lostPassword.html",
 	"lostid" : "lostID.html",

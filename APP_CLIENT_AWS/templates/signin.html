@@ -57,6 +57,30 @@
 
 			setFormErrorHeader(urlParams,myLangTexts);
 		}
+		
+		function displayLangMenuIcons(){
+			
+			for ( var i in languages ) {
+				var mylang = languages[i];
+				
+				var id = "signin" + mylang;
+				var href = "javascript:goTo(pages.signin,{'lang' : '" + mylang + "'})";
+				
+				var li = document.createElement("li");
+				var a = document.createElement("a");
+				a.setAttribute("id",id);
+				a.setAttribute("href",href);
+				li.appendChild(a);
+
+				//var ul = document.getElementById("langMenuUL");
+				var ul = document.getElementById("langMenuUL");
+				ul.appendChild(li);
+				
+				//a.innerHTML = "javascript:displayIcon(\'" + id + "\',\'" + mylang + "\')";
+				displayIcon(id,mylang);
+				//a.innerHTML = mylang;
+			}
+		}
 
 		function field_format_check(input,message) {
 			if (input.validity.patternMismatch) {
@@ -178,11 +202,15 @@
 		<script>javascript:displayIcon("langMenu",lang)</script>
 	<span class="caret"></span></button>
 	<!-- <button class="btn btn-default dropdown-toggle pull-right" type="button" id="langMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LANG<span class="caret"></span></button> -->
-	<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="langMenu">
+	<ul id="langMenuUL" class="dropdown-menu dropdown-menu-right" aria-labelledby="langMenu">
+	<!--
                 <li><a id="signinEsp" href="javascript:goTo(pages.signin,{'lang' : 'esp'})"><script>javascript:displayIcon("signinEsp","esp")</script></a></li>
                 <li><a id="signinEng" href="javascript:goTo(pages.signin,{'lang' : 'eng'})"><script>javascript:displayIcon("signinEng","eng")</script></a></li>
+                <li><a id="signinFra" href="javascript:goTo(pages.signin,{'lang' : 'fra'})"><script>javascript:displayIcon("signinFra","fra")</script></a></li>
+	-->
 	</ul>
 	</div>
+	<script>displayLangMenuIcons();</script>
 
 	<div class="subscriberarea" id="area">
 		<p><script>javascript:document.getElementById("area").innerHTML = myLangTexts["zone"]["customer"].toUpperCase()</script></p>

@@ -1520,15 +1520,39 @@ function insertAppointment(response, request, dbcnx, db) {
 }
 
 function getCustomerAppointments(response, request, dbcnx, db) {
+	var TAG = arguments.callee.name;
+
 	var customerid = url.parse(request.url, true).query.customerid;
+	var sessionid = url.parse(request.url, true).query.sessionid;
 	var action = url.parse(request.url, true).query.action;
 
-	if ( myUndefined.indexOf(action) >= 0 ) { action = getcustomerappointments; }
+	if ( myUndefined.indexOf(action) >= 0 ) { action = "getcustomerappointments"; }
 	
-	if ( myUndefined.indexOf(customerid) >= 0 ) {
+	if ( myUndefined.indexOf(customerid) >= 0 && myUndefined.indexOf(sessionid) >= 0 ) {
+		printError(TAG,"wrong request received",request.url);
 		writeErrorResponse(response, 400, "badrequest", action);
 	} else {
+		if ( myUndefined.indexOf(sessionid) < 0 ) {
+			var getCustomeridQuery = { "sessionid.value" : sessionid };
+			customer.doGet(dbcnx, db, getCustomeridQuery, function(err, attList) {
+				if (err || attList == null) {
+					printError(TAG,"no customer found for this sessionid","invalidsessionid");
+				} else {
+					customerid = attList["id"];
+					console.log(TAG + " [DEBUG] customerid = " + customerid);
+					getCustomeridAppointments(customerid);
+				}
+
+			});
+		} else {
+			getCustomeridAppointments(customerid);
+		}
+	}
+
+	function getCustomeridAppointments(customerid) {
 		var getQuery = { "customerid" : customerid };
+		console.log(TAG + " [DEBUG] getting appointments with query: " + JSON.stringify(getQuery));
+		if ( ! /^[a-z0-9]{24}/.test(customerid) ) {  console.log(TAG + " [DEBUG] BAD FORMAT OF CUSTOMERID " + customerid); }
 		appointment.doGetAll(dbcnx, db, getQuery, function(err,appList) {
 			if (err) {
 				writeErrorResponse(response,500,err,action);
@@ -1537,9 +1561,11 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 			} else {
 				var body = {};
 				var appointments = {};
+				console.log(TAG + " [DEBUG] starting appointments loop. Length = " + appList.length);
 				for ( var i in appList ) {
 					var appt = appList[i];
 					var appid = appt["_id"];
+					console.log(TAG + " [DEBUG] i = " + i + " -- appid = " + appt["_id"]);
 					appointments[appid] = appt;
 				}
 				body["appointments"] = appointments;
@@ -1621,6 +1647,32 @@ function updateAppointment(response, request, dbcnx, db) {
 	}
 }
 
+function getProvidersList (response, request, dbcnx, db, callback) {
+	var TAG = arguments.callee.name;
+	var action = url.parse(request.url, true).query.action;
+	if ( myUndefined.indexOf(action) >= 0 ) action = "getproviderslist";
+
+	var getQuery = {};
+	provider.doGetAll(dbcnx, db, getQuery, function(err,provList){
+		if (err) {
+			printError(TAG,"Failed to get the list of providers.",err);
+			writeErrorResponse(response, 500, err, action);
+		} else if ( provList == null ) {
+			printError(TAG,"NULL response from server getting providers list","NULL");
+			writeErrorResponse(response, 500, "nullfromserver", action);
+		} else {
+			var body = {};
+			var providers = {};
+			for ( var i in provList ) {
+				var providerid = provList[i]["_id"];
+				providers[providerid] = provList[i];
+			}
+			body["providers"] = providers;
+			writeSuccessResponse(response,body);
+		}
+	});
+}
+
 exports.getCustomer = getCustomer;
 exports.getFullCustomerData = getFullCustomerData;
 //exports.checkCredentials = checkCredentials;
@@ -1637,3 +1689,4 @@ exports.getCustomerProviders = getCustomerProviders;
 exports.insertAppointment = insertAppointment;
 exports.getCustomerAppointments = getCustomerAppointments;
 exports.updateAppointment = updateAppointment;
+exports.getProvidersList = getProvidersList;

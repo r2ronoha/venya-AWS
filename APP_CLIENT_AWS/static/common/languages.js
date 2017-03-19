@@ -90,6 +90,14 @@ var languages_text = {
 						"sessionid" : "session id",
 						"webcreation" : "customer successfully created"
 				},
+				"appointment" : {
+					"provider" : "provider",
+					"date" : "date",
+					"time" : "time",
+					"address" : "address",
+					"status" : "status",
+					"delay" : "delay"
+				},
                 "settings" : {
                         "yoursettings" : "these are your settings",
                         "setting" : "setting",
@@ -110,11 +118,14 @@ var languages_text = {
 			"newemail" : "new email address",
 			"enterdetails" : "please enter your details",
 			"submit" : "submit",
+			"change" : "change",
 			"cancel" : "cancel",
 			"toprovider" : "Don't have an id? Get an account from your provider.",
 			"getid" : "Id lost? Get it here",
 			"dobformatexample" : "DD/MM/YYYY",
-			"optional" : "optional"
+			"optional" : "optional",
+			"newdate" : "select a new date",
+			"newappointment" : "select a provider and a date"
                 },
 				"tableheaders" : {
 					"name" : "name",
@@ -266,6 +277,14 @@ var languages_text = {
                         "listoption" : "seleccionar",
 						"updatesuccess" : "cambiado con éxito"
                 },
+				"appointment" : {
+					"provider" : "proveedor",
+					"date" : "fecha",
+					"time" : "hora",
+					"address" : "dirección",
+					"status" : "estado",
+					"delay" : "retraso"
+				},
 		"form" : {
 			"page" : "página",
 			"old" : "antiguo",
@@ -277,10 +296,13 @@ var languages_text = {
 			"enterdetails" : "Introduce tus datos",
 			"submit" : "enviar",
 			"cancel" : "anular",
+			"change" : "cambiar",
 			"toprovider" : "¿No tienes identificador? Créate una cuenta con tu proveedor.",
 			"getid" : "¿Identificador perdido? Recupéralo aquí",
 			"dobformatexample" : "DD/MM/AAAA",
-			"optional" : "opcional"
+			"optional" : "opcional",
+			"newdate" : "elige una nueva fecha",
+			"newappointment" : "elige un proveedor y una fecha"
                 },
 				"tableheaders" : {
 					"name" : "nombre",
@@ -432,6 +454,14 @@ var languages_text = {
                         "listoption" : "chosir",
 						"updatesuccess" : "mis à jour avec succès"
                 },
+				"appointment" : {
+					"provider" : "spécialiste",
+					"date" : "date",
+					"time" : "heure",
+					"address" : "adresse",
+					"status" : "statut",
+					"delay" : "retard"
+				},
 		"form" : {
 			"page" : "page",
 			"old" : "ancien",
@@ -443,10 +473,13 @@ var languages_text = {
 			"enterdetails" : "Entrez vos données",
 			"submit" : "envoyer",
 			"cancel" : "annuler",
+			"change" : "modifier",
 			"toprovider" : "¿Vous n'avez pas un identifiant? Créez un compte chez le spécialiste.",
 			"getid" : "¿Identifiant perdu? Retrouvez le ici",
 			"dobformatexample" : "JJ/MM/AAAA",
-			"optional" : "optionnel"
+			"optional" : "optionnel",
+			"newdate" : "choisissez une nouvelle date",
+			"newappointment" : "choisissez un spécialiste et une date"
                 },
 				"tableheaders" : {
 					"name" : "nom",
