@@ -196,20 +196,22 @@
 		unsubscribe from service: set value for the provider id to "false" in the customer's profile
 		if update is successful, delete the row from the table
 	*/
-		console.log("unsubscribe function called");
-		var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?" +
-			"action=update" +
-			"&type=customer" +
-			"&sessionid=" + sessionid +
-			"&field=providers" + 
-			"&newvalue=" + providerid + "=" + false;
-
-		console.log("update URL: " + myUrl);
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET',myUrl,true);
-		xhr.send();
-		xhr.onreadystatechange = processRequest;
-		//return false;
+		if ( confirm(formatMessage([myLangTexts["form"]["confirmunsubscribe"]])) ) {
+			console.log("unsubscribe function called");
+			var myUrl = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting?" +
+				"action=update" +
+				"&type=customer" +
+				"&sessionid=" + sessionid +
+				"&field=providers" + 
+				"&newvalue=" + providerid + "=" + false;
+	
+			console.log("update URL: " + myUrl);
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET',myUrl,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+			//return false;
+		}
 
 		function processRequest(e) {
 			if ( xhr.readyState == 4 ){

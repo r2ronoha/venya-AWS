@@ -29,8 +29,10 @@
 
 	<!-- imports for the date time picker -->
 	<!-- // jquery -->
+	<!--
 	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
 	<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	-->
 	<!-- // style sheets -->
 	<!--
 	<link href="/static/css/jquery-ui-timepicker-addon.css" rel="stylesheet">
@@ -62,9 +64,28 @@
 	<!-- end of not showing version -->
 
 	<script>
+		/*$(function() {
+			$('#inputDate').datetimepicker({
+				yearRange:"+0:+2",
+				dateFormat: "dd/mm/yyyy",
+				onSelect: function(myLangTexts){
+					document.getElementById("tpicker_time").innerHTML = myLangTexts["picker"]["time"];
+					document.getElementById("tpicker_hour").innerHTML = myLangTexts["picker"]["hour"];
+					document.getElementById("tpicker_minute").innerHTML = myLangTexts["picker"]["minute"];
+					document.getElementById("dpicker_now").innerHTML = myLangTexts["picker"]["now"];
+					document.getElementById("dpicker_close").innerHTML = myLangTexts["picker"]["close"];
+					document.getElementById("dpicker_next").innerHTML = myLangTexts["picker"]["next"];
+					document.getElementById("dpicker_prev").innerHTML = myLangTexts["picker"]["prev"];
+				}
+			});
+		});*/
 		$(function() {
-			$('#inputDate').datetimepicker({'scrollDefault':'now'});
+			$('#inputDate').datetimepicker({
+				yearRange:"+0:+2",
+				dateFormat: "dd/mm/yyyy"
+			});
 		});
+		//$('#inputDate').datepicker();
 	</script>
 	<script type="text/javascript">
 		var changeField;
@@ -105,17 +126,21 @@
 			var form = document.querySelector("form");
 			var newDate = form.elements.inputDate.value;
 			var dateMilliseconds = new Date(newDate).getTime();
-
-			var providerid = form.elements.selectProvider.value;
-
-			var getCustomerIDUrl = "http://" + venya_node_server + ":" + venya_node_port +
-				"/getCustomer" +
-				"?action=getidfromsessionid" +
-				"&sessionid=" + sessionid;
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET',getCustomerIDUrl,true);
-			xhr.send();
-			xhr.onreadystatechange = processGetIdResponse;
+			var now = new Date().getTime();
+			if ( now >= dateMilliseconds ) {
+				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["pastdate"]]);
+			} else {
+				var providerid = form.elements.selectProvider.value;
+	
+				var getCustomerIDUrl = "http://" + venya_node_server + ":" + venya_node_port +
+					"/getCustomer" +
+					"?action=getidfromsessionid" +
+					"&sessionid=" + sessionid;
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET',getCustomerIDUrl,true);
+				xhr.send();
+				xhr.onreadystatechange = processGetIdResponse;
+			}
 
 			function processGetIdResponse(e) {
 				if ( xhr.readyState == 4 ) {
@@ -239,6 +264,13 @@
 			selectMenu.appendChild(option);
 			*/
 		}
+		document.getElementById("tpicker_time").innerHTML = myLangTexts["picker"]["time"];
+		document.getElementById("tpicker_hour").innerHTML = myLangTexts["picker"]["hour"];
+		document.getElementById("tpicker_minute").innerHTML = myLangTexts["picker"]["minute"];
+		document.getElementById("dpicker_now").innerHTML = myLangTexts["picker"]["now"];
+		document.getElementById("dpicker_close").innerHTML = myLangTexts["picker"]["close"];
+		document.getElementById("dpicker_next").innerHTML = myLangTexts["picker"]["next"];
+		document.getElementById("dpicker_prev").innerHTML = myLangTexts["picker"]["prev"];
 
 	</script>
 	<!-- <div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div> -->

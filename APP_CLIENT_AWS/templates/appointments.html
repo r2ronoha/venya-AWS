@@ -32,6 +32,7 @@
 		var myLangTexts;
 		var lang;
 		var providersList;
+		var customerid;
 
 		function init() {
 			parseUrl();
@@ -45,7 +46,14 @@
 				//getSubscriberDetails( urlParams["action"], urlParams["id"], function () {
 				//setHeader("h2",formatMessage([myLangTexts["action"][action]]));
 				document.getElementById("pageTitle").appendChild(document.createElement("h2").appendChild(document.createTextNode(formatMessage([myLangTexts["action"][action]]))));
-				get_appointments();
+				get_id_from_sessionid("customer",sessionid,function(err,id) {
+					if (err) {
+						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["accountnotfound"]]);
+					} else {
+						customerid = id;
+						get_appointments();
+					}
+				});
 			});
 		}
 
@@ -65,7 +73,9 @@
 				if ( xhr.readyState == 4 ){
 					if ( xhr.status = 200 ){
 						//get the list of providers to get info fro appointments
-						var getProvsUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getProvidersList";
+						//var getProvsUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getProvidersList";
+						var getProvsUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getProvidersList?action=getproviders" +
+							"&customerid=" + customerid;
 						var provxhr = new XMLHttpRequest();
 						provxhr.open('GET',getProvsUrl,true);
 						provxhr.send();
@@ -95,10 +105,28 @@
 									table.appendChild(row);
 									
 									var appList = response["appointments"];
+
+									// Added to sort appointments by date
+									var appListSortable = []; // array to hold all appointments
 									for ( var appId in appList ) {
-										var appt = appList[appId];
-										var appointmentid = appt["_id"];
+										var myApp = appList[appId];
+										if ( myApp["providerid"] in providersList ) { // process only appointments for active providers
+											appListSortable.push(myApp);
+										}
+									}
+									appListSortable.sort(function(a,b) {
+										return a.date - b.date;
+									});
+									//End sorting
+
+									//for ( var appId in appList ) {
+									for ( var a in appListSortable ) { // iterate the index of the global array containng all appointments arrays
+										var appt = appListSortable[a];
+										//console.log(appt);
+
 										var providerid = appt["providerid"];
+	
+										var appointmentid = appt["_id"];
 										var appStatus = appt["status"];
 										var delay = appt["delay"];
 										var dateMilliseconds = appt["date"];
@@ -164,7 +192,6 @@
 										}
 
 										table.appendChild(row);
-
 
 									}
 									document.getElementById("tableDiv").appendChild(table);

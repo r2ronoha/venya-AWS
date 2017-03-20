@@ -129,7 +129,7 @@ function doGet (cnx, db, query, callback) {
 function doGetFullData (cnx, db, query, callback) {
 	var attList = {};
 	
-	console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	//console.log("[customer.doGetFullData()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);

@@ -125,7 +125,8 @@ var languages_text = {
 			"dobformatexample" : "DD/MM/YYYY",
 			"optional" : "optional",
 			"newdate" : "select a new date",
-			"newappointment" : "select a provider and a date"
+			"newappointment" : "select a provider and a date",
+			"confirmunsubscribe" : "Are you sure you want to unsubscribe?"
                 },
 				"tableheaders" : {
 					"name" : "name",
@@ -169,11 +170,21 @@ var languages_text = {
 			"badrequest" : "the request is not supported",
 			"unknownprovider" : "the provider does not exist",
 			"nullfromserver" : "null response from server",
-			"noprovider" : "your are not registered with any provider"
+			"noprovider" : "your are not registered with any provider",
+			"pastdate" : "the date you have selected is in the past" 
 		},
 		"email" : {
 			"credentialssent" : "Credentials sent to",
 			"emailfailed" : "failed to send email to"
+		},
+		"picker" : {
+			"time" : "Time",
+			"hour" : "hour",
+			"minute" : "minute",
+			"now" : "now",
+			"close" : "done",
+			"next" : "next",
+			"prev" : "prev"
 		}
         },
         "esp" : {
@@ -302,7 +313,8 @@ var languages_text = {
 			"dobformatexample" : "DD/MM/AAAA",
 			"optional" : "opcional",
 			"newdate" : "elige una nueva fecha",
-			"newappointment" : "elige un proveedor y una fecha"
+			"newappointment" : "elige un proveedor y una fecha",
+			"confirmunsubscribe" : "¿Estás seguro que quieres borrarte del servicio?"
                 },
 				"tableheaders" : {
 					"name" : "nombre",
@@ -346,11 +358,21 @@ var languages_text = {
 			"badrequest" : "el formato solicitado no está soportado",
 			"unknownprovider" : "el proveedor no existe",
 			"nullfromserver" : "respuesta vacía (NULL) recibida del servidor",
-			"noprovider" : "No estás registrado con ningún proveedor"
+			"noprovider" : "No estás registrado con ningún proveedor",
+			"pastdate" : "la fecha elegida está en el pasado"
 		},
 		"email" : {
 			"credentialssent" : "Las credenciales se han enviado a",
 			"emailfailed" : "No a sido posible enviar el email a"
+		},
+		"picker" : {
+			"time" : "Hora",
+			"hour" : "horas",
+			"minute" : "minutos",
+			"now" : "ahora",
+			"close" : "cerrar",
+			"next" : "suiguiente",
+			"prev" : "anterior"
 		}
         },
         "fra" : {
@@ -479,7 +501,8 @@ var languages_text = {
 			"dobformatexample" : "JJ/MM/AAAA",
 			"optional" : "optionnel",
 			"newdate" : "choisissez une nouvelle date",
-			"newappointment" : "choisissez un spécialiste et une date"
+			"newappointment" : "choisissez un spécialiste et une date",
+			"confirmunsubscribe" : "Etes-vous sur de vouloir vour désenregistrer?"
                 },
 				"tableheaders" : {
 					"name" : "nom",
@@ -523,11 +546,21 @@ var languages_text = {
 			"badrequest" : "le format demandé n'est pas supporté",
 			"unknownprovider" : "le spécialiste n'existe pas",
 			"nullfromserver" : "NULL réponse recu du serveur",
-			"noprovider" : "vous n'etes enregistré avec aucun professionel"
+			"noprovider" : "vous n'etes enregistré avec aucun professionel",
+			"pastdate" : "la date est dans le passé"
 		},
 		"email" : {
 			"credentialssent" : "Les crédentielles ont été envoyées à",
 			"emailfailed" : "Il n'a pas été possible d'envoyer l'email à"
+		},
+		"picker" : {
+			"time" : "l'heure",
+			"hour" : "heures",
+			"minute" : "minutes",
+			"now" : "maintenant",
+			"close" : "fermer",
+			"next" : "suivant",
+			"prev" : "précédent"
 		}
         }
 }

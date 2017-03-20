@@ -380,7 +380,8 @@ function getSubscriber(response,request,dbcnx,db) {
 
 function getCustomer(response, request, dbcnx, db) {	
 	//console.log("[requestHandlers.getCustomer] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
-	
+	var TAG = arguments.callee.name;
+
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
 	var password = url.parse(request.url, true).query.password;
@@ -398,17 +399,9 @@ function getCustomer(response, request, dbcnx, db) {
 			( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || 
 			( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || 
 			( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-		console.log("[requestHandlers.getCustomer] bad request based on action : \n- action: \"" + action + "\"\n- username: \"" + username + "\"\n- password: \"" + password);
 
+		printError(TAG,"Wrong parameters receive for action " + action,"badrequest: " + request.url);
 		writeErrorResponse(response,400,"badrequest",action);
-/*
-		response.writeHead(400, responseHeadParams);
-		var body = {};
-		body["status"] = "ERROR";
-		body["errormessage"] = "badrequest";
-		var respBody = JSON.stringify(body);
-		response.write(respBody, function(err) { response.end(); } );
-*/
 		return;
 	}
 	
@@ -420,16 +413,8 @@ function getCustomer(response, request, dbcnx, db) {
 	function queryAndRespond(query) {
 		customer.doGet(dbcnx, db, query, function(err,attList) {
 			if (err) {
+				printError(TAG,"Failed to get customer details",err);
 				writeErrorResponse(response,500,err,action);
-				/*
-				response.writeHead(500, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = err;
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
-				*/
 			}else if (attList != null) {
 				response.writeHead(200, responseHeadParams);
 				var body = {};
@@ -444,16 +429,8 @@ function getCustomer(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 			} else {
 				respErrorMessage = ( action == "getidfromsessionid" ) ? "invalidsessionid" : "wrongcredentials";
+				printError(TAG,"Null response from DB","NULL === " + respErrorMessage);
 				writeErrorResponse(response,401,respErrorMessage,action);
-				/*
-				response.writeHead(401, responseHeadParams);
-				var body = {};
-				body["status"] = "ERROR";
-				body["errormessage"] = ( action == "getidfromsessionid" ) ? "invalidsessionid" : "wrongcredentials";
-				body["action"] = action;
-				var respBody = JSON.stringify(body);
-				response.write(respBody, function(err) { response.end(); } );
-				*/
 			}
 		});
 	}
@@ -531,6 +508,8 @@ function getCustomer(response, request, dbcnx, db) {
 
 function createCustomer(response, request, dbcnx, db) {
 	//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
+	var TAG = arguments.callee.name;
+
 	var action = "createcustomer";
 	
 	var insertQuery = {};
@@ -546,19 +525,19 @@ function createCustomer(response, request, dbcnx, db) {
 			}
 			var fieldQuery = { "fix": customerAttributesDefault[field].fix, "value": value };
 			insertQuery[field] = fieldQuery;
-			console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
+			//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " added " + field + " : " + JSON.stringify(insertQuery[field]) + " to insertQuery");
 		}
 	}
 
 	//set provider to VenyaDefault if no provider sent (i.e. created via self customer creation during development/testing phase
 	if ( !( "providers" in insertQuery ) ) {
-		console.log("Getting default provider info");
+		console.log(TAG + " Getting default provider info");
 		//var providername = default_provider;
 		var getProviderQuery = { 'name.value' : default_provider };
-		console.log(JSON.stringify(getProviderQuery));
+		//console.log(JSON.stringify(getProviderQuery));
 		provider.doGet(dbcnx, db, getProviderQuery, function(err, attList) {
 			if(err) {
-				console.log("[createProvider] error : " + err);
+				printError(TAG,"Failed to get provider details",err);
 				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
@@ -568,7 +547,7 @@ function createCustomer(response, request, dbcnx, db) {
 				response.write(respBody, function(err) { response.end(); } );
 				return;
 			} else if (attList == null) {
-				console.log("[createProvider] error : NULL FROM DB");
+				printError(TAG,"Null response from DB","NULL");
 				response.writeHead(500, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
@@ -579,16 +558,16 @@ function createCustomer(response, request, dbcnx, db) {
 				return;
 			} else {
 				var providerid = attList["id"];
-				console.log("default provider id = " + providerid);
+				console.log(TAG + " default provider id = " + providerid);
 				var value = {};
 				value[providerid] = true;
 				insertQuery["providers"] = { "fix" : customerAttributesDefault["providers"].fix, "value" : value };
-				console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
+				//console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
 				insert(dbcnx, db, insertQuery)
 			}
 		});
 	} else {
-		console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
+		//console.log("[reqHandler.createCustomer] Inserting : " + JSON.stringify(insertQuery));
 		insert(dbcnx, db, insertQuery)
 	}
 	
@@ -642,7 +621,7 @@ function createCustomer(response, request, dbcnx, db) {
 }
 
 function getProvider(response, request, dbcnx, db) {	
-	console.log("[requestHandlers.getProvider] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
+	//console.log("[requestHandlers.getProvider] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	
 	var action = url.parse(request.url, true).query.action;
 	var username = url.parse(request.url, true).query.username;
@@ -659,7 +638,7 @@ function getProvider(response, request, dbcnx, db) {
 			( myUndefined.indexOf(id) >= 0 && myUndefined.indexOf(username) >= 0 ) || 
 			( action == "login" && ( myUndefined.indexOf(username) >= 0 || myUndefined.indexOf(password) >= 0 ) ) || 
 			( action != "login" && myUndefined.indexOf(id) >= 0 ))) ) {
-		console.log("[reqHandler.getProvider] [DEBUG] action = " + action + " -- id = " + id);
+		//console.log("[reqHandler.getProvider] [DEBUG] action = " + action + " -- id = " + id);
 		response.writeHead(400, responseHeadParams);
 		var body = {};
 		body["status"] = "ERROR";
@@ -1062,7 +1041,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 					for ( var field in attList ) {
 						if ( field != "email" ) {
 							body[field] = attList[field];
-							console.log("[requestHandler.getCustomer.queryandRespond] " + Math.round(new Date().getTime() / 1000) + " field: \"" + field + "\" : \"" + JSON.stringify(body[field]) );
+							//console.log("[requestHandler.getCustomer.queryandRespond] " + Math.round(new Date().getTime() / 1000) + " field: \"" + field + "\" : \"" + JSON.stringify(body[field]) );
 						}
 					}
 					//body[credential] = attList[credential];
@@ -1146,7 +1125,7 @@ function updateSetting(response, request, dbcnx, db) {
 	var query = ( myUndefined.indexOf(sessionid) < 0 ) ? { "sessionid.value" : sessionid } : { "_id": ObjectId(id) };
 	
 	function updateAndRespond(query, updateQuery) {
-		console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
+		//console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
 		mycollection.doUpdate(dbcnx, db, query, updateQuery, function(err,query) {
 			if ( err ) {
 				response.writeHead(500, responseHeadParams);
@@ -1362,7 +1341,7 @@ function getCustomerProviders(response, request, dbcnx, db) {
 
 	// if we have a sessionid,, we use it as field for the request. Otherwise we'll use the customer id
 	var getQuery = ( myUndefined.indexOf(sessionid) < 0 ) ? { "sessionid.value" : sessionid } : { "_id" : ObjectId(customerid) };
-	console.log("[reqHandlers.getCustomerProviders] getQuery = " + JSON.stringify(getQuery));
+	//console.log("[reqHandlers.getCustomerProviders] getQuery = " + JSON.stringify(getQuery));
 
 	/*
 		1. get the information for the customer based on the sessionid or customerid
@@ -1376,22 +1355,18 @@ function getCustomerProviders(response, request, dbcnx, db) {
 			writeErrorResponse(response,401,"nullfromserver",action);
 		} else {
 			var providers = attList["providers"].value;
-			console.log("Providers = " + JSON.stringify(providers));
 			if ( myUndefined.indexOf(providers) >= 0 || providers.length <= 0 ) {
 				writeErrorResponse(response,400,"noprovider",action);
 			} else {
 				var queryList = [];
 				//for ( var providerid in Object.keys(providers) ) {
 				for ( var providerid in providers ) {
-					console.log("Providerid = " + providerid + " (" + providers[providerid] + ")");
 					if ( providers[providerid] ) {
-						console.log("Pushing to queryList");
 						queryList.push({ "_id" : ObjectId(providerid) });
 					}
 				}
 				if ( queryList.length > 0 ) {
 					var query = { "$or" : queryList };
-					console.log("[reqHandlers.getCustProvs] queryProvIds = " + JSON.stringify(query));
 					provider.doGetAll(dbcnx, db, query, function(err, attList) {
 						doGetHandler(response,err,attList,action, function() {
 							var body = {};
@@ -1539,7 +1514,6 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 					printError(TAG,"no customer found for this sessionid","invalidsessionid");
 				} else {
 					customerid = attList["id"];
-					console.log(TAG + " [DEBUG] customerid = " + customerid);
 					getCustomeridAppointments(customerid);
 				}
 
@@ -1551,7 +1525,6 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 
 	function getCustomeridAppointments(customerid) {
 		var getQuery = { "customerid" : customerid };
-		console.log(TAG + " [DEBUG] getting appointments with query: " + JSON.stringify(getQuery));
 		if ( ! /^[a-z0-9]{24}/.test(customerid) ) {  console.log(TAG + " [DEBUG] BAD FORMAT OF CUSTOMERID " + customerid); }
 		appointment.doGetAll(dbcnx, db, getQuery, function(err,appList) {
 			if (err) {
@@ -1561,11 +1534,9 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 			} else {
 				var body = {};
 				var appointments = {};
-				console.log(TAG + " [DEBUG] starting appointments loop. Length = " + appList.length);
 				for ( var i in appList ) {
 					var appt = appList[i];
 					var appid = appt["_id"];
-					console.log(TAG + " [DEBUG] i = " + i + " -- appid = " + appt["_id"]);
 					appointments[appid] = appt;
 				}
 				body["appointments"] = appointments;
@@ -1624,7 +1595,7 @@ function updateAppointment(response, request, dbcnx, db) {
 		} else {
 			appointment.doUpdate(dbcnx, db, checkQuery, updateQuery, function(err,query) {
 				if (err) {
-					console.log(TAG,"Failed to perform update",err);
+					printError(TAG,"Failed to perform update",err);
 					writeErrorResponse(response, 500, err, action);
 				} else {
 					appointment.doGet(dbcnx, db, query, function(err,attList) {
@@ -1650,27 +1621,77 @@ function updateAppointment(response, request, dbcnx, db) {
 function getProvidersList (response, request, dbcnx, db, callback) {
 	var TAG = arguments.callee.name;
 	var action = url.parse(request.url, true).query.action;
+	var customerid = url.parse(request.url, true).query.customerid;
+
 	if ( myUndefined.indexOf(action) >= 0 ) action = "getproviderslist";
 
-	var getQuery = {};
-	provider.doGetAll(dbcnx, db, getQuery, function(err,provList){
-		if (err) {
-			printError(TAG,"Failed to get the list of providers.",err);
-			writeErrorResponse(response, 500, err, action);
-		} else if ( provList == null ) {
-			printError(TAG,"NULL response from server getting providers list","NULL");
-			writeErrorResponse(response, 500, "nullfromserver", action);
-		} else {
-			var body = {};
-			var providers = {};
-			for ( var i in provList ) {
-				var providerid = provList[i]["_id"];
-				providers[providerid] = provList[i];
+	if ( myUndefined.indexOf(customerid) >= 0 ) { // if no customer id, get list of all providers
+		var getQuery = {};
+		provider.doGetAll(dbcnx, db, getQuery, function(err,provList){
+			if (err) {
+				printError(TAG,"Failed to get the list of providers.",err);
+				writeErrorResponse(response, 500, err, action);
+			} else if ( provList == null ) {
+				printError(TAG,"NULL response from server getting providers list","NULL");
+				writeErrorResponse(response, 500, "nullfromserver", action);
+			} else {
+				var body = {};
+				var providers = {};
+				for ( var i in provList ) {
+					var providerid = provList[i]["_id"];
+					providers[providerid] = provList[i];
+				}
+				body["providers"] = providers;
+				writeSuccessResponse(response,body);
 			}
-			body["providers"] = providers;
-			writeSuccessResponse(response,body);
-		}
-	});
+		});
+	} else { // if customer id provided, only get the providers that the customer is subscribed with
+		var customerQuery = { "_id" : ObjectId(customerid) };
+		customer.doGet(dbcnx, db, customerQuery, function(err,attList) {
+			processDBResponse(response,action,TAG,err,attList,function(customer){
+				//var activeCustomerProviders = {};
+				var customerProviders = customer["providers"];
+				var getQuery = {};
+				var queryOr = [];
+				for ( providerid in customerProviders ) {
+					if ( customerProviders[providerid] ) {
+						queryOr.push( {"_id" : ObjectId(providerid)} );
+						//activeCustomerProviders[providerid] = true;
+					}
+				}
+				if ( queryOr.length <= 0 ) {
+					printError(TAG,"The customer " + customerid + " is not registered with any provider","noprovider");
+					writeErrorResponse(response,401,"noprovider",action);
+				} else {
+					getQuery = { "$or" : queryOr };
+					provider.doGetAll(dbcnx, db, getQuery, function(err,provList) {
+						processDBResponse(response,action,TAG,err,provList,function(provList) {
+							var body = {};
+							var providers = {};
+							for ( var i in provList ) {
+								var providerid = provList[i]["_id"];
+								providers[providerid] = provList[i];
+							}
+							body["providers"] = providers;
+							writeSuccessResponse(response,body);
+						});
+					});
+				}
+			});
+		});
+	}
+}
+
+function processDBResponse (response,action,TAG,err,attList,callback) {
+	if (err) {
+		printError(TAG,"Failed to perform DB request",err);
+		writeErrorResponse(response,500,err,action);
+	} else if (attList == null) {
+		printError(TAG,"NULL response from server","NULL");
+		writeErrorResponse(response,500,"nullfromserver",action);
+	} else {
+		callback(attList);
+	}
 }
 
 exports.getCustomer = getCustomer;

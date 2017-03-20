@@ -95,17 +95,21 @@
 			var form = document.querySelector("form");
 			var newDate = form.elements.inputDate.value;
 			var dateMilliseconds = new Date(newDate).getTime();
-
-			var url = "http://" + venya_node_server + ":" + venya_node_port +
-				"/updateAppointment" +
-				"?id=" + appointmentid +
-				"&date=" + dateMilliseconds;
-			console.log("insert url = " + url);
-
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET',url,true);
-			xhr.send();
-			xhr.onreadystatechange = processInsertResponse;
+			var now = new Date().getTime();
+			if ( now >= dateMilliseconds ) {
+				document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["pastdate"]]);
+			} else {
+				var url = "http://" + venya_node_server + ":" + venya_node_port +
+					"/updateAppointment" +
+					"?id=" + appointmentid +
+					"&date=" + dateMilliseconds;
+				console.log("insert url = " + url);
+	
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET',url,true);
+				xhr.send();
+				xhr.onreadystatechange = processInsertResponse;
+			}
 
 			function processInsertResponse(e) {
 				if ( xhr.readyState == 4 ) {
