@@ -1682,6 +1682,25 @@ function getProvidersList (response, request, dbcnx, db, callback) {
 	}
 }
 
+function getAllCustomers(response,request,dbcnx,db) {
+	var TAG = arguments.callee.name;
+	var query = {};
+
+	customer.doGetAll(dbcnx, db, query, function(err,attList) {
+		processDBResponse(response,"getAllCustomers",TAG,err,attList,function(attList){
+			var body = {};
+			var customers = {};
+			for ( var i in attList ) {
+				var customerid = attList[i]["_id"];
+				customers[customerid] = attList[i];
+			}
+			body["customers"] = customers;
+			writeSuccessResponse(response,body);
+		});
+
+	});
+}
+
 function processDBResponse (response,action,TAG,err,attList,callback) {
 	if (err) {
 		printError(TAG,"Failed to perform DB request",err);
@@ -1711,3 +1730,4 @@ exports.insertAppointment = insertAppointment;
 exports.getCustomerAppointments = getCustomerAppointments;
 exports.updateAppointment = updateAppointment;
 exports.getProvidersList = getProvidersList;
+exports.getAllCustomers = getAllCustomers;
