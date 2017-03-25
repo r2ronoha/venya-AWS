@@ -1622,10 +1622,11 @@ function getProvidersList (response, request, dbcnx, db, callback) {
 	var TAG = arguments.callee.name;
 	var action = url.parse(request.url, true).query.action;
 	var customerid = url.parse(request.url, true).query.customerid;
+	var sessionid = url.parse(request.url, true).query.sessionid;
 
 	if ( myUndefined.indexOf(action) >= 0 ) action = "getproviderslist";
 
-	if ( myUndefined.indexOf(customerid) >= 0 ) { // if no customer id, get list of all providers
+	if ( myUndefined.indexOf(customerid) >= 0 && myUndefined.indexOf(sessionid) >= 0 ) { // if no customer id, get list of all providers
 		var getQuery = {};
 		provider.doGetAll(dbcnx, db, getQuery, function(err,provList){
 			if (err) {
@@ -1646,7 +1647,7 @@ function getProvidersList (response, request, dbcnx, db, callback) {
 			}
 		});
 	} else { // if customer id provided, only get the providers that the customer is subscribed with
-		var customerQuery = { "_id" : ObjectId(customerid) };
+		var customerQuery = ( myUndefined.indexOf(sessionid) >= 0 ) ? { "_id" : ObjectId(customerid) } : { "sessionid.value" : sessionid };
 		customer.doGet(dbcnx, db, customerQuery, function(err,attList) {
 			processDBResponse(response,action,TAG,err,attList,function(customer){
 				//var activeCustomerProviders = {};

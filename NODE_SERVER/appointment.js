@@ -11,7 +11,9 @@ var appointmentAttributes = {
 	"customerid" : "", //customer id
 	"providerid" : "", //provider id
 	"delay" : 0,
-	"status" : "future"
+	"status" : "tentative",
+	"duration" : 1800000,
+	"googleId" : ""
 };
 
 function getAttDefault(callback) {
@@ -117,7 +119,12 @@ function doGetFullData (cnx, db, query, callback) {
 function doGetAll (cnx, db, query, callback) {
 	var attList = {};
 	
-	console.log("[appointment.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	console.log("[appointment.doGetAll] [DEBUG]");
+	console.log("[appointment.doGetAll] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	for ( var field in query ) {
+		console.log("\"" + field + "\" : \"" + query[field] + "\"");
+	}
+	console.log("[appointment.doGetAll] [END DEBUG]");
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);
