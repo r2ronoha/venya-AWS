@@ -13,7 +13,9 @@ var privateFields = ['id','sessionid','type','action'];
 var secretFields = ['password'];
 var dateFields = ['dob'];
 var appointmentHeaders = ['provider','date','time','address','status','delay'];
+var appointmentProviderHeaders = ['customer','date','time','phone','email','status','delay'];
 var appointmentFields = ['_id','customerid','providerid','date','status','delay'];
+var customerFields = ['surname','firstname','address','email','phone','status'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -64,7 +66,10 @@ var pages = {
 		"logout" : "provider_logout.html",
 		"createcustomer" : "provider_create_customer.html",
 		"changeSettings": "changeSettings.html",
-		"appointments": "appointments.html",
+		"appointments": "provider_appointments.html",
+		"newappointment" : "provider_newAppointment.html",
+	"updateappointment" : "provider_updateAppointment.html",
+	"customers" : "provider_providerCustomers.html",
 		"settingsPages": {
 			"email": "changeEmail.html",
 			"password": "changePassword.html",
@@ -507,8 +512,8 @@ function verifySessionId(sessionid,type,callback) {
 			urlParams["errormessage"] = "invalidsessionid";
 			goTo(signinPage,urlParams);
 		} else {
-			var customerid = sessionid.substring(0,sessionid.length - 2);
-			getSubscriberDetails("checksessionid",customerid,type,function() {
+			var subscriberid = sessionid.substring(0,sessionid.length - 2);
+			getSubscriberDetails("checksessionid",subscriberid,type,function() {
 				var currentSessionid = subscriberDetails["sessionid"];
 				if ( sessionid != currentSessionid ) {
 					console.log("[parsing.verifySessionID] " + Math.round(new Date().getTime() / 1000) + " session id FAILED");

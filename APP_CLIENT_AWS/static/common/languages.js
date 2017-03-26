@@ -16,7 +16,8 @@ var languages_text = {
                         "settings" : "settings",
                         "logout" : "logout",
 						"createcustomer" : "add new customer",
-						"providers" : "my providers"
+						"providers" : "my providers",
+						"customers": "my customers"
                 },
                 "action" : {
                         "login" : "login successful",
@@ -26,7 +27,8 @@ var languages_text = {
 			"notifications" : "notifications",
 			"registration" : "successfully registered",
 			"logout" : "logout",
-			"unsubscribe" : "unsubscribe"
+			"unsubscribe" : "unsubscribe",
+			"customers" : "customers"
                 },
                 "username" : "username",
                 "password" : "password",
@@ -72,7 +74,8 @@ var languages_text = {
 						"oldpassword" : "old password",
 						"oldusername" : "old username",
 						"oldemail" : "old email",
-						"sessionid" : "session id"
+						"sessionid" : "session id",
+						"status" : "active"
                 },
 				"provider" : {
 						"id" : "id",
@@ -92,11 +95,18 @@ var languages_text = {
 				},
 				"appointment" : {
 					"provider" : "provider",
+					"customer" : "customer",
 					"date" : "date",
 					"time" : "time",
 					"address" : "address",
 					"status" : "status",
-					"delay" : "delay"
+					"delay" : "delay",
+					"phone" : "phone",
+					"email" : "email"
+				},
+				"status" : {
+					"cancelled" : "cancelled",
+					"confirmed" : "confirmed"
 				},
                 "settings" : {
                         "yoursettings" : "these are your settings",
@@ -113,20 +123,30 @@ var languages_text = {
 			"old" : "old",
 			"new" : "new",
 			"of" : "of",
+			"yes" : "yes",
+			"no" : "no",
 			"confirm" : "confirm",
 			"oldemail" : "old email address",
 			"newemail" : "new email address",
+						"option" : "option",
+						"activecustomers" : "active customers",
+						"inactivecustomers" : "unsubscribed customers",
 			"enterdetails" : "please enter your details",
+			"entercustomerdetails" : "enter the customer's details",
 			"submit" : "submit",
 			"change" : "change",
 			"cancel" : "cancel",
+			"activate" : "activate",
+			"deactivate" : "deactivate",
 			"toprovider" : "Don't have an id? Get an account from your provider.",
 			"getid" : "Id lost? Get it here",
 			"dobformatexample" : "DD/MM/YYYY",
 			"optional" : "optional",
 			"newdate" : "select a new date",
 			"newappointment" : "select a provider and a date",
-			"confirmunsubscribe" : "Are you sure you want to unsubscribe?"
+			"confirmunsubscribe" : "Are you sure you want to unsubscribe?",
+			"confirmcancelappointment" : "Are you sure you want to cancel the appointment?",
+			"confirmappointmentstatus" : "Are you sure you want the appointment"
                 },
 				"tableheaders" : {
 					"name" : "name",
@@ -144,6 +164,7 @@ var languages_text = {
 			"usernameformat" : "username must be at least 8 characters long and alphanumeric",
 			"emailformat" : "invalid email format",
 			"phoneformat" : "invalid phone number",
+			"idformat" : "invalid ID format",
 			"notregistered" : "username invalid. Please register to the service with the id provided by your provider",
 			"notcreated" : "the user profile has not been created. Please contact your provider",
 			"notcreatedselfcreation" : "the user profile has not been created. Please create a profile with the provider here",
@@ -204,7 +225,8 @@ var languages_text = {
                         "settings" : "ajustes",
                         "logout" : "desconexión",
 						"createcustomer" : "crear nuevo cliente",
-						"providers" : "mis proveedores"
+						"providers" : "mis proveedores",
+						"customers": "mis clientes"
                 },
                 "action" : {
                         "login" : "login realizado con éxito",
@@ -214,7 +236,8 @@ var languages_text = {
 			"notifications" : "notificaciones",
 			"registration" : "Ya estás inscrito.",
 			"logout" : "desconexión",
-			"unsubscribe" : "desinscribirse"
+			"unsubscribe" : "desinscribirse",
+			"customers" : "clientes"
                 },
                 "username" : "nombre de usuario",
                 "password" : "contraseña",
@@ -260,7 +283,8 @@ var languages_text = {
 						"oldpassword" : "antigua contraseña",
 						"oldusername" : "antiguo nombre de usuario",
 						"oldemail" : "antiguo email",
-						"sessionid" : "ID de la sesión"
+						"sessionid" : "ID de la sesión",
+						"status" : "activo"
                 },
 				"provider" : {
 						"id" : "id",
@@ -290,31 +314,48 @@ var languages_text = {
                 },
 				"appointment" : {
 					"provider" : "proveedor",
+					"customer" : "cliente",
 					"date" : "fecha",
 					"time" : "hora",
 					"address" : "dirección",
 					"status" : "estado",
-					"delay" : "retraso"
+					"delay" : "retraso",
+					"phone" : "teléfono",
+					"email" : "email"
+				},
+				"status" : {
+					"cancelled" : "cancelado",
+					"confirmed" : "confirmado"
 				},
 		"form" : {
 			"page" : "página",
 			"old" : "antiguo",
 			"new" : "nuevo",
 			"of" : "de",
+			"yes" : "sí",
+			"no" : "no",
 			"confirm" : "confirma",
 			"oldemail" : "antigua dirección de email",
 			"newemail" : "nueva dirección de email",
+						"option" : "option",
+						"activecustomers" : "clientes activos",
+						"inactivecustomers" : "clientes desinscritos",
 			"enterdetails" : "Introduce tus datos",
+			"entercustomerdetails" : "introduzca los datos del cliente",
 			"submit" : "enviar",
 			"cancel" : "anular",
 			"change" : "cambiar",
+			"activate" : "activar",
+			"deactivate" : "desactivar",
 			"toprovider" : "¿No tienes identificador? Créate una cuenta con tu proveedor.",
 			"getid" : "¿Identificador perdido? Recupéralo aquí",
 			"dobformatexample" : "DD/MM/AAAA",
 			"optional" : "opcional",
 			"newdate" : "elige una nueva fecha",
 			"newappointment" : "elige un proveedor y una fecha",
-			"confirmunsubscribe" : "¿Estás seguro que quieres borrarte del servicio?"
+			"confirmunsubscribe" : "¿Estás seguro que quieres borrarte del servicio?",
+			"confirmcancelappointment" : "¿Estás seguro que quieres cancelar la cita?",
+			"confirmappointmentstatus" : "¿Estás seguro que quieres tu cita"
                 },
 				"tableheaders" : {
 					"name" : "nombre",
@@ -332,6 +373,7 @@ var languages_text = {
 			"usernameformat" : "el nombre de usuario debe tener al menos 8 caracteres y todos alfanuméricos",
 			"emailformat" : "formato de email erróneo",
 			"phoneformat" : "formato de teléfono no válido",
+			"idformat" : "formato de ID no válido",
 			"notregistered" : "nombre de usuario no válido. Regístrate con el identificador proporcionado por tu proveedor",
 			"notcreated" : "no hay un perfil para este usuario.Contacte a su proveedor",
 			"notcreatedselfcreation" : "no hay un perfil para este usuario. Crea un perfile con tu proveedor aquí",
@@ -392,7 +434,8 @@ var languages_text = {
                         "settings" : "configuraation",
                         "logout" : "déconnxexion",
 						"createcustomer" : "créer un nouveau client",
-						"providers" : "mes spécialistes"
+						"providers" : "mes spécialistes",
+						"customers": "mes clients"
                 },
                 "action" : {
                         "login" : "connection réussie",
@@ -402,7 +445,8 @@ var languages_text = {
 			"notifications" : "notifications",
 			"registration" : "Vous avez été inscrit",
 			"logout" : "déconnexion",
-			"unsubscribe" : "desenregistrement"
+			"unsubscribe" : "desenregistrement",
+			"customers" : "clients"
                 },
                 "username" : "nom d'utilisateur",
                 "password" : "mot de passe ",
@@ -448,7 +492,8 @@ var languages_text = {
 						"oldpassword" : "ancienne mot de passe",
 						"oldusername" : "ancien nom d'utilisateur",
 						"oldemail" : "ancien email",
-						"sessionid" : "ID de la session"
+						"sessionid" : "ID de la session",
+						"status" : "actif"
                 },
 				"provider" : {
 						"id" : "id",
@@ -478,31 +523,48 @@ var languages_text = {
                 },
 				"appointment" : {
 					"provider" : "spécialiste",
+					"customer" : "client",
 					"date" : "date",
 					"time" : "heure",
 					"address" : "adresse",
 					"status" : "statut",
-					"delay" : "retard"
+					"delay" : "retard",
+					"phone" : "téléphone",
+					"email" : "email"
+				},
+				"status" : {
+					"cancelled" : "annulé",
+					"confirmed" : "confirmé"
 				},
 		"form" : {
 			"page" : "page",
 			"old" : "ancien",
 			"new" : "nouveau",
 			"of" : "de",
+			"yes" : "oui",
+			"no" : "non",
 			"confirm" : "confirmer",
 			"oldemail" : "ancienne adresse email",
 			"newemail" : "nouvelle adresse email",
 			"enterdetails" : "Entrez vos données",
+			"entercustomerdetails" : "Entrez les données du client",
 			"submit" : "envoyer",
 			"cancel" : "annuler",
 			"change" : "modifier",
+			"activate" : "activer",
+						"option" : "option",
+						"activecustomers" : "clients actifs",
+						"inactivecustomers" : "clients desenregistrés",
+			"deactivate" : "desactiver",
 			"toprovider" : "¿Vous n'avez pas un identifiant? Créez un compte chez le spécialiste.",
 			"getid" : "¿Identifiant perdu? Retrouvez le ici",
 			"dobformatexample" : "JJ/MM/AAAA",
 			"optional" : "optionnel",
 			"newdate" : "choisissez une nouvelle date",
 			"newappointment" : "choisissez un spécialiste et une date",
-			"confirmunsubscribe" : "Etes-vous sur de vouloir vour désenregistrer?"
+			"confirmunsubscribe" : "Etes-vous sur de vouloir vour désenregistrer?",
+			"confirmcancelappointment" : "Etes-vous sur de vouloir annuler ce rdv?",
+			"confirmappointmentstatus" : "Etes-vous sur de vouloir votre rdv"
                 },
 				"tableheaders" : {
 					"name" : "nom",
@@ -520,6 +582,7 @@ var languages_text = {
 			"usernameformat" : "le nom d'utilisateur doit avoir minimum 8 caractères alphanumériques",
 			"emailformat" : "mauvais forma d'email",
 			"phoneformat" : "format de téléphone non valide",
+			"idformat" : "formato d'ID non valide",
 			"notregistered" : "nom d'utilisateur inconnu. Enregistrez vous avec l'idantifiant fourni par votre spécialiste",
 			"notcreated" : "On n'a pas trouvé un profil pour cet utilisateur. Contactez votre spécialiste",
 			"notcreatedselfcreation" : "On n'a pas trouvé un profil pour cet utilisateur. Crééz un avec votre spécialiste ici",

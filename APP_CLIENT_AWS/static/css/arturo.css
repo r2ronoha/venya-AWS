@@ -7,9 +7,27 @@ body {
   background-color: #eee;
 }
 
+.provider-web {
+	background-color:  #c7a0f4;
+}
+
+.provider-web .container h2 {
+	font-size: 20px;
+	font-style: bold;
+	text-align: center;
+}
+
 .provider {
 	background-color: #1a7a90;
 	vertical-align: middle;
+}
+
+.provide table {
+	margin: 30px;
+}
+
+.provider th, td{
+	padding: 5px;
 }
 
 .provider table, th {

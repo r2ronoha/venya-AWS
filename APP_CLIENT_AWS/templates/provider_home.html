@@ -60,12 +60,13 @@
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>
 </head>
-<body class="provider">
+<body class="provider-web">
 	<script>init();</script>
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
 		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                 <li><a id="menuHome" href="javascript:goTo(pages.provider.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
+		<li><a id="menuCustomers" href="javascript:goTo(pages.provider.customers,{'action' : 'customers' , 'sessionid' : sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCustomers",myLangTexts["menu"]["customers"])</script></a></li>
                 <li><a id="menuAppointments" href="javascript:goTo(pages.provider.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
                 <li><a id="menuCreateCustomer" href="javascript:goTo(pages.provider.createcustomer,{'action': 'createcustomer', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCreateCustomer",myLangTexts["menu"]["createcustomer"])</script></a></li>
                 <li><a id="menuSettings" href="javascript:goTo(pages.provider.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>

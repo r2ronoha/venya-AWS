@@ -50,11 +50,6 @@ provider.getAttDefault( function(attDef) {
 	providerAttributesDefault = attDef;
 });	
 
-var appointmentAttributesDefault = {};
-appointment.getAttDefault( function(attDef) {
-	providerAttributesDefault = attDef;
-});	
-
 function printError(tag,message,err) {
 	try {
 		console.log("[requestHandlers." + tag + "] !!!ERROR!!! " + message + ". Error: \"" + err + "\"");
@@ -573,7 +568,7 @@ function createCustomer(response, request, dbcnx, db) {
 	
 	//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling customer.doInsert\n[requestHandler.createCustomer()] dbcnx = " + dbcnx + " -- db = " + db + " insertQuery = " + JSON.stringify(insertQuery))
 	function insert(dbcnx, db, insertQuery) {
-		customer.doInsert(dbcnx, db, insertQuery, function(query,exists,message){
+		customer.doInsert(dbcnx, db, insertQuery, function(query,exists,customerid){
 			if ( exists == 0 ) {
 				//console.log("[requestHandler.createCustomer()] " + Math.round(new Date().getTime() / 1000) + " Calling customer.doGet\n[requestHandler.createCustomer()] query = " + JSON.stringify(query))
 				customer.doGet(dbcnx, db, query, function(err,attList) {
@@ -608,11 +603,13 @@ function createCustomer(response, request, dbcnx, db) {
 					}
 				})
 			} else {
+				console.log("createCustomer [DEBUG] Customer exists. ID: " + customerid);
 				response.writeHead(401, responseHeadParams);
 				var body = {};
 				body["status"] = "ERROR";
-				body["errormessage"] = message;
+				body["errormessage"] = "alreadyregistered";
 				body["action"] = action;
+				body["customerid"] = customerid;
 				var respBody = JSON.stringify(body);
 				response.write(respBody, function(err) { response.end(); } );
 			}
@@ -1066,6 +1063,7 @@ function getLostCredentials(response, request, dbcnx, db) {
 }
 
 function updateSetting(response, request, dbcnx, db) {
+	var TAG = arguments.callee.name;
 	//console.log("[requestHandlers.updasteSetting] " + Math.round(new Date().getTime() / 1000) + " request.url = " + request.url);
 	var urlParams = url.parse(request.url, true).query;
 	var id = urlParams["id"];
@@ -1122,7 +1120,19 @@ function updateSetting(response, request, dbcnx, db) {
 			updateQuery['sessionid.timestamp'] = timestamp;
 		}
 	}
-	var query = ( myUndefined.indexOf(sessionid) < 0 ) ? { "sessionid.value" : sessionid } : { "_id": ObjectId(id) };
+	if ( myUndefined.indexOf(sessionid) < 0 ) {
+		query = { "sessionid.value" : sessionid } 
+	} else {
+			console.log(TAG + " [DEBUG] id = " + id);
+		try {
+			var idObject = ObjectId(id);
+			query = { "_id": idObject };
+		} catch (err) {
+			printError(TAG,"failed to convert id to objectid",err);
+			writeErrorResponse(response,400,"badrequest",action);
+			return;
+		}
+	}
 	
 	function updateAndRespond(query, updateQuery) {
 		//console.log("[requestHandlers.updateSetting] " + Math.round(new Date().getTime() / 1000) + " calling mycollection.doUpadte with query: " + JSON.stringify(updateQuery));
@@ -1434,6 +1444,7 @@ function insertAppointment(response, request, dbcnx, db) {
 	var providerid = url.parse(request.url, true).query.providerid;
 	var date = url.parse(request.url, true).query.date;
 	var action = url.parse(request.url, true).query.action;
+	var appStatus = url.parse(request.url, true).query.status;
 
 	if ( myUndefined.indexOf(action) >= 1 ) { action = "insertappointment"; }
 
@@ -1455,6 +1466,10 @@ function insertAppointment(response, request, dbcnx, db) {
 	insertQuery["customerid"] = customerid;
 	insertQuery["providerid"] = providerid;
 	insertQuery["date"] = date;
+
+	if ( myUndefined.indexOf(appStatus) < 0 ) {
+		insertQuery["status"] = appStatus;
+	}
 
 	// check that both customer and provider exist
 	var customerCheckQuery = ( myUndefined.indexOf(customerid) >= 0 ) ? { "sessionid.value" : sessionid } : { "_id" : ObjectId(customerid) };
@@ -1618,6 +1633,42 @@ function updateAppointment(response, request, dbcnx, db) {
 	}
 }
 
+function getProviderAppointments (response,request,dbcnx,db,callback) {
+	var TAG = arguments.callee.name;
+	var action = url.parse(request.url, true).query.action;
+	if ( myUndefined.indexOf(action) >= 0 ) action = "getproviderappointments";
+
+	var providerid = url.parse(request.url, true).query.providerid;
+	if ( myUndefined.indexOf(providerid) >= 0 || providerid == "" ) {
+		printError(TAG,"Missing providerid to get appointments",request.url);
+		writeErrorResponse(response,400,"badrequest",action);
+	} else {
+		// verify the format of the id before querying the DB
+		var idObject;
+		try { 
+			idObject = ObjectId(providerid);
+		} catch (err) {
+			printError(TAG,"Wrong format of provider id",providerid);
+			writeErrorResponse(response, 400, "idformat",action);
+			return;
+		}	
+		// the field is string, so we used the providerid string in the query
+		var query = { "providerid" : providerid };
+		appointment.doGetAll(dbcnx, db, query, function(err, appList) {
+			processDBResponse(response,TAG,action,err,appList,function(appList) {
+				var body = {};
+				var appointments = {};
+				for ( var i in appList ) {
+					var appid = appList[i]["_id"];
+					appointments[appid] = appList[i];
+				}
+				body["appointments"] = appointments;
+				writeSuccessResponse(response,body);
+			});
+		});
+	}
+}
+
 function getProvidersList (response, request, dbcnx, db, callback) {
 	var TAG = arguments.callee.name;
 	var action = url.parse(request.url, true).query.action;
@@ -1686,6 +1737,18 @@ function getProvidersList (response, request, dbcnx, db, callback) {
 function getAllCustomers(response,request,dbcnx,db) {
 	var TAG = arguments.callee.name;
 	var query = {};
+	var gotProvider = false;
+
+	var providerid = url.parse(request.url, true).query.providerid;
+	if ( myUndefined.indexOf(providerid) < 0  && providerid != "" ) {
+		try {
+			var idObject = ObjectId(providerid);
+			var queryField = "providers.value." + providerid;
+			query[queryField] = { '$exists' : true };
+		} catch (err) {
+			printError(TAG,"invalid provider id. Getting full list of customers",err);
+		}
+	}
 
 	customer.doGetAll(dbcnx, db, query, function(err,attList) {
 		processDBResponse(response,"getAllCustomers",TAG,err,attList,function(attList){
@@ -1732,3 +1795,4 @@ exports.getCustomerAppointments = getCustomerAppointments;
 exports.updateAppointment = updateAppointment;
 exports.getProvidersList = getProvidersList;
 exports.getAllCustomers = getAllCustomers;
+exports.getProviderAppointments = getProviderAppointments;

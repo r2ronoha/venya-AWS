@@ -71,9 +71,9 @@ function doInsert (cnx, db, query, callback) {
 		if (err) {
 			callback(null);
 		} else if (attList != null) {
-			var message = "alreadyregistered";
+			var customerid = attList["id"];
 			exists = 1;
-			callback(query,exists,message);
+			callback(query,exists,customerid);
 		} else {
 			MongoClient.connect(
 				cnx + db,
@@ -153,7 +153,7 @@ function doGetFullData (cnx, db, query, callback) {
 function doGetAll (cnx, db, query, callback) {
 	var attList = {};
 	
-	//console.log("[customer.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
+	console.log("[customer.doGetAll()] cnx = " + cnx + " -- db = " + db + " -- query = " + JSON.stringify(query));
 	
 	MongoClient.connect( cnx + db, function (err, connection) {
 		//assert.equal(null, err);

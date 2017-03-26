@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	
+	<title>VenYa Appointments</title>
+	
+	<!-- Bootstrap core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+	<link href="/static/css/navbar.css" rel="stylesheet">
+	<link href="/static/css/arturo.css" rel="stylesheet">
+	<link href="/static/css/jquery-ui-timepicker-addon.css" rel="stylesheet">
+
+	<script src="/static/js/ie-emulation-modes-warning.js"></script>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
+	<script type="text/javascript" src="/static/common/languages.js"></script>
+	<script type="text/javascript" src="/static/common/parsing.js"></script>
+
+	<script type="text/javascript">
+		var sessionid;
+		var myLangTexts;
+		var lang;
+		var cutomersList;
+		var providerid;
+
+		function init() {
+			parseUrl();
+			sessionid = urlParams["sessionid"];
+			lang = urlParams["lang"];
+			var action = urlParams["action"];
+			myLangTexts = languages_text[lang];
+
+			verifySessionId(sessionid, "provider", function() {
+				providerid = sessionid.substring(0,sessionid.length - 2);
+				//getSubscriberDetails( urlParams["action"], urlParams["id"], function () {
+				//setHeader("h2",formatMessage([myLangTexts["action"][action]]));
+				document.getElementById("pageTitle").appendChild(document.createElement("h2").appendChild(document.createTextNode(formatMessage([myLangTexts["action"][action]]))));
+				get_id_from_sessionid("provider",sessionid,function(err,id) {
+					if (err) {
+						document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["accountnotfound"]]);
+					} else {
+						providerid = id;
+						getCustomers();
+					}
+				});
+			});
+		}
+
+		function getCustomers(){
+			//get the list of customer to get info for appointments
+			var getProvsUrl = "http://" + venya_node_server + ":" + venya_node_port + "/getAllCustomers?action=getproviders" +
+				"&providerid=" + providerid;
+			var custxhr = new XMLHttpRequest();
+			custxhr.open('GET',getProvsUrl,true);
+			custxhr.send();
+			custxhr.onreadystatechange = processProviders;
+
+			function processProviders(e) {
+				if ( custxhr.readyState == 4 ) {
+					if ( custxhr.status == 200 ) {
+						document.getElementById("activeTableDiv").appendChild(document.createElement("h2").appendChild(document.createTextNode(myLangTexts["form"]["activecustomers"])));
+						document.getElementById("inactiveTableDiv").appendChild(document.createElement("h2").appendChild(document.createTextNode(myLangTexts["form"]["inactivecustomers"])));
+						
+						var customersResponse = JSON.parse(custxhr.responseText);
+						customersList = customersResponse["customers"];
+						
+						var activeTable = document.createElement("table");
+						activeTable.className = "provider";
+						activeTable.setAttribute("id","activeTable");
+						activeTable.style.width = '80%';
+						
+						var inactiveTable = document.createElement("table");
+						inactiveTable.className = "provider";
+						inactiveTable.setAttribute("id","inactiveTable");
+						inactiveTable.style.width = '80%';
+
+						var cellsData = {
+							'surname' : { 'value' : 'surname', 'width' : '15%' },
+							'firstname' : { 'value' : 'firstname', 'width' : '15%' },
+							'address' : { 'value' : 'address', 'width' : '15%' },
+							'phone' : { 'value' : 'phone', 'width' : '15%' },
+							'email' : { 'value' : 'email', 'width' : '15%' },
+							'status' : { 'value' : 'appStatus', 'width' : '10%' }
+						};
+
+						var myTables = [activeTable, inactiveTable];
+						for ( t in myTables ) {
+							var row = document.createElement("tr");
+							for ( var i in customerFields ) {
+								var field = customerFields[i];
+								console.log("adding " + field + " to the header");
+								var cell = document.createElement("th");
+								var cellText = formatName(myLangTexts["customer"][field]);
+								cell.appendChild(document.createTextNode(cellText));
+								cell.style.width = cellsData[field].width;
+								row.appendChild(cell);
+								myTables[t].appendChild(row);
+							}
+							var actionCell = document.createElement("th");
+							actionCell.appendChild(document.createTextNode(myLangTexts["form"]["option"]));
+							actionCell.style.width = '7%';
+							row.appendChild(actionCell);
+
+							/*
+							activeTable.appendChild(row);
+
+							var row = document.createElement("tr");
+							var field = customerFields[i];
+							console.log("adding " + field + " to the header");
+							var cell = document.createElement("th");
+							var cellText = formatName(myLangTexts["customer"][field]);
+							cell.appendChild(document.createTextNode(cellText));
+							row.appendChild(cell);
+							inactiveTable.appendChild(row2);
+							*/
+						}
+						
+						for ( var customerid in customersList ) {
+							var customer = customersList[customerid];
+							var surname = customer.surname.value;
+							var firstname = customer.firstname.value;
+							var address = formatAddress(customer.address.value);
+							var phone = customer.phone.value;
+							var email = customer.email.value;
+							var isActive = customer.providers.value[providerid];
+							var appStatus = ( isActive ) ? myLangTexts["form"]["yes"] : myLangTexts["form"]["no"];
+							var prefix = ( isActive ) ? "active_" : "inactive_";
+
+							var appData = {
+								'surname' : { 'value' : surname, 'width' : '15%' },
+								'firstname' : { 'value' : firstname, 'width' : '15%' },
+								'address' : { 'value' : address, 'width' : '15%' },
+								'phone' : { 'value' : phone, 'width' : '15%' },
+								'email' : { 'value' : email, 'width' : '15%' },
+								'status' : { 'value' : appStatus, 'width' : '7%' }
+							};
+
+							var row = document.createElement("tr");
+							row.setAttribute("id","row_" + customerid);
+							row.style.backgroundColor = "#88beca";
+
+							for ( var i in customerFields ) {
+								var field = customerFields[i];
+								var cell = document.createElement("td");
+								cell.setAttribute("id",field + "_" + customerid);
+								cell.appendChild(document.createTextNode(appData[field].value));
+								cell.style.width = appData[field].width;
+								row.appendChild(cell);
+							}
+
+							var changeActiveTarget = "javascript:changeActive(\'" + customerid + "\'); return false;";
+							var changeText = ( isActive ) ? myLangTexts["form"]["deactivate"] : myLangTexts["form"]["activate"];
+							var changeActivateCell = document.createElement("td");
+							var changeActivateForm = document.createElement("form");
+							changeActivateForm.setAttribute("onsubmit",changeActiveTarget);
+							var changeActivateButton = document.createElement("button");
+							changeActivateButton.setAttribute("id","change_" + customerid);
+							changeActivateButton.appendChild(document.createTextNode(changeText));
+							changeActivateForm.appendChild(changeActivateButton);
+							changeActivateCell.appendChild(changeActivateForm);
+							changeActivateCell.width = '10%';
+							row.appendChild(changeActivateCell);
+
+							if ( isActive ) {
+								activeTable.appendChild(row);
+							} else {
+								row.style.color = "#87878f";
+								row.style.backgroundColor = "#c9c9ca";
+								inactiveTable.appendChild(row);
+							}
+
+						}
+						document.getElementById("activeTableDiv").style.width = '100%';
+						document.getElementById("inactiveTableDiv").style.width = '100%';
+						document.getElementById("activeTableDiv").appendChild(activeTable);
+						document.getElementById("inactiveTableDiv").appendChild(inactiveTable);
+					} else {
+						try {
+							var response = JSON.parse(custxhr.responseText);
+							var errormessage = response["errormessage"];
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][errormessage]]); 
+						} catch (err) {
+							document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+						}
+					}
+				}
+			}
+
+		}
+
+		function changeActive(customerid) {
+			var myCustomer = customersList[customerid];
+			var newIsActive = ! (myCustomer.providers.value[providerid]);
+
+			var url = "http://" + venya_node_server + ":" + venya_node_port + "/updateSetting" +
+				"?action=update" +
+				"&type=customer" +
+				"&id=" + customerid +
+				"&field=providers" +
+				"&newvalue=" + providerid + "=" + newIsActive;
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET',url,true);
+				xhr.send();
+				xhr.onreadystatechange = processRequest;
+
+				function processRequest(e) {
+					if ( xhr.readyState == 4 ) {
+						if ( xhr.status == 200 ) {
+							var oldTable;
+							var newTable;
+							var text;
+							var status;
+							var rowid = "row_" + customerid;
+							var buttonid = "change_" + customerid;
+							var myRow = document.getElementById(rowid);
+
+							if ( newIsActive ) { //customer was deactivated and we activated it
+								oldTable = document.getElementById("inactiveTable");
+								newTable = document.getElementById("activeTable");
+								text = myLangTexts["form"]["deactivate"];
+								status = myLangTexts["form"]["yes"];
+								myRow.style.color = "black";
+								myRow.style.backgroundColor = "#88beca";
+							} else {
+								oldTable = document.getElementById("activeTable");
+								newTable = document.getElementById("inactiveTable");
+								text = myLangTexts["form"]["activate"];
+								status = myLangTexts["form"]["no"];
+								myRow.style.color = "#87878f";
+								myRow.style.backgroundColor = "#c9c9ca";
+							}
+							var myButton = document.getElementById(buttonid);
+							myButton.innerHTML = text;
+							
+							newTable.appendChild(myRow);
+
+							for ( r in oldTable.rows ) {
+								if ( oldTable.rows[r].id == rowid ) {
+									oldTable.deleteRow(r);
+									break;
+								}
+							}
+
+							myCustomer.providers.value[providerid] = newIsActive;
+
+						} else {
+							try {
+								var response = JSON.parse(xhr.responseText);
+								var errormessage = response["errormessage"];
+								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"][errormessage]]);
+							} catch(err) {
+								document.getElementById("errors").innerHTML = formatMessage([myLangTexts["errors"]["dbcnxerror"]]);
+							}
+						}
+					}
+				}
+		}
+
+	</script>
+</head>
+<header>
+</header>
+<body class="provider-web">
+	<script>init();</script>
+	<div class="errors" id="errors"></div>
+	<div class="dropdown">
+		<button class="btn btn-default dropdown-toggle pull-right" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MENU<span class="caret"></span></button>
+		<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                <li><a id="menuHome" href="javascript:goTo(pages.provider.home,{'action': 'home', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuHome",myLangTexts["menu"]["home"])</script></a></li>
+		<li><a id="menuCustomers" href="javascript:goTo(pages.provider.customers,{'action' : 'customers' , 'sessionid' : sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCustomers",myLangTexts["menu"]["customers"])</script></a></li>
+                <li><a id="menuAppointments" href="javascript:goTo(pages.provider.appointments,{'action': 'appointments', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuAppointments",myLangTexts["menu"]["appointments"])</script></a></li>
+                <li><a id="menuCreateCustomer" href="javascript:goTo(pages.provider.createcustomer,{'action': 'createcustomer', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuCreateCustomer",myLangTexts["menu"]["createcustomer"])</script></a></li>
+                <li><a id="menuSettings" href="javascript:goTo(pages.provider.settings,{'action': 'settings', 'sessionid': sessionid, 'lang' : lang})"><script>javascript:displayMenu("menuSettings",myLangTexts["menu"]["settings"])</script></a></li>
+                <li role="separator" class="divider"></li>
+                <li><a id="menuLogout" href="javascript:goTo(pages.provider.logout,{'sessionid' : sessionid,'lang' : lang})"><script>javascript:displayMenu("menuLogout",myLangTexts["menu"]["logout"])</script></a></li>
+		</ul>
+	</div>
+
+	<div class="subscriberarea" id="area">
+		<p><script>javascript:document.getElementById("area").innerHTML = myLangTexts["zone"]["provider"].toUpperCase()</script></p>
+	</div>
+
+	<div class="container" id="pageTitle"></div>
+	<div class="container" id="activeTableDiv"></div>
+	<div class="container" id="inactiveTableDiv"></div>
+
+	
+	<!-- Bootstrap core JavaScript
+	================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js" />')</script></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+</body>
