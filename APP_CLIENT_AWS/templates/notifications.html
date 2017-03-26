@@ -35,17 +35,6 @@
 				customerId = sessionid.substring(0,sessionid.length - 2);
 				//getSubscriberDetails( urlParams["action"], urlParams["id"], function () {
 				setHeader("h2",formatMessage([myLangTexts["action"][action],myLangTexts["form"]["page"],myLangTexts["underconstruction"]]));
-				/*getSubscriberDetails( "home", urlParams["id"], function () {
-					customerId = subscriberDetails["id"];
-					
-					var action = urlParams["action"];
-					var headerText = "HOME ";
-					if ( action != "home" ) headerText = action.toUpperCase() + " SUCCESSFUL.nWELCOME ";
-					headerText += unescape(subscriberDetails["surname"].toUpperCase()) + ", " + unescape(subscriberDetails["firstname"].toUpperCase());
-					setHeader("h2",headerText);
-					setHeader("h4","This is your data");
-					createDataTable();
-				});*/
 			});
 		}
 	</script>

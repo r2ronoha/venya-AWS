@@ -53,7 +53,7 @@
 					//if ( action != "home" ) headerText += "\n" + formatMessage([myLangTexts["home"]["welcome"]]);
 					//headerText = formatMessage([headerText,unescape(subscriberDetails["name"].toUpperCase())]).replace(/ ,/,',');
 					setHeader("h4",myLangTexts["home"]["yourdata"]);
-					createDataTable(subscriberDetails, lang, action);
+					createDataTable("subscriberHome",subscriberDetails, lang, action);
 				});
 			});
 		}
