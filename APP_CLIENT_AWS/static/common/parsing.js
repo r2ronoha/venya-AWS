@@ -165,6 +165,7 @@ function createDataTable(tableid, tableData, lang, action){
 			
 			var fieldCell = document.createElement("td");
 			var fieldTag = languages_text[lang]["customer"][field];
+			if ( fieldTag == undefined ) fieldTag = languages_text[lang]["provider"][field];
 			fieldCell.appendChild(document.createTextNode(fieldTag));
 			fieldCell.className = "field";
 			row.appendChild(fieldCell);
