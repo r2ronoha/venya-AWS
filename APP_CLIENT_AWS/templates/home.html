@@ -22,6 +22,7 @@
 		var sessionid;
 		var lang;
 		var myLangTexts;
+		var customerid;
 		function init() {
 			parseUrl();
 			
@@ -30,10 +31,15 @@
 			myLangTexts = languages_text[lang];
 			
 			verifySessionId(sessionid, "customer", function() {
-				customerId = sessionid.substring(0,sessionid.length - 2);
-				//getSubscriberDetails( "home", customerId, function () {
-				getSubscriberDetails( "home", customerId, "customer", function () {
-					customerId = subscriberDetails["id"];
+				customerid = sessionid.substring(0,sessionid.length - 2);
+				//getSubscriberDetails( "home", customerid, function () {
+				getSubscriberDetails( "home", customerid, "customer", function () {
+					customerid = subscriberDetails["id"];
+					var displayDetails = {};
+					for ( var i in homeFields ) {
+						field = homeFields[i];
+						displayDetails[field] = subscriberDetails[field];
+					}
 					myLangTexts;
 					var action = urlParams["action"];
 					var headerText = formatMessage([myLangTexts["action"][action]]);
@@ -41,9 +47,133 @@
 					headerText = formatMessage([headerText,unescape(subscriberDetails["surname"].toUpperCase()),",",unescape(subscriberDetails["firstname"].toUpperCase())]).replace(/ ,/,',');
 					setHeader("h2",headerText);
 					setHeader("h4",myLangTexts["home"]["yourdata"]);
-					createDataTable(subscriberDetails, lang, action);
+					createDataTable("homeTable",displayDetails, lang, action);
+					getProviders(customerid,getAppointments);
 				});
 			});
+		}
+
+		function getProviders(customerid,callback) {
+			var url = "http://" + venya_node_server + ":" + venya_node_port + "/getProvidersList" +
+				"?customerid=" + customerid;
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET',url,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+
+			function processRequest(e) {
+				if ( xhr.readyState == 4 ) {
+					if ( xhr.status == 200 ) {
+						var response = JSON.parse(xhr.responseText);
+						var providers = response.providers;
+						var table = document.getElementById("homeTable");
+						var titleCell = document.createElement("td");
+						titleCell.className = "field";
+						var title = formatName(myLangTexts["menu"]["providers"]);
+						titleCell.appendChild(document.createTextNode(title));
+						table.appendChild(titleCell);
+
+						var nameCell = document.createElement("td");
+						nameCell.className = "value";
+						var namesTable = document.createElement("table");
+						namesTable.className = "providernames";
+						namesTable.style.width = "100%";
+						namesTable.style.border = 0;
+						for ( var provid in providers ) {
+							var row = document.createElement("tr");
+							var text = formatName(providers[provid].name.value);
+							row.appendChild(document.createTextNode(text));
+							namesTable.appendChild(row);
+						}
+						nameCell.appendChild(namesTable);
+						table.appendChild(nameCell);
+						callback(customerid,providers);
+					}
+				}
+			}
+		}
+
+		function getAppointments(customerid,providersList) {
+			var url = "http://" + venya_node_server + ":" + venya_node_port + "/getCustomerAppointments" +
+				"?customerid=" + customerid;
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET',url,true);
+			xhr.send();
+			xhr.onreadystatechange = processRequest;
+
+			function processRequest(e) {
+				if ( xhr.readyState == 4 ) {
+					if ( xhr.status == 200 ) {
+						var response = JSON.parse(xhr.responseText);
+						var appointments = response.appointments;
+
+						var table = document.createElement("table");
+						table.className = "settings";
+						table.setAttribute("id","appointmentsTable");
+						
+						var row = document.createElement("tr");
+						for ( var f in appointmentHeaders ) {
+							var field = appointmentHeaders[f];
+							if (field == "time") continue;
+							var cell = document.createElement("th");
+							cell.appendChild(document.createTextNode(field.toUpperCase()));
+							if ( field == "status" || field == "delay" ) {
+								cell.style.width = "10%";
+							} else {
+								cell.style.width = "15%";
+							}
+							row.appendChild(cell);
+						}
+						table.appendChild(row);
+
+						for ( var appid in appointments ) {
+							var app = appointments[appid];
+							var row = document.createElement("tr");
+							for ( var f in appointmentHeaders ) {
+								var field = appointmentHeaders[f];
+								if ( field == "time" ) continue;
+								var cell = document.createElement("td");
+								var text;
+								switch (field) {
+									case "provider":
+								//if ( field == "provider" ) {
+										text = providersList[app["providerid"]].name.value;
+										break;
+									case "date":
+										var myDate = new Date(parseInt(app.date));
+										//text = myDate.format('dd-mm-yyyy');
+										text = myDate.toLocaleString('en-gb');
+										break;
+									case "time":
+										var myTime = new Date(parseInt(app.date));
+										text = myTime.toLocaleString('en-gb');
+										//text = myTime.format("HH:MM");
+										break;
+									case "address":
+										text = formatAddress(providersList[app["providerid"]].address.value);
+										break;
+									default:
+										
+								//} else {
+										text = app[field];
+								}
+								cell.appendChild(document.createTextNode(text));
+								if ( field == "status" || field == "delay" ) {
+									cell.style.width = "10%";
+								} else {
+									cell.style.width = "15%";
+								}
+								row.appendChild(cell);
+							}
+							table.appendChild(row);
+						}
+
+						document.body.appendChild(table);
+					}
+				}
+			}
 		}
 	</script>
 	<script type="text/javascript" src="/static/common/languages.js"></script>

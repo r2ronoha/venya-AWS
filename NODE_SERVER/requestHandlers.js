@@ -1528,8 +1528,14 @@ function getCustomerAppointments(response, request, dbcnx, db) {
 				if (err || attList == null) {
 					printError(TAG,"no customer found for this sessionid","invalidsessionid");
 				} else {
-					customerid = attList["id"];
-					getCustomeridAppointments(customerid);
+					try {
+						customerid = attList["id"];
+						var idObj = ObjectId(customerid);
+						getCustomeridAppointments(customerid);
+					} catch (err) {
+						printError(TAG,"Invalid ID format",err);
+						writeErrorResponse(response,400,"idformat",action);
+					}
 				}
 
 			});

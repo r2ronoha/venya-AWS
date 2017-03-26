@@ -16,6 +16,7 @@ var appointmentHeaders = ['provider','date','time','address','status','delay'];
 var appointmentProviderHeaders = ['customer','date','time','phone','email','status','delay'];
 var appointmentFields = ['_id','customerid','providerid','date','status','delay'];
 var customerFields = ['surname','firstname','address','email','phone','status'];
+var homeFields = ['surname','firstname','email'];
 //var emailFormat = new RegExp("^[^@]+@[^@]+\\.[^@]+$","g");
 //var emailFormat = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?","g");
 var emailFormat = new RegExp("^\\w+([\\.-_]?\\w+)*@\\w+([\\.-_]?\\w+)*(\\.\\w{2,3})+$","g");
@@ -146,7 +147,7 @@ function hideValue(value) {
 	return value.replace(/./g,'*');
 }
 
-function createDataTable(tableData, lang, action){
+function createDataTable(tableid, tableData, lang, action){
 	if ( tableData == null ) tableData = urlParams;
 	if ( lang == null || languages.indexOf(lang) < 0 ) {
 		console.log("[parsing.createDataTable] " + Math.round(new Date().getTime() / 1000) + " language " + lang + " not supported. Setting it to " + default_lang);
@@ -155,6 +156,7 @@ function createDataTable(tableData, lang, action){
 	if ( action == null ) action = "home";
 
 	var table = document.createElement("table");
+	table.setAttribute("id",tableid);
 	table.className = "settings";
 	for (var field in tableData) {
 		//console.log("[parsing.createDataTable] " + Math.round(new Date().getTime() / 1000) + " field to process : " + field);
@@ -199,6 +201,8 @@ function createDataTable(tableData, lang, action){
 				value = myAddress.replace(/, $/,'');				
 				if ( value == "" ) { value = "N/A"; }
 				//else value = formatName(value);
+			} else if (field == "providers" ) {
+				var myProviders;
 			}
 			
 			//valueCell.appendChild(document.createTextNode(unescape(tableData[field])));

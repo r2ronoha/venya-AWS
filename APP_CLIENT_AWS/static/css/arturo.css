@@ -161,15 +161,29 @@ h1 {
 
 .settings td.value {
 	text-align: center;
+	width: 60%;
 	padding-left: 15px;
 	padding-right: 15px;
 }
 
 .settings td.field {
-	width: 100px;
+	width: 40%;
 	text-align: center;
 	background-color: #dbdbdb;
 	font-weight: bold;
+}
+
+.settings .providernames table {
+	border: 0;
+	width: 100%;
+}
+
+.settings .providernames tr {
+	border: 0;
+}
+
+.settings .providernames td {
+	border: 0;
 }
 
 .providers table {
