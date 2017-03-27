@@ -482,14 +482,22 @@ function getCredentialsProcessRequest(url,credential,lang,errorid) {
 				console.log("raw responseText" + xhr.responseText);
 				try {
 					var response = JSON.parse(xhr.responseText);
-					var params = {};
-					params["lang"] = lang;
-					params["status"] = response["status"];
-					params["message"] = response["errormessage"];
-					params["email"] = response["email"];
-					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"][response["errormessage"]]]);
-					console.log(JSON.stringify(response));
-					//goTo(errUrl,params);
+					var errormessage = response["errormessage"];
+					if ( errormessage == "emailfailed" ) {
+								var params = {};
+							params["lang"] = lang;
+							params["action"] = "webcreation";
+							params["status"] = response["status"];
+							params["id"] = response["id"];
+							params["email"] = response["email"];
+							params["errormessage"] = errormessage;
+							params["credential"] = credential;
+							goTo(pages.signin,params);
+					} else {
+							document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"][errormessage]]);
+							console.log(JSON.stringify(response));
+							//goTo(errUrl,params);
+					}
 				} catch (err) {
 					document.getElementById(errorid).innerHTML = formatMessage([langTexts["errors"]["dbcnxerror"]]);
 					console.log(err.stack);
