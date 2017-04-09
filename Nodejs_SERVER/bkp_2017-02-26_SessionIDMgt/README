@@ -1,1 +1,0 @@
-.dockerignore tells Docker what not to copy onto the Docker image to avoid overwriting of modules
